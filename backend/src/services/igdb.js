@@ -7,9 +7,10 @@ class IGDBService {
     this.baseUrl = 'https://api.igdb.com/v4'
   }
 
-  async searchGames(query, limit = 10) {
+  async searchGames(query, limit = 15) {
     try {
-      const response = await axios({
+      // First try standard search and include remasters field
+      const standardResponse = await axios({
         url: `${this.baseUrl}/games`,
         method: 'POST',
         headers: {
@@ -23,13 +24,97 @@ class IGDBService {
                  platforms.name, involved_companies.company.name, involved_companies.developer, 
                  involved_companies.publisher, screenshots.url, game_engines.name, 
                  age_ratings.rating, age_ratings.category, websites.url, websites.category,
-                 storyline, aggregated_rating, total_rating, artworks.url;
-          limit ${limit};
-          where category = 0 & version_parent = null;
+                 storyline, aggregated_rating, total_rating, artworks.url, remasters, remakes;
+          limit ${Math.ceil(limit * 0.7)};
+          where category = 0;
         `
       })
 
-      return response.data.map(game => this.formatGameData(game))
+      // Collect all games including remasters
+      const allGames = []
+      const seenIds = new Set()
+
+      // Add standard search results first
+      for (const game of standardResponse.data) {
+        if (!seenIds.has(game.id)) {
+          seenIds.add(game.id)
+          allGames.push(this.formatGameData(game))
+        }
+
+        // Debug logging
+        console.log(`Game: ${game.name}, ID: ${game.id}, Remasters: ${JSON.stringify(game.remasters)}`)
+
+        // If this game has remasters, fetch them too
+        if (game.remasters && game.remasters.length > 0) {
+          console.log(`Fetching remasters for ${game.name}: ${game.remasters}`)
+          try {
+            const remastersResponse = await axios({
+              url: `${this.baseUrl}/games`,
+              method: 'POST',
+              headers: {
+                'Client-ID': this.clientId,
+                'Authorization': `Bearer ${this.accessToken}`,
+                'Content-Type': 'text/plain'
+              },
+              data: `
+                fields name, cover.url, first_release_date, genres.name, summary, rating, 
+                       platforms.name, involved_companies.company.name, involved_companies.developer, 
+                       involved_companies.publisher, screenshots.url, game_engines.name, 
+                       age_ratings.rating, age_ratings.category, websites.url, websites.category,
+                       storyline, aggregated_rating, total_rating, artworks.url;
+                where id = (${game.remasters.join(',')});
+              `
+            })
+
+            console.log(`Found ${remastersResponse.data.length} remasters`)
+            
+            // Add remastered versions
+            for (const remaster of remastersResponse.data) {
+              console.log(`Adding remaster: ${remaster.name}`)
+              if (!seenIds.has(remaster.id)) {
+                seenIds.add(remaster.id)
+                allGames.push(this.formatGameData(remaster))
+              }
+            }
+          } catch (remasterError) {
+            console.warn('Failed to fetch remasters:', remasterError.message)
+          }
+        }
+      }
+
+      // Then try a broader name-based search to catch any other variations
+      try {
+        const broaderResponse = await axios({
+          url: `${this.baseUrl}/games`,
+          method: 'POST',
+          headers: {
+            'Client-ID': this.clientId,
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'text/plain'
+          },
+          data: `
+            fields name, cover.url, first_release_date, genres.name, summary, rating, 
+                   platforms.name, involved_companies.company.name, involved_companies.developer, 
+                   involved_companies.publisher, screenshots.url, game_engines.name, 
+                   age_ratings.rating, age_ratings.category, websites.url, websites.category,
+                   storyline, aggregated_rating, total_rating, artworks.url;
+            where name ~ *"${query}"* & category = 0;
+            limit ${Math.ceil(limit * 0.4)};
+          `
+        })
+
+        // Add broader search results
+        for (const game of broaderResponse.data) {
+          if (!seenIds.has(game.id)) {
+            seenIds.add(game.id)
+            allGames.push(this.formatGameData(game))
+          }
+        }
+      } catch (broaderError) {
+        console.warn('Broader search failed:', broaderError.message)
+      }
+
+      return allGames.slice(0, limit)
     } catch (error) {
       console.error('IGDB API Error:', error.response?.data || error.message)
       throw new Error('Failed to search games')

@@ -48,25 +48,47 @@
 
 <script setup>
 /* global alert, console */
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useGamesStore } from "@/stores/games";
 import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
 import MediaSearch from "@/components/media/MediaSearch.vue";
 import MediaLibrary from "@/components/media/MediaLibrary.vue";
 
+const route = useRoute();
 const gamesStore = useGamesStore();
 
 // Modal state
 const showModal = ref(false);
 const selectedGame = ref(null);
 
-const userGames = computed(() => gamesStore.games);
+// Computed properties
+const allUserGames = computed(() => gamesStore.games);
 const searchResults = computed(() => gamesStore.searchResults);
 const loading = computed(() => gamesStore.loading);
+
+// Filtered games based on route query
+const userGames = computed(() => {
+  const statusFilter = route.query.status;
+
+  if (!statusFilter || statusFilter === "all") {
+    return allUserGames.value;
+  }
+
+  return allUserGames.value.filter((game) => game.status === statusFilter);
+});
 
 const handleSearch = (query) => {
   gamesStore.searchGames(query);
 };
+
+// Watch route changes to handle status filtering
+watch(
+  () => route.query.status,
+  (newStatus) => {
+    console.log("Status filter changed to:", newStatus || "all");
+  },
+);
 
 const showGameDetails = async (game) => {
   // Check if this is a library game (has library-specific fields) or search result

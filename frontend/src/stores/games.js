@@ -1,7 +1,7 @@
 /* global console */
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import axios from "axios";
+import { gamesApi } from "../services/api.js";
 
 export const useGamesStore = defineStore("games", () => {
   const games = ref([]);
@@ -16,9 +16,7 @@ export const useGamesStore = defineStore("games", () => {
 
     loading.value = true;
     try {
-      const response = await axios.get(
-        `/api/games/search?q=${encodeURIComponent(query)}`,
-      );
+      const response = await gamesApi.search(query);
       searchResults.value = response.data;
     } catch (error) {
       console.error("Error searching games:", error);
@@ -31,7 +29,7 @@ export const useGamesStore = defineStore("games", () => {
   const getUserGames = async () => {
     loading.value = true;
     try {
-      const response = await axios.get("/api/games/user");
+      const response = await gamesApi.getUserGames();
       games.value = response.data;
     } catch (error) {
       console.error("Error fetching user games:", error);
@@ -42,7 +40,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const addGame = async (gameData) => {
     try {
-      const response = await axios.post("/api/games", gameData);
+      const response = await gamesApi.addGame(gameData);
       games.value.push(response.data);
       return { success: true };
     } catch (error) {
@@ -55,7 +53,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const updateGameStatus = async (gameId, status) => {
     try {
-      const response = await axios.patch(`/api/games/${gameId}`, { status });
+      const response = await gamesApi.updateGame(gameId, { status });
       const index = games.value.findIndex((g) => g.id === gameId);
       if (index !== -1) {
         games.value[index] = response.data;
@@ -71,7 +69,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const updateGameQuickReview = async (gameId, quickReview) => {
     try {
-      const response = await axios.patch(`/api/games/${gameId}`, {
+      const response = await gamesApi.updateGame(gameId, {
         quick_review: quickReview,
       });
       const index = games.value.findIndex((g) => g.id === gameId);
@@ -89,7 +87,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const removeGame = async (gameId) => {
     try {
-      await axios.delete(`/api/games/${gameId}`);
+      await gamesApi.removeGame(gameId);
       games.value = games.value.filter((g) => g.id !== gameId);
       return { success: true };
     } catch (error) {
@@ -102,7 +100,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const getGameDetails = async (igdbId) => {
     try {
-      const response = await axios.get(`/api/games/details/${igdbId}`);
+      const response = await gamesApi.getGameDetails(igdbId);
       return { success: true, data: response.data };
     } catch (error) {
       return {
@@ -114,7 +112,7 @@ export const useGamesStore = defineStore("games", () => {
 
   const updateGameDetails = async (gameId, updateData) => {
     try {
-      const response = await axios.patch(`/api/games/${gameId}`, updateData);
+      const response = await gamesApi.updateGame(gameId, updateData);
       // Update the local games array
       const gameIndex = games.value.findIndex((g) => g.id === gameId);
       if (gameIndex !== -1) {

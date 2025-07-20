@@ -65,27 +65,6 @@
             </svg>
           </div>
 
-          <!-- Quick Review Overlay -->
-          <div
-            v-if="item.quick_review"
-            class="absolute top-2 left-2 bg-black bg-opacity-60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm"
-            :title="getQuickReviewLabel(item.quick_review)"
-          >
-            <span class="text-lg">
-              {{ getQuickReviewEmoji(item.quick_review) }}
-            </span>
-          </div>
-
-          <!-- Platform Overlay -->
-          <div
-            v-if="item.user_platform"
-            class="absolute top-2 right-2 bg-black bg-opacity-60 rounded px-2 py-1 backdrop-blur-sm"
-          >
-            <span class="text-xs text-white font-medium">
-              {{ item.user_platform }}
-            </span>
-          </div>
-
           <!-- Title Overlay (appears on hover) -->
           <div
             class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-3"
@@ -201,23 +180,5 @@ const getImageUrl = (item) => {
 
 const getDateField = (item) => {
   return item.release_date || item.publication_date || item.air_date;
-};
-
-const getQuickReviewEmoji = (reviewValue) => {
-  const emojis = {
-    positive: "👍",
-    neutral: "😐",
-    negative: "👎",
-  };
-  return emojis[reviewValue] || "❓";
-};
-
-const getQuickReviewLabel = (reviewValue) => {
-  const labels = {
-    positive: "Liked it",
-    neutral: "It was okay",
-    negative: "Disliked",
-  };
-  return labels[reviewValue] || "No review";
 };
 </script>
