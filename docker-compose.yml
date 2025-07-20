@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: media-tracker-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: media_tracker_db
+      POSTGRES_USER: media_tracker_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-media_tracker_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - media-tracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U media_tracker_user -d media_tracker_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: media-tracker-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://media_tracker_user:${DB_PASSWORD:-media_tracker_password}@postgres:5432/media_tracker_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key}
+      NODE_ENV: production
+      IGDB_CLIENT_ID: ${IGDB_CLIENT_ID}
+      IGDB_ACCESS_TOKEN: ${IGDB_ACCESS_TOKEN}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - media-tracker-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: media-tracker-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - media-tracker-network
+
+volumes:
+  postgres_data:
+
+networks:
+  media-tracker-network:
+    driver: bridge

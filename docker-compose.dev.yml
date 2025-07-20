@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: media-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: media_tracker_db
+      POSTGRES_USER: media_tracker_user
+      POSTGRES_PASSWORD: media_tracker_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U media_tracker_user -d media_tracker_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:

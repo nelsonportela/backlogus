@@ -1,0 +1,38 @@
+{
+  "name": "media-tracker-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "format": "prettier --write src/"
+  },
+  "keywords": [
+    "vue",
+    "media-tracker",
+    "games"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Media Tracker Frontend - Vue 3 app for tracking games and media",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.31.0",
+    "eslint-plugin-vue": "^10.3.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.0.5"
+  }
+}

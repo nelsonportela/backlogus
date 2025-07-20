@@ -1,0 +1,47 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import LoginView from '@/views/LoginView.vue'
+import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import GamesView from '@/views/GamesView.vue'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView
+    },
+    {
+      path: '/',
+      component: DashboardLayout,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'dashboard',
+          redirect: { name: 'games' }
+        },
+        {
+          path: 'games',
+          name: 'games',
+          component: GamesView
+        }
+      ]
+    }
+  ]
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'login' })
+  } else if (to.name === 'login' && authStore.isAuthenticated) {
+    next({ name: 'dashboard' })
+  } else {
+    next()
+  }
+})
+
+export default router
