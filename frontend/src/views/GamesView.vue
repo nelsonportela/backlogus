@@ -1,191 +1,255 @@
 <template>
   <div class="space-y-6">
     <!-- Search Section -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Search Games</h3>
-      <div class="flex gap-4">
-        <div class="flex-1">
-          <input
-            type="text"
-            v-model="searchQuery"
-            @input="debouncedSearch"
-            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-            placeholder="Search for games..."
-          />
-        </div>
-      </div>
-
-      <!-- Search Results -->
-      <div v-if="searchResults.length > 0" class="mt-4 space-y-2 max-h-96 overflow-y-auto">
-        <div
-          v-for="game in searchResults"
-          :key="game.id"
-          class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-        >
-          <div class="flex items-center space-x-4">
-            <img
-              v-if="game.cover_url"
-              :src="game.cover_url"
-              :alt="game.name"
-              class="w-12 h-16 object-cover rounded"
-            />
-            <div class="w-12 h-16 bg-gray-200 rounded flex items-center justify-center" v-else>
-              <span class="text-gray-400 text-xs">No Image</span>
-            </div>
-            <div>
-              <h4 class="font-medium text-gray-900">{{ game.name }}</h4>
-              <p class="text-sm text-gray-500" v-if="game.release_date">
-                Released: {{ formatDate(game.release_date) }}
-              </p>
-              <p class="text-sm text-gray-500" v-if="game.genres">
-                {{ game.genres.join(', ') }}
-              </p>
-            </div>
-          </div>
-          <button
-            @click="addGameToLibrary(game)"
-            class="btn-primary text-sm"
-            :disabled="isGameInLibrary(game.id)"
-          >
-            {{ isGameInLibrary(game.id) ? 'Added' : 'Add to Library' }}
-          </button>
-        </div>
-      </div>
-
-      <div v-if="searchQuery && !loading && searchResults.length === 0" class="mt-4 text-center text-gray-500">
-        No games found for "{{ searchQuery }}"
-      </div>
-
-      <div v-if="loading" class="mt-4 text-center text-gray-500">
-        Searching...
-      </div>
-    </div>
+    <MediaSearch
+      :media-type="'game'"
+      :search-results="searchResults"
+      :loading="loading"
+      :library-items="userGames"
+      @search="handleSearch"
+      @add-to-library="addGameToLibrary"
+      @show-details="showGameDetails"
+    />
 
     <!-- User Library -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-medium text-gray-900">My Library</h3>
-        <button @click="refreshLibrary" class="btn-secondary text-sm">
-          Refresh
-        </button>
-      </div>
+    <MediaLibrary
+      :media-type="'game'"
+      :library-items="userGames"
+      @refresh-library="refreshLibrary"
+      @show-details="showGameDetails"
+      @update-status="updateStatus"
+      @remove-from-library="removeGameFromLibrary"
+      @update-quick-review="updateQuickReview"
+    />
 
-      <div v-if="userGames.length === 0" class="text-center text-gray-500 py-8">
-        No games in your library yet. Search and add some games!
-      </div>
-
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="game in userGames"
-          :key="game.id"
-          class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-        >
-          <div class="flex items-start space-x-4">
-            <img
-              v-if="game.cover_url"
-              :src="game.cover_url"
-              :alt="game.name"
-              class="w-16 h-20 object-cover rounded"
-            />
-            <div class="w-16 h-20 bg-gray-200 rounded flex items-center justify-center" v-else>
-              <span class="text-gray-400 text-xs">No Image</span>
-            </div>
-            <div class="flex-1">
-              <h4 class="font-medium text-gray-900">{{ game.name }}</h4>
-              <p class="text-sm text-gray-500 mb-2" v-if="game.release_date">
-                {{ formatDate(game.release_date) }}
-              </p>
-              <select
-                v-model="game.status"
-                @change="updateStatus(game.id, game.status)"
-                class="text-sm border border-gray-300 rounded px-2 py-1"
-              >
-                <option value="want_to_play">Want to Play</option>
-                <option value="playing">Playing</option>
-                <option value="completed">Completed</option>
-                <option value="dropped">Dropped</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Media Details Modal -->
+    <MediaDetailsModal
+      :is-open="showModal"
+      :item="selectedGame"
+      :media-type="'game'"
+      :is-in-library="
+        selectedGame
+          ? isGameInLibrary(
+              selectedGame.igdb_id || selectedGame.igdbId || selectedGame.id,
+            )
+          : false
+      "
+      :current-status="selectedGame?.status"
+      @close="closeModal"
+      @add-to-library="addGameToLibraryFromModal"
+      @remove-from-library="removeGameFromLibrary"
+      @update-status="updateGameStatusFromModal"
+      @update-personal-rating="updatePersonalRating"
+      @update-user-platform="updateUserPlatform"
+      @update-quick-review="updateQuickReview"
+    />
   </div>
 </template>
 
-<script>
-import { ref, computed, onMounted } from 'vue'
-import { useGamesStore } from '@/stores/games'
+<script setup>
+/* global alert, console */
+import { ref, computed, onMounted } from "vue";
+import { useGamesStore } from "@/stores/games";
+import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
+import MediaSearch from "@/components/media/MediaSearch.vue";
+import MediaLibrary from "@/components/media/MediaLibrary.vue";
 
-export default {
-  name: 'GamesView',
-  setup() {
-    const gamesStore = useGamesStore()
-    const searchQuery = ref('')
-    let searchTimeout = null
+const gamesStore = useGamesStore();
 
-    const userGames = computed(() => gamesStore.games)
-    const searchResults = computed(() => gamesStore.searchResults)
-    const loading = computed(() => gamesStore.loading)
+// Modal state
+const showModal = ref(false);
+const selectedGame = ref(null);
 
-    const debouncedSearch = () => {
-      clearTimeout(searchTimeout)
-      searchTimeout = setTimeout(() => {
-        gamesStore.searchGames(searchQuery.value)
-      }, 300)
-    }
+const userGames = computed(() => gamesStore.games);
+const searchResults = computed(() => gamesStore.searchResults);
+const loading = computed(() => gamesStore.loading);
 
-    const addGameToLibrary = async (game) => {
-      const result = await gamesStore.addGame({
-        igdb_id: game.id,
-        name: game.name,
-        cover_url: game.cover_url,
-        release_date: game.release_date,
-        genres: game.genres,
-        status: 'want_to_play'
-      })
+const handleSearch = (query) => {
+  gamesStore.searchGames(query);
+};
 
-      if (!result.success) {
-        alert(result.error)
+const showGameDetails = async (game) => {
+  // Check if this is a library game (has library-specific fields) or search result
+  const isLibraryGame =
+    Object.prototype.hasOwnProperty.call(game, "status") &&
+    Object.prototype.hasOwnProperty.call(game, "userId");
+
+  if (isLibraryGame) {
+    // For library games, use the stored data directly since we now store everything
+    selectedGame.value = game;
+    showModal.value = true;
+  } else {
+    // For search results, fetch detailed information from IGDB
+    selectedGame.value = game;
+    showModal.value = true;
+
+    const igdbId = game.id;
+    if (igdbId) {
+      const result = await gamesStore.getGameDetails(igdbId);
+      if (result.success) {
+        // Merge the detailed data with the current game data
+        selectedGame.value = {
+          ...selectedGame.value,
+          ...result.data,
+        };
       }
-    }
-
-    const updateStatus = async (gameId, status) => {
-      const result = await gamesStore.updateGameStatus(gameId, status)
-      if (!result.success) {
-        alert(result.error)
-      }
-    }
-
-    const isGameInLibrary = (igdbId) => {
-      return userGames.value.some(game => game.igdb_id === igdbId)
-    }
-
-    const refreshLibrary = () => {
-      gamesStore.getUserGames()
-    }
-
-    const formatDate = (dateString) => {
-      if (!dateString) return 'Unknown'
-      return new Date(dateString).toLocaleDateString()
-    }
-
-    onMounted(() => {
-      gamesStore.getUserGames()
-    })
-
-    return {
-      searchQuery,
-      userGames,
-      searchResults,
-      loading,
-      debouncedSearch,
-      addGameToLibrary,
-      updateStatus,
-      isGameInLibrary,
-      refreshLibrary,
-      formatDate
     }
   }
-}
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  selectedGame.value = null;
+};
+
+const addGameToLibrary = async (game) => {
+  const result = await gamesStore.addGame({
+    igdb_id: game.id,
+    name: game.name,
+    cover_url: game.cover_url,
+    release_date: game.release_date,
+    genres: game.genres,
+    summary: game.summary,
+    platforms: game.platforms,
+    developer: game.developer,
+    publisher: game.publisher,
+    game_engine: game.game_engine,
+    esrb_rating: game.esrb_rating,
+    website: game.website,
+    screenshots: game.screenshots,
+    franchise: game.franchise,
+    rating: game.rating,
+    total_rating: game.total_rating,
+    aggregated_rating: game.aggregated_rating,
+    status: "want_to_play",
+  });
+
+  if (!result.success) {
+    alert(result.error);
+  }
+};
+
+const addGameToLibraryFromModal = async (game) => {
+  await addGameToLibrary(game);
+  closeModal();
+};
+
+const removeGameFromLibrary = async (game) => {
+  console.log("removeGameFromLibrary called with:", game);
+  console.log("Current userGames:", userGames.value);
+
+  // Find the game in library by igdb_id
+  const libraryGame = userGames.value.find((g) => {
+    const matches = g.igdb_id === (game.igdb_id || game.igdbId || game.id);
+    console.log(
+      `Checking game ${g.name} (igdb_id: ${g.igdb_id}) against ${game.name || game.title} (igdb_id: ${game.igdb_id || game.igdbId || game.id}): ${matches}`,
+    );
+    return matches;
+  });
+
+  console.log("Found library game:", libraryGame);
+
+  if (libraryGame) {
+    console.log("Calling gamesStore.removeGame with ID:", libraryGame.id);
+    const result = await gamesStore.removeGame(libraryGame.id);
+    console.log("Remove result:", result);
+    if (!result.success) {
+      alert(result.error);
+    } else {
+      closeModal();
+    }
+  } else {
+    console.log("Game not found in library!");
+    alert("Game not found in your library");
+  }
+};
+
+const updateStatus = async (gameId, status) => {
+  const result = await gamesStore.updateGameStatus(gameId, status);
+  if (!result.success) {
+    alert(result.error);
+  }
+};
+
+const updateGameStatusFromModal = async (gameId, status) => {
+  // For library games, use the library game ID
+  const libraryGame = userGames.value.find(
+    (g) => g.igdb_id === gameId || g.id === gameId,
+  );
+  if (libraryGame) {
+    await updateStatus(libraryGame.id, status);
+    // Update the selected game status for the modal
+    if (selectedGame.value) {
+      selectedGame.value.status = status;
+    }
+  }
+};
+
+const updatePersonalRating = async (gameId, rating) => {
+  // For library games, use the library game ID
+  const libraryGame = userGames.value.find(
+    (g) => g.igdb_id === gameId || g.id === gameId,
+  );
+  if (libraryGame) {
+    // This would need to be implemented in the store/backend
+    // For now, just update locally
+    if (selectedGame.value) {
+      selectedGame.value.personal_rating = rating;
+    }
+  }
+};
+
+const updateUserPlatform = async (gameId, platform) => {
+  const libraryGame = userGames.value.find(
+    (g) => g.igdb_id === gameId || g.id === gameId,
+  );
+  if (libraryGame) {
+    const result = await gamesStore.updateGameDetails(libraryGame.id, {
+      user_platform: platform,
+    });
+    if (result.success) {
+      // Update local state
+      libraryGame.user_platform = platform;
+      if (selectedGame.value) {
+        selectedGame.value.user_platform = platform;
+      }
+    } else {
+      alert(result.error);
+    }
+  }
+};
+
+const updateQuickReview = async (gameId, reviewValue) => {
+  const libraryGame = userGames.value.find(
+    (g) => g.igdb_id === gameId || g.id === gameId,
+  );
+  if (libraryGame) {
+    const result = await gamesStore.updateGameDetails(libraryGame.id, {
+      quick_review: reviewValue,
+    });
+    if (result.success) {
+      // Update local state
+      libraryGame.quick_review = reviewValue;
+      if (selectedGame.value) {
+        selectedGame.value.quick_review = reviewValue;
+      }
+    } else {
+      alert(result.error);
+    }
+  }
+};
+
+const isGameInLibrary = (gameId) => {
+  return userGames.value.some(
+    (game) => game.igdb_id === gameId || game.igdbId === gameId,
+  );
+};
+
+const refreshLibrary = () => {
+  gamesStore.getUserGames();
+};
+
+onMounted(() => {
+  gamesStore.getUserGames();
+});
 </script>

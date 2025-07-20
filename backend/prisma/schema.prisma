@@ -27,10 +27,27 @@ model Game {
   igdbId      Int      @map("igdb_id")
   name        String
   coverUrl    String?  @map("cover_url")
+  bannerUrl   String?  @map("banner_url")
   releaseDate DateTime? @map("release_date")
   genres      String[] @default([])
+  summary     String?
+  platforms   String[] @default([])
+  developer   String?
+  publisher   String?
+  gameEngine  String?  @map("game_engine")
+  esrbRating  String?  @map("esrb_rating")
+  website     String?
+  screenshots String[] @default([])
+  franchise   String?
+  rating      Float?   // IGDB rating
+  totalRating Float?   @map("total_rating") // IGDB total rating
+  aggregatedRating Float? @map("aggregated_rating") // IGDB aggregated rating
+  
+  // User-specific data
   status      GameStatus @default(WANT_TO_PLAY)
-  rating      Int?     // 1-10 user rating
+  personalRating Int?   @map("personal_rating") // 1-10 user rating
+  quickReview QuickReview? @map("quick_review") // Emoji-based review
+  userPlatform String? @map("user_platform") // Platform user played on
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -47,4 +64,10 @@ enum GameStatus {
   PLAYING
   COMPLETED
   DROPPED
+}
+
+enum QuickReview {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
 }

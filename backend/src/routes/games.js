@@ -14,6 +14,18 @@ const reverseStatusMap = {
   'DROPPED': 'dropped'
 }
 
+const quickReviewMap = {
+  'positive': 'POSITIVE',
+  'neutral': 'NEUTRAL',
+  'negative': 'NEGATIVE'
+}
+
+const reverseQuickReviewMap = {
+  'POSITIVE': 'positive',
+  'NEUTRAL': 'neutral',
+  'NEGATIVE': 'negative'
+}
+
 async function gamesRoutes(fastify, options) {
   // Search games from IGDB
   fastify.get('/search', {
@@ -52,7 +64,19 @@ async function gamesRoutes(fastify, options) {
       const transformedGames = games.map(game => ({
         ...game,
         status: reverseStatusMap[game.status],
-        releaseDate: game.releaseDate?.toISOString() || null
+        quick_review: game.quickReview ? reverseQuickReviewMap[game.quickReview] : null,
+        releaseDate: game.releaseDate?.toISOString() || null,
+        // Map database field names to frontend expected names
+        igdb_id: game.igdbId, // Map igdbId to igdb_id for frontend consistency
+        release_date: game.releaseDate?.toISOString() || null,
+        cover_url: game.coverUrl,
+        banner_url: game.bannerUrl,
+        game_engine: game.gameEngine,
+        esrb_rating: game.esrbRating,
+        personal_rating: game.personalRating,
+        total_rating: game.totalRating,
+        aggregated_rating: game.aggregatedRating,
+        user_platform: game.userPlatform
       }))
 
       return reply.send(transformedGames)
@@ -60,6 +84,29 @@ async function gamesRoutes(fastify, options) {
       fastify.log.error(error)
       return reply.status(500).send({ 
         message: 'Failed to fetch games' 
+      })
+    }
+  })
+
+  // Get detailed game information by IGDB ID
+  fastify.get('/details/:igdbId', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    const { igdbId } = request.params
+
+    if (!igdbId || isNaN(parseInt(igdbId))) {
+      return reply.status(400).send({ 
+        message: 'Valid IGDB ID is required' 
+      })
+    }
+
+    try {
+      const gameDetails = await IGDBService.getGameById(parseInt(igdbId))
+      return reply.send(gameDetails)
+    } catch (error) {
+      fastify.log.error(error)
+      return reply.status(500).send({ 
+        message: 'Failed to get game details' 
       })
     }
   })
@@ -72,10 +119,22 @@ async function gamesRoutes(fastify, options) {
       igdb_id, 
       name, 
       cover_url, 
+      banner_url,
       release_date, 
-      genres, 
-      status = 'want_to_play',
+      genres,
+      summary,
+      platforms,
+      developer,
+      publisher,
+      game_engine,
+      esrb_rating,
+      website,
+      screenshots,
+      franchise,
       rating,
+      total_rating,
+      aggregated_rating,
+      status = 'want_to_play',
       notes 
     } = request.body
 
@@ -108,16 +167,28 @@ async function gamesRoutes(fastify, options) {
         })
       }
 
-      // Create game entry
+      // Create game entry with comprehensive data
       const game = await fastify.prisma.game.create({
         data: {
           igdbId: parseInt(igdb_id),
           name,
           coverUrl: cover_url || null,
+          bannerUrl: banner_url || null,
           releaseDate: release_date ? new Date(release_date) : null,
           genres: Array.isArray(genres) ? genres : [],
+          summary: summary || null,
+          platforms: Array.isArray(platforms) ? platforms : [],
+          developer: developer || null,
+          publisher: publisher || null,
+          gameEngine: game_engine || null,
+          esrbRating: esrb_rating || null,
+          website: website || null,
+          screenshots: Array.isArray(screenshots) ? screenshots : [],
+          franchise: franchise || null,
+          rating: rating ? parseFloat(rating) : null,
+          totalRating: total_rating ? parseFloat(total_rating) : null,
+          aggregatedRating: aggregated_rating ? parseFloat(aggregated_rating) : null,
           status: statusMap[status],
-          rating: rating ? parseInt(rating) : null,
           notes: notes || null,
           userId: request.user.userId
         }
@@ -127,7 +198,18 @@ async function gamesRoutes(fastify, options) {
       const responseGame = {
         ...game,
         status: reverseStatusMap[game.status],
-        releaseDate: game.releaseDate?.toISOString() || null
+        quick_review: game.quickReview ? reverseQuickReviewMap[game.quickReview] : null,
+        releaseDate: game.releaseDate?.toISOString() || null,
+        // Map database field names to frontend expected names
+        igdb_id: game.igdbId, // Map igdbId to igdb_id for frontend consistency
+        release_date: game.releaseDate?.toISOString() || null,
+        cover_url: game.coverUrl,
+        banner_url: game.bannerUrl,
+        game_engine: game.gameEngine,
+        esrb_rating: game.esrbRating,
+        personal_rating: game.personalRating,
+        total_rating: game.totalRating,
+        aggregated_rating: game.aggregatedRating
       }
 
       return reply.status(201).send(responseGame)
@@ -144,7 +226,7 @@ async function gamesRoutes(fastify, options) {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
     const { gameId } = request.params
-    const { status, rating, notes } = request.body
+    const { status, personal_rating, notes, quick_review, user_platform } = request.body
 
     if (!gameId || isNaN(parseInt(gameId))) {
       return reply.status(400).send({ 
@@ -163,12 +245,28 @@ async function gamesRoutes(fastify, options) {
       updateData.status = statusMap[status]
     }
 
-    if (rating !== undefined) {
-      updateData.rating = rating ? parseInt(rating) : null
+    if (personal_rating !== undefined) {
+      updateData.personalRating = personal_rating ? parseInt(personal_rating) : null
     }
 
     if (notes !== undefined) {
       updateData.notes = notes || null
+    }
+
+    if (quick_review !== undefined) {
+      if (quick_review === null) {
+        updateData.quickReview = null
+      } else if (!quickReviewMap[quick_review]) {
+        return reply.status(400).send({ 
+          message: 'Invalid quick review value' 
+        })
+      } else {
+        updateData.quickReview = quickReviewMap[quick_review]
+      }
+    }
+
+    if (user_platform !== undefined) {
+      updateData.userPlatform = user_platform || null
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -202,7 +300,17 @@ async function gamesRoutes(fastify, options) {
       const responseGame = {
         ...updatedGame,
         status: reverseStatusMap[updatedGame.status],
-        releaseDate: updatedGame.releaseDate?.toISOString() || null
+        quick_review: updatedGame.quickReview ? reverseQuickReviewMap[updatedGame.quickReview] : null,
+        releaseDate: updatedGame.releaseDate?.toISOString() || null,
+        // Map database field names to frontend expected names
+        release_date: updatedGame.releaseDate?.toISOString() || null,
+        cover_url: updatedGame.coverUrl,
+        game_engine: updatedGame.gameEngine,
+        esrb_rating: updatedGame.esrbRating,
+        personal_rating: updatedGame.personalRating,
+        total_rating: updatedGame.totalRating,
+        aggregated_rating: updatedGame.aggregatedRating,
+        user_platform: updatedGame.userPlatform
       }
 
       return reply.send(responseGame)

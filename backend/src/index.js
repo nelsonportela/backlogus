@@ -2,10 +2,15 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { PrismaClient } from '@prisma/client'
 
 // Load environment variables
 dotenv.config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const fastify = Fastify({
   logger: {
@@ -24,6 +29,12 @@ await fastify.register(cors, {
 
 await fastify.register(jwt, {
   secret: process.env.JWT_SECRET
+})
+
+// Serve static files (for platform logos)
+await fastify.register(import('@fastify/static'), {
+  root: path.join(__dirname, '../public'),
+  prefix: '/'
 })
 
 // Add prisma to fastify instance
