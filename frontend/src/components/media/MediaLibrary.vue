@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow p-6">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-medium text-gray-900">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
         My {{ mediaTypeLabel }} Library
       </h3>
       <button @click="refreshLibrary" class="btn-secondary text-sm">
@@ -11,7 +11,7 @@
 
     <div
       v-if="libraryItems.length === 0"
-      class="text-center text-gray-500 py-8"
+      class="text-center text-gray-500 dark:text-gray-400 py-8"
     >
       No {{ mediaTypeLabel.toLowerCase() }} in your library yet. Search and add
       some {{ mediaTypeLabel.toLowerCase() }}!
@@ -33,7 +33,19 @@
           class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
           title="Remove from library"
         >
-          ×
+          <svg
+            class="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="3"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
         </button>
 
         <!-- Cover Image Container -->
@@ -48,10 +60,10 @@
           />
           <div
             v-else
-            class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center"
+            class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center"
           >
             <svg
-              class="w-8 h-8 text-gray-400"
+              class="w-8 h-8 text-gray-400 dark:text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -65,9 +77,14 @@
             </svg>
           </div>
 
-          <!-- Title Overlay (appears on hover) -->
+          <!-- Full Cover Gradient Overlay (appears on hover) -->
           <div
-            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-3"
+            class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+
+          <!-- Title Text (appears on hover) -->
+          <div
+            class="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           >
             <h4 class="text-white font-medium text-sm leading-tight">
               {{ item.name || item.title }}

@@ -9,8 +9,7 @@ class IGDBService {
 
   async searchGames(query, limit = 15) {
     try {
-      // First try standard search and include remasters field
-      const standardResponse = await axios({
+      const response = await axios({
         url: `${this.baseUrl}/games`,
         method: 'POST',
         headers: {
@@ -21,100 +20,16 @@ class IGDBService {
         data: `
           search "${query}";
           fields name, cover.url, first_release_date, genres.name, summary, rating, 
-                 platforms.name, involved_companies.company.name, involved_companies.developer, 
-                 involved_companies.publisher, screenshots.url, game_engines.name, 
-                 age_ratings.rating, age_ratings.category, websites.url, websites.category,
-                 storyline, aggregated_rating, total_rating, artworks.url, remasters, remakes;
-          limit ${Math.ceil(limit * 0.7)};
-          where category = 0;
+                platforms.name, involved_companies.company.name, involved_companies.developer, 
+                involved_companies.publisher, screenshots.url, game_engines.name, 
+                age_ratings.rating, age_ratings.category, websites.url, websites.category,
+                storyline, aggregated_rating, total_rating, artworks.url, artworks.width, artworks.height;
+          limit ${limit};
+          where category = (0,1,2,3,4,5,8,9,10,11);
         `
       })
 
-      // Collect all games including remasters
-      const allGames = []
-      const seenIds = new Set()
-
-      // Add standard search results first
-      for (const game of standardResponse.data) {
-        if (!seenIds.has(game.id)) {
-          seenIds.add(game.id)
-          allGames.push(this.formatGameData(game))
-        }
-
-        // Debug logging
-        console.log(`Game: ${game.name}, ID: ${game.id}, Remasters: ${JSON.stringify(game.remasters)}`)
-
-        // If this game has remasters, fetch them too
-        if (game.remasters && game.remasters.length > 0) {
-          console.log(`Fetching remasters for ${game.name}: ${game.remasters}`)
-          try {
-            const remastersResponse = await axios({
-              url: `${this.baseUrl}/games`,
-              method: 'POST',
-              headers: {
-                'Client-ID': this.clientId,
-                'Authorization': `Bearer ${this.accessToken}`,
-                'Content-Type': 'text/plain'
-              },
-              data: `
-                fields name, cover.url, first_release_date, genres.name, summary, rating, 
-                       platforms.name, involved_companies.company.name, involved_companies.developer, 
-                       involved_companies.publisher, screenshots.url, game_engines.name, 
-                       age_ratings.rating, age_ratings.category, websites.url, websites.category,
-                       storyline, aggregated_rating, total_rating, artworks.url;
-                where id = (${game.remasters.join(',')});
-              `
-            })
-
-            console.log(`Found ${remastersResponse.data.length} remasters`)
-            
-            // Add remastered versions
-            for (const remaster of remastersResponse.data) {
-              console.log(`Adding remaster: ${remaster.name}`)
-              if (!seenIds.has(remaster.id)) {
-                seenIds.add(remaster.id)
-                allGames.push(this.formatGameData(remaster))
-              }
-            }
-          } catch (remasterError) {
-            console.warn('Failed to fetch remasters:', remasterError.message)
-          }
-        }
-      }
-
-      // Then try a broader name-based search to catch any other variations
-      try {
-        const broaderResponse = await axios({
-          url: `${this.baseUrl}/games`,
-          method: 'POST',
-          headers: {
-            'Client-ID': this.clientId,
-            'Authorization': `Bearer ${this.accessToken}`,
-            'Content-Type': 'text/plain'
-          },
-          data: `
-            fields name, cover.url, first_release_date, genres.name, summary, rating, 
-                   platforms.name, involved_companies.company.name, involved_companies.developer, 
-                   involved_companies.publisher, screenshots.url, game_engines.name, 
-                   age_ratings.rating, age_ratings.category, websites.url, websites.category,
-                   storyline, aggregated_rating, total_rating, artworks.url;
-            where name ~ *"${query}"* & category = 0;
-            limit ${Math.ceil(limit * 0.4)};
-          `
-        })
-
-        // Add broader search results
-        for (const game of broaderResponse.data) {
-          if (!seenIds.has(game.id)) {
-            seenIds.add(game.id)
-            allGames.push(this.formatGameData(game))
-          }
-        }
-      } catch (broaderError) {
-        console.warn('Broader search failed:', broaderError.message)
-      }
-
-      return allGames.slice(0, limit)
+      return response.data.map(game => this.formatGameData(game))
     } catch (error) {
       console.error('IGDB API Error:', error.response?.data || error.message)
       throw new Error('Failed to search games')
@@ -136,7 +51,7 @@ class IGDBService {
                  platforms.name, involved_companies.company.name, involved_companies.developer, 
                  involved_companies.publisher, screenshots.url, game_engines.name, 
                  age_ratings.rating, age_ratings.category, websites.url, websites.category,
-                 storyline, aggregated_rating, total_rating, franchise.name, collection.name, artworks.url;
+                 storyline, aggregated_rating, total_rating, franchise.name, collection.name, artworks.url, artworks.width, artworks.height;
           where id = ${gameId};
         `
       })
@@ -172,9 +87,35 @@ class IGDBService {
     // Format screenshots
     const screenshots = game.screenshots?.map(s => `https:${s.url.replace('t_thumb', 't_screenshot_big')}`) || []
 
-    // Format artworks for banner (use first artwork if available)
-    const artworks = game.artworks?.map(a => `https:${a.url.replace('t_thumb', 't_1080p')}`) || []
-    const banner_url = artworks.length > 0 ? artworks[0] : null
+    // Format artworks and select best key art
+    const artworks = game.artworks?.map(a => ({
+      url: `https:${a.url.replace('t_thumb', 't_1080p')}`,
+      width: a.width || 0,
+      height: a.height || 0,
+      aspectRatio: a.width && a.height ? a.width / a.height : 1
+    })) || []
+    
+    // Select key art with preference for landscape orientation (key art is usually wide)
+    let keyArt = null
+    if (artworks.length > 0) {
+      // Prefer landscape artworks (aspect ratio > 1.2) as they work better as banners
+      const landscapeArt = artworks.find(art => art.aspectRatio > 1.2)
+      keyArt = landscapeArt || artworks[0] // Fallback to first artwork
+    }
+    
+    // Create banner_url with improved fallback strategy:
+    // 1. Key art (landscape artwork preferred)
+    // 2. First screenshot as banner (if available) 
+    // 3. Cover image as banner (if available)
+    let banner_url = null
+    if (keyArt) {
+      banner_url = keyArt.url
+    } else if (game.screenshots?.length > 0) {
+      banner_url = `https:${game.screenshots[0].url.replace('t_thumb', 't_1080p')}`
+    } else if (game.cover?.url) {
+      // Use cover as banner fallback, but with a larger size
+      banner_url = `https:${game.cover.url.replace('t_thumb', 't_1080p')}`
+    }
 
     return {
       id: game.id,
@@ -192,6 +133,8 @@ class IGDBService {
       esrb_rating: this.formatAgeRating(ageRating),
       website: officialWebsite,
       screenshots: screenshots,
+      artworks: artworks.map(a => a.url), // All artworks as URLs
+      key_art: keyArt?.url || null, // Best key art specifically
       franchise: game.franchise?.name || game.collection?.name || null
     }
   }

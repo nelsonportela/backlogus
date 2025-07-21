@@ -55,28 +55,41 @@ async function gamesRoutes(fastify, options) {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
     try {
-      const games = await fastify.prisma.game.findMany({
+      const userGames = await fastify.prisma.userGame.findMany({
         where: { userId: request.user.userId },
+        include: { game: true },
         orderBy: { updatedAt: 'desc' }
       })
 
-      // Transform status for frontend
-      const transformedGames = games.map(game => ({
-        ...game,
-        status: reverseStatusMap[game.status],
-        quick_review: game.quickReview ? reverseQuickReviewMap[game.quickReview] : null,
-        releaseDate: game.releaseDate?.toISOString() || null,
-        // Map database field names to frontend expected names
-        igdb_id: game.igdbId, // Map igdbId to igdb_id for frontend consistency
-        release_date: game.releaseDate?.toISOString() || null,
-        cover_url: game.coverUrl,
-        banner_url: game.bannerUrl,
-        game_engine: game.gameEngine,
-        esrb_rating: game.esrbRating,
-        personal_rating: game.personalRating,
-        total_rating: game.totalRating,
-        aggregated_rating: game.aggregatedRating,
-        user_platform: game.userPlatform
+      // Transform for frontend
+      const transformedGames = userGames.map(userGame => ({
+        // UserGame fields
+        id: userGame.id, // This is now the userGame ID for updates
+        status: reverseStatusMap[userGame.status],
+        quick_review: userGame.quickReview ? reverseQuickReviewMap[userGame.quickReview] : null,
+        personal_rating: userGame.personalRating,
+        user_platform: userGame.userPlatform,
+        notes: userGame.notes,
+        // Game fields
+        igdb_id: userGame.game.igdbId,
+        name: userGame.game.name,
+        cover_url: userGame.game.coverUrl,
+        banner_url: userGame.game.bannerUrl,
+        artworks: userGame.game.artworks,
+        release_date: userGame.game.releaseDate?.toISOString() || null,
+        genres: userGame.game.genres,
+        summary: userGame.game.summary,
+        platforms: userGame.game.platforms,
+        developer: userGame.game.developer,
+        publisher: userGame.game.publisher,
+        game_engine: userGame.game.gameEngine,
+        esrb_rating: userGame.game.esrbRating,
+        website: userGame.game.website,
+        screenshots: userGame.game.screenshots,
+        franchise: userGame.game.franchise,
+        rating: userGame.game.rating,
+        total_rating: userGame.game.totalRating,
+        aggregated_rating: userGame.game.aggregatedRating
       }))
 
       return reply.send(transformedGames)
@@ -120,6 +133,8 @@ async function gamesRoutes(fastify, options) {
       name, 
       cover_url, 
       banner_url,
+      key_art, // Received but not stored (using banner_url instead)
+      artworks,
       release_date, 
       genres,
       summary,
@@ -135,7 +150,9 @@ async function gamesRoutes(fastify, options) {
       total_rating,
       aggregated_rating,
       status = 'want_to_play',
-      notes 
+      quick_review = null,
+      user_platform = null,
+      notes = null
     } = request.body
 
     if (!igdb_id || !name) {
@@ -150,66 +167,101 @@ async function gamesRoutes(fastify, options) {
       })
     }
 
+    // Validate quick_review if provided
+    if (quick_review && !quickReviewMap[quick_review]) {
+      return reply.status(400).send({ 
+        message: 'Invalid quick_review value' 
+      })
+    }
+
     try {
-      // Check if game already exists for user
-      const existingGame = await fastify.prisma.game.findUnique({
+      // Get or create the game record first
+      let game = await fastify.prisma.game.findUnique({
+        where: { igdbId: parseInt(igdb_id) }
+      })
+
+      if (!game) {
+        game = await fastify.prisma.game.create({
+          data: {
+            igdbId: parseInt(igdb_id),
+            name,
+            coverUrl: cover_url || null,
+            bannerUrl: banner_url || null,
+            artworks: Array.isArray(artworks) ? artworks : [],
+            releaseDate: release_date ? new Date(release_date) : null,
+            genres: Array.isArray(genres) ? genres : [],
+            summary: summary || null,
+            platforms: Array.isArray(platforms) ? platforms : [],
+            developer: developer || null,
+            publisher: publisher || null,
+            gameEngine: game_engine || null,
+            esrbRating: esrb_rating || null,
+            website: website || null,
+            screenshots: Array.isArray(screenshots) ? screenshots : [],
+            franchise: franchise || null,
+            rating: rating ? parseFloat(rating) : null,
+            totalRating: total_rating ? parseFloat(total_rating) : null,
+            aggregatedRating: aggregated_rating ? parseFloat(aggregated_rating) : null
+          }
+        })
+      }
+
+      // Check if user already has this game
+      const existingUserGame = await fastify.prisma.userGame.findUnique({
         where: {
-          userId_igdbId: {
+          userId_gameId: {
             userId: request.user.userId,
-            igdbId: parseInt(igdb_id)
+            gameId: game.id
           }
         }
       })
 
-      if (existingGame) {
+      if (existingUserGame) {
         return reply.status(409).send({ 
           message: 'Game already in your library' 
         })
       }
 
-      // Create game entry with comprehensive data
-      const game = await fastify.prisma.game.create({
+      // Create user-game relationship
+      const userGame = await fastify.prisma.userGame.create({
         data: {
-          igdbId: parseInt(igdb_id),
-          name,
-          coverUrl: cover_url || null,
-          bannerUrl: banner_url || null,
-          releaseDate: release_date ? new Date(release_date) : null,
-          genres: Array.isArray(genres) ? genres : [],
-          summary: summary || null,
-          platforms: Array.isArray(platforms) ? platforms : [],
-          developer: developer || null,
-          publisher: publisher || null,
-          gameEngine: game_engine || null,
-          esrbRating: esrb_rating || null,
-          website: website || null,
-          screenshots: Array.isArray(screenshots) ? screenshots : [],
-          franchise: franchise || null,
-          rating: rating ? parseFloat(rating) : null,
-          totalRating: total_rating ? parseFloat(total_rating) : null,
-          aggregatedRating: aggregated_rating ? parseFloat(aggregated_rating) : null,
+          userId: request.user.userId,
+          gameId: game.id,
           status: statusMap[status],
-          notes: notes || null,
-          userId: request.user.userId
-        }
+          quickReview: quick_review ? quickReviewMap[quick_review] : null,
+          userPlatform: user_platform || null,
+          notes: notes || null
+        },
+        include: { game: true }
       })
 
       // Transform for response
       const responseGame = {
-        ...game,
-        status: reverseStatusMap[game.status],
-        quick_review: game.quickReview ? reverseQuickReviewMap[game.quickReview] : null,
-        releaseDate: game.releaseDate?.toISOString() || null,
-        // Map database field names to frontend expected names
-        igdb_id: game.igdbId, // Map igdbId to igdb_id for frontend consistency
-        release_date: game.releaseDate?.toISOString() || null,
-        cover_url: game.coverUrl,
-        banner_url: game.bannerUrl,
-        game_engine: game.gameEngine,
-        esrb_rating: game.esrbRating,
-        personal_rating: game.personalRating,
-        total_rating: game.totalRating,
-        aggregated_rating: game.aggregatedRating
+        id: userGame.id,
+        status: reverseStatusMap[userGame.status],
+        quick_review: userGame.quickReview ? reverseQuickReviewMap[userGame.quickReview] : null,
+        personal_rating: userGame.personalRating,
+        user_platform: userGame.userPlatform,
+        notes: userGame.notes,
+        // Game data
+        igdb_id: userGame.game.igdbId,
+        name: userGame.game.name,
+        cover_url: userGame.game.coverUrl,
+        banner_url: userGame.game.bannerUrl,
+        release_date: userGame.game.releaseDate?.toISOString() || null,
+        genres: userGame.game.genres,
+        summary: userGame.game.summary,
+        platforms: userGame.game.platforms,
+        developer: userGame.game.developer,
+        publisher: userGame.game.publisher,
+        game_engine: userGame.game.gameEngine,
+        esrb_rating: userGame.game.esrbRating,
+        website: userGame.game.website,
+        screenshots: userGame.game.screenshots,
+        franchise: userGame.game.franchise,
+        rating: userGame.game.rating,
+        total_rating: userGame.game.totalRating,
+        aggregated_rating: userGame.game.aggregatedRating
       }
 
       return reply.status(201).send(responseGame)
@@ -222,15 +274,15 @@ async function gamesRoutes(fastify, options) {
   })
 
   // Update game in user's library
-  fastify.patch('/:gameId', {
+  fastify.patch('/:userGameId', {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
-    const { gameId } = request.params
+    const { userGameId } = request.params
     const { status, personal_rating, notes, quick_review, user_platform } = request.body
 
-    if (!gameId || isNaN(parseInt(gameId))) {
+    if (!userGameId || isNaN(parseInt(userGameId))) {
       return reply.status(400).send({ 
-        message: 'Valid game ID is required' 
+        message: 'Valid user game ID is required' 
       })
     }
 
@@ -276,41 +328,55 @@ async function gamesRoutes(fastify, options) {
     }
 
     try {
-      // Check if game belongs to user
-      const existingGame = await fastify.prisma.game.findFirst({
+      // Check if user game exists and belongs to user
+      const existingUserGame = await fastify.prisma.userGame.findFirst({
         where: {
-          id: parseInt(gameId),
+          id: parseInt(userGameId),
           userId: request.user.userId
-        }
+        },
+        include: { game: true }
       })
 
-      if (!existingGame) {
+      if (!existingUserGame) {
         return reply.status(404).send({ 
           message: 'Game not found in your library' 
         })
       }
 
-      // Update game
-      const updatedGame = await fastify.prisma.game.update({
-        where: { id: parseInt(gameId) },
-        data: updateData
+      // Update user game
+      const updatedUserGame = await fastify.prisma.userGame.update({
+        where: { id: parseInt(userGameId) },
+        data: updateData,
+        include: { game: true }
       })
 
       // Transform for response
       const responseGame = {
-        ...updatedGame,
-        status: reverseStatusMap[updatedGame.status],
-        quick_review: updatedGame.quickReview ? reverseQuickReviewMap[updatedGame.quickReview] : null,
-        releaseDate: updatedGame.releaseDate?.toISOString() || null,
-        // Map database field names to frontend expected names
-        release_date: updatedGame.releaseDate?.toISOString() || null,
-        cover_url: updatedGame.coverUrl,
-        game_engine: updatedGame.gameEngine,
-        esrb_rating: updatedGame.esrbRating,
-        personal_rating: updatedGame.personalRating,
-        total_rating: updatedGame.totalRating,
-        aggregated_rating: updatedGame.aggregatedRating,
-        user_platform: updatedGame.userPlatform
+        id: updatedUserGame.id,
+        status: reverseStatusMap[updatedUserGame.status],
+        quick_review: updatedUserGame.quickReview ? reverseQuickReviewMap[updatedUserGame.quickReview] : null,
+        personal_rating: updatedUserGame.personalRating,
+        user_platform: updatedUserGame.userPlatform,
+        notes: updatedUserGame.notes,
+        // Game data
+        igdb_id: updatedUserGame.game.igdbId,
+        name: updatedUserGame.game.name,
+        cover_url: updatedUserGame.game.coverUrl,
+        banner_url: updatedUserGame.game.bannerUrl,
+        release_date: updatedUserGame.game.releaseDate?.toISOString() || null,
+        genres: updatedUserGame.game.genres,
+        summary: updatedUserGame.game.summary,
+        platforms: updatedUserGame.game.platforms,
+        developer: updatedUserGame.game.developer,
+        publisher: updatedUserGame.game.publisher,
+        game_engine: updatedUserGame.game.gameEngine,
+        esrb_rating: updatedUserGame.game.esrbRating,
+        website: updatedUserGame.game.website,
+        screenshots: updatedUserGame.game.screenshots,
+        franchise: updatedUserGame.game.franchise,
+        rating: updatedUserGame.game.rating,
+        total_rating: updatedUserGame.game.totalRating,
+        aggregated_rating: updatedUserGame.game.aggregatedRating
       }
 
       return reply.send(responseGame)
@@ -323,27 +389,27 @@ async function gamesRoutes(fastify, options) {
   })
 
   // Remove game from user's library
-  fastify.delete('/:gameId', {
+  fastify.delete('/:userGameId', {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
-    const { gameId } = request.params
+    const { userGameId } = request.params
 
-    if (!gameId || isNaN(parseInt(gameId))) {
+    if (!userGameId || isNaN(parseInt(userGameId))) {
       return reply.status(400).send({ 
-        message: 'Valid game ID is required' 
+        message: 'Valid user game ID is required' 
       })
     }
 
     try {
-      // Check if game belongs to user and delete
-      const deletedGame = await fastify.prisma.game.deleteMany({
+      // Check if user game exists and belongs to user, then delete
+      const deletedUserGame = await fastify.prisma.userGame.deleteMany({
         where: {
-          id: parseInt(gameId),
+          id: parseInt(userGameId),
           userId: request.user.userId
         }
       })
 
-      if (deletedGame.count === 0) {
+      if (deletedUserGame.count === 0) {
         return reply.status(404).send({ 
           message: 'Game not found in your library' 
         })

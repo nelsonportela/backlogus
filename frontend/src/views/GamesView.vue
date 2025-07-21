@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-/* global alert, console */
+/* global alert */
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useGamesStore } from "@/stores/games";
@@ -85,19 +85,20 @@ const handleSearch = (query) => {
 // Watch route changes to handle status filtering
 watch(
   () => route.query.status,
-  (newStatus) => {
-    console.log("Status filter changed to:", newStatus || "all");
+  () => {
+    // Filter status changed - no action needed as computed property handles this
   },
 );
 
 const showGameDetails = async (game) => {
-  // Check if this is a library game (has library-specific fields) or search result
-  const isLibraryGame =
+  // Check if this is a library game or search result
+  // Library games have status and igdb_id fields, search results have id (IGDB ID) but no status
+  const isLibraryGame = 
     Object.prototype.hasOwnProperty.call(game, "status") &&
-    Object.prototype.hasOwnProperty.call(game, "userId");
+    Object.prototype.hasOwnProperty.call(game, "igdb_id");
 
   if (isLibraryGame) {
-    // For library games, use the stored data directly since we now store everything
+    // For library games, use the stored data directly - do NOT fetch from IGDB
     selectedGame.value = game;
     showModal.value = true;
   } else {
@@ -124,26 +125,51 @@ const closeModal = () => {
   selectedGame.value = null;
 };
 
-const addGameToLibrary = async (game) => {
+const addGameToLibrary = async (libraryData) => {
+  // Handle both old format (just game object) and new format (enhanced data from modal)
+  let gameData, status, quickReview, userPlatform, notes;
+  
+  if (libraryData.item) {
+    // New format from AddToLibraryModal
+    gameData = libraryData.item;
+    status = libraryData.status;
+    quickReview = libraryData.quick_review;
+    userPlatform = libraryData.user_platform;
+    notes = libraryData.notes;
+  } else {
+    // Old format - direct game object
+    gameData = libraryData;
+    status = "want_to_play"; // default status
+    quickReview = null;
+    userPlatform = null;
+    notes = null;
+  }
+
   const result = await gamesStore.addGame({
-    igdb_id: game.id,
-    name: game.name,
-    cover_url: game.cover_url,
-    release_date: game.release_date,
-    genres: game.genres,
-    summary: game.summary,
-    platforms: game.platforms,
-    developer: game.developer,
-    publisher: game.publisher,
-    game_engine: game.game_engine,
-    esrb_rating: game.esrb_rating,
-    website: game.website,
-    screenshots: game.screenshots,
-    franchise: game.franchise,
-    rating: game.rating,
-    total_rating: game.total_rating,
-    aggregated_rating: game.aggregated_rating,
-    status: "want_to_play",
+    igdb_id: gameData.id,
+    name: gameData.name,
+    cover_url: gameData.cover_url,
+    banner_url: gameData.banner_url,
+    key_art: gameData.key_art,
+    artworks: gameData.artworks,
+    release_date: gameData.release_date,
+    genres: gameData.genres,
+    summary: gameData.summary,
+    platforms: gameData.platforms,
+    developer: gameData.developer,
+    publisher: gameData.publisher,
+    game_engine: gameData.game_engine,
+    esrb_rating: gameData.esrb_rating,
+    website: gameData.website,
+    screenshots: gameData.screenshots,
+    franchise: gameData.franchise,
+    rating: gameData.rating,
+    total_rating: gameData.total_rating,
+    aggregated_rating: gameData.aggregated_rating,
+    status: status,
+    quick_review: quickReview,
+    user_platform: userPlatform,
+    notes: notes,
   });
 
   if (!result.success) {
@@ -157,31 +183,19 @@ const addGameToLibraryFromModal = async (game) => {
 };
 
 const removeGameFromLibrary = async (game) => {
-  console.log("removeGameFromLibrary called with:", game);
-  console.log("Current userGames:", userGames.value);
-
   // Find the game in library by igdb_id
-  const libraryGame = userGames.value.find((g) => {
-    const matches = g.igdb_id === (game.igdb_id || game.igdbId || game.id);
-    console.log(
-      `Checking game ${g.name} (igdb_id: ${g.igdb_id}) against ${game.name || game.title} (igdb_id: ${game.igdb_id || game.igdbId || game.id}): ${matches}`,
-    );
-    return matches;
-  });
-
-  console.log("Found library game:", libraryGame);
+  const libraryGame = userGames.value.find(
+    (g) => g.igdb_id === (game.igdb_id || game.igdbId || game.id),
+  );
 
   if (libraryGame) {
-    console.log("Calling gamesStore.removeGame with ID:", libraryGame.id);
     const result = await gamesStore.removeGame(libraryGame.id);
-    console.log("Remove result:", result);
     if (!result.success) {
       alert(result.error);
     } else {
       closeModal();
     }
   } else {
-    console.log("Game not found in library!");
     alert("Game not found in your library");
   }
 };

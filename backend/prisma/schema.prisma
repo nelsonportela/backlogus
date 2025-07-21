@@ -17,46 +17,58 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  games     Game[]
+  userGames UserGame[]
   
   @@map("users")
 }
 
 model Game {
-  id          Int      @id @default(autoincrement())
-  igdbId      Int      @map("igdb_id")
-  name        String
-  coverUrl    String?  @map("cover_url")
-  bannerUrl   String?  @map("banner_url")
-  releaseDate DateTime? @map("release_date")
-  genres      String[] @default([])
-  summary     String?
-  platforms   String[] @default([])
-  developer   String?
-  publisher   String?
-  gameEngine  String?  @map("game_engine")
-  esrbRating  String?  @map("esrb_rating")
-  website     String?
-  screenshots String[] @default([])
-  franchise   String?
-  rating      Float?   // IGDB rating
-  totalRating Float?   @map("total_rating") // IGDB total rating
+  id              Int      @id @default(autoincrement())
+  igdbId          Int      @unique @map("igdb_id")
+  name            String
+  coverUrl        String?  @map("cover_url")
+  bannerUrl       String?  @map("banner_url")
+  artworks        String[] @default([]) // All artworks from IGDB
+  releaseDate     DateTime? @map("release_date")
+  genres          String[] @default([])
+  summary         String?
+  platforms       String[] @default([])
+  developer       String?
+  publisher       String?
+  gameEngine      String?  @map("game_engine")
+  esrbRating      String?  @map("esrb_rating")
+  website         String?
+  screenshots     String[] @default([])
+  franchise       String?
+  rating          Float?   // IGDB rating
+  totalRating     Float?   @map("total_rating") // IGDB total rating
   aggregatedRating Float? @map("aggregated_rating") // IGDB aggregated rating
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  // User-specific data
-  status      GameStatus @default(WANT_TO_PLAY)
-  personalRating Int?   @map("personal_rating") // 1-10 user rating
-  quickReview QuickReview? @map("quick_review") // Emoji-based review
-  userPlatform String? @map("user_platform") // Platform user played on
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  userGames       UserGame[]
   
-  userId      Int      @map("user_id")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, igdbId])
   @@map("games")
+}
+
+model UserGame {
+  id             Int      @id @default(autoincrement())
+  status         GameStatus @default(WANT_TO_PLAY)
+  personalRating Int?     @map("personal_rating") // 1-10 user rating
+  quickReview    QuickReview? @map("quick_review") // Emoji-based review
+  userPlatform   String?  @map("user_platform") // Platform user played on
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  userId         Int      @map("user_id")
+  gameId         Int      @map("game_id")
+  
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game           Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, gameId])
+  @@map("user_games")
 }
 
 enum GameStatus {

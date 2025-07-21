@@ -1,4 +1,3 @@
-/* global console */
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { gamesApi } from "../services/api.js";

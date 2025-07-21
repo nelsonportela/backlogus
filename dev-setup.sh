@@ -30,10 +30,8 @@ check_docker() {
         exit 1
     fi
 
-    # Check for Docker Compose (new or legacy)
-    if command -v docker-compose &> /dev/null; then
-        DOCKER_COMPOSE="docker-compose"
-    elif docker compose version &> /dev/null; then
+    # Check for Docker Compose
+    if docker compose version &> /dev/null; then
         DOCKER_COMPOSE="docker compose"
     else
         print_error "Docker Compose is not available. Please install Docker Compose."
@@ -53,7 +51,6 @@ start_db() {
     sleep 5
     
     # Check if database is ready
-    if $DOCKER_COMPOSE -f docker-compose.dev.yml exec postgres pg_isready -U media_tracker_user -d media_tracker_db; then
         print_status "Database is ready!"
     else
         print_warning "Database might still be starting up. Please wait a moment and try again."

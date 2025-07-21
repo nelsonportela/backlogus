@@ -13,6 +13,10 @@ export default [
       sourceType: "module",
       globals: {
         process: "readonly",
+        document: "readonly",
+        window: "readonly",
+        localStorage: "readonly",
+        console: "readonly",
       },
     },
     rules: {
