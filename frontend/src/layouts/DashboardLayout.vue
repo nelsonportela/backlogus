@@ -152,7 +152,9 @@
         class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 pl-16 md:pl-6"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 truncate">
+          <h2
+            class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 truncate"
+          >
             {{ dynamicTitle }}
           </h2>
 
@@ -163,7 +165,7 @@
               class="w-5 h-5 transition-colors"
               :class="{
                 'text-yellow-500': !isDark,
-                'text-gray-400 dark:text-gray-500': isDark
+                'text-gray-400 dark:text-gray-500': isDark,
               }"
               fill="none"
               stroke="currentColor"
@@ -171,31 +173,33 @@
               strokeWidth="2"
             >
               <circle cx="12" cy="12" r="5"></circle>
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+              <path
+                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+              ></path>
             </svg>
-            
+
             <!-- Switch -->
             <input
               type="checkbox"
               :checked="isDark"
               @change="toggleTheme"
-              class="relative h-5 w-10 appearance-none rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 cursor-pointer
-                     after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-lg after:transition-transform after:duration-200 after:ease-in-out after:content-[''] 
-                     checked:bg-primary-600 checked:after:translate-x-5"
+              class="relative h-5 w-10 appearance-none rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 cursor-pointer after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-lg after:transition-transform after:duration-200 after:ease-in-out after:content-[''] checked:bg-primary-600 checked:after:translate-x-5"
               :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
             />
-            
+
             <!-- Moon Icon (Dark Mode) -->
             <svg
               class="w-5 h-5 transition-colors"
               :class="{
                 'text-blue-500 dark:text-blue-400': isDark,
-                'text-gray-400 dark:text-gray-500': !isDark
+                'text-gray-400 dark:text-gray-500': !isDark,
               }"
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+              <path
+                d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+              />
             </svg>
           </div>
         </div>
@@ -242,7 +246,7 @@ const isGamesRoute = computed(() => {
 });
 
 const dynamicTitle = computed(() => {
-  if (route.name && route.name !== 'dashboard') {
+  if (route.name && route.name !== "dashboard") {
     // Capitalize first letter of route name and add "Dashboard"
     const routeName = route.name.charAt(0).toUpperCase() + route.name.slice(1);
     return `${routeName} Dashboard`;

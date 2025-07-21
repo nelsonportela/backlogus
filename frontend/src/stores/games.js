@@ -17,8 +17,7 @@ export const useGamesStore = defineStore("games", () => {
     try {
       const response = await gamesApi.search(query);
       searchResults.value = response.data;
-    } catch (error) {
-      console.error("Error searching games:", error);
+    } catch {
       searchResults.value = [];
     } finally {
       loading.value = false;
@@ -30,8 +29,8 @@ export const useGamesStore = defineStore("games", () => {
     try {
       const response = await gamesApi.getUserGames();
       games.value = response.data;
-    } catch (error) {
-      console.error("Error fetching user games:", error);
+    } catch {
+      // Silently fail - errors should be handled by UI components
     } finally {
       loading.value = false;
     }

@@ -34,14 +34,18 @@
       ></div>
 
       <!-- Search results container -->
-      <div class="relative z-50 mx-auto max-w-4xl mt-16 sm:mt-20 mb-8 px-2 sm:px-4">
+      <div
+        class="relative z-50 mx-auto max-w-4xl mt-16 sm:mt-20 mb-8 px-2 sm:px-4"
+      >
         <div
           class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border dark:border-gray-700 max-h-[80vh] overflow-hidden flex flex-col"
         >
           <!-- Search header in overlay -->
           <div class="p-4 sm:p-6 border-b dark:border-gray-700 flex-shrink-0">
             <div class="flex items-center justify-between">
-              <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 pr-2 truncate">
+              <h3
+                class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 pr-2 truncate"
+              >
                 Search Results for "{{ searchQuery }}"
               </h3>
               <button
@@ -78,7 +82,9 @@
               class="flex items-center justify-between p-3 sm:p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
               @click="showItemDetails(item)"
             >
-              <div class="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+              <div
+                class="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1"
+              >
                 <img
                   v-if="getImageUrl(item)"
                   :src="getImageUrl(item)"
@@ -94,7 +100,9 @@
                   >
                 </div>
                 <div class="min-w-0 flex-1">
-                  <h4 class="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
+                  <h4
+                    class="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate"
+                  >
                     {{ item.name || item.title }}
                   </h4>
                   <p
@@ -171,7 +179,6 @@
 </template>
 
 <script setup>
-/* global clearTimeout, setTimeout */
 import { ref, computed } from "vue";
 import AddToLibraryModal from "./AddToLibraryModal.vue";
 
@@ -223,10 +230,6 @@ const debouncedSearch = () => {
 
 const showItemDetails = (item) => {
   emit("show-details", item);
-};
-
-const addToLibrary = (item) => {
-  emit("add-to-library", item);
 };
 
 const openAddToLibraryModal = (item) => {

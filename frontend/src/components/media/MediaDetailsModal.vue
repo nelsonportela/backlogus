@@ -4,9 +4,7 @@
     class="fixed inset-0 z-50 overflow-y-auto"
     @click.self="closeModal"
   >
-    <div
-      class="flex items-center justify-center min-h-screen px-4 py-4"
-    >
+    <div class="flex items-center justify-center min-h-screen px-4 py-4">
       <!-- Background overlay -->
       <div
         class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
@@ -18,9 +16,13 @@
         class="relative w-full max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg max-h-[90vh] flex flex-col"
       >
         <!-- Header -->
-        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div
+          class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+        >
           <div class="flex items-center justify-between">
-            <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 truncate pr-2">
+            <h3
+              class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 truncate pr-2"
+            >
               {{ item?.name || "Media Details" }}
             </h3>
             <button
@@ -62,14 +64,18 @@
                 v-else
                 class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center"
               >
-                <span class="text-white text-sm sm:text-lg font-medium px-4 text-center">
+                <span
+                  class="text-white text-sm sm:text-lg font-medium px-4 text-center"
+                >
                   {{ item.name || item.title }}
                 </span>
               </div>
             </div>
-            
+
             <!-- Gradient overlay from black at bottom to transparent at middle -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/30 to-transparent pointer-events-none"></div>
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/30 to-transparent pointer-events-none"
+            ></div>
 
             <!-- Game Cover (left side, overlapping) -->
             <div class="absolute left-3 sm:left-6 top-12 sm:top-16 z-10">
@@ -398,10 +404,14 @@
               </h4>
               <div class="relative">
                 <!-- Carousel Container -->
-                <div class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
-                  <div 
+                <div
+                  class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700"
+                >
+                  <div
                     class="flex transition-transform duration-300 ease-in-out"
-                    :style="{ transform: `translateX(-${currentScreenshotIndex * 100}%)` }"
+                    :style="{
+                      transform: `translateX(-${currentScreenshotIndex * 100}%)`,
+                    }"
                   >
                     <img
                       v-for="(screenshot, index) in item.screenshots"
@@ -411,48 +421,84 @@
                       class="w-full h-64 sm:h-80 object-cover flex-shrink-0"
                     />
                   </div>
-                  
+
                   <!-- Navigation Arrows -->
                   <button
                     v-if="item.screenshots.length > 1"
                     @click="previousScreenshot"
                     class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
                     :disabled="currentScreenshotIndex === 0"
-                    :class="{ 'opacity-50 cursor-not-allowed': currentScreenshotIndex === 0 }"
+                    :class="{
+                      'opacity-50 cursor-not-allowed':
+                        currentScreenshotIndex === 0,
+                    }"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                      />
                     </svg>
                   </button>
-                  
+
                   <button
                     v-if="item.screenshots.length > 1"
                     @click="nextScreenshot"
                     class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                    :disabled="currentScreenshotIndex === item.screenshots.length - 1"
-                    :class="{ 'opacity-50 cursor-not-allowed': currentScreenshotIndex === item.screenshots.length - 1 }"
+                    :disabled="
+                      currentScreenshotIndex === item.screenshots.length - 1
+                    "
+                    :class="{
+                      'opacity-50 cursor-not-allowed':
+                        currentScreenshotIndex === item.screenshots.length - 1,
+                    }"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </button>
-                  
+
                   <!-- Image Counter -->
-                  <div class="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                    {{ currentScreenshotIndex + 1 }} / {{ item.screenshots.length }}
+                  <div
+                    class="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm"
+                  >
+                    {{ currentScreenshotIndex + 1 }} /
+                    {{ item.screenshots.length }}
                   </div>
                 </div>
-                
+
                 <!-- Thumbnail Navigation -->
-                <div v-if="item.screenshots.length > 1" class="flex justify-center mt-3 space-x-2 overflow-x-auto pb-2">
+                <div
+                  v-if="item.screenshots.length > 1"
+                  class="flex justify-center mt-3 space-x-2 overflow-x-auto pb-2"
+                >
                   <button
                     v-for="(screenshot, index) in item.screenshots"
                     :key="index"
                     @click="goToScreenshot(index)"
                     class="flex-shrink-0 relative overflow-hidden rounded border-2 transition-all"
                     :class="{
-                      'border-primary-500 dark:border-primary-400': currentScreenshotIndex === index,
-                      'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500': currentScreenshotIndex !== index
+                      'border-primary-500 dark:border-primary-400':
+                        currentScreenshotIndex === index,
+                      'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500':
+                        currentScreenshotIndex !== index,
                     }"
                   >
                     <img
@@ -460,7 +506,7 @@
                       :alt="`Screenshot ${index + 1}`"
                       class="w-16 h-10 sm:w-20 sm:h-12 object-cover"
                     />
-                    <div 
+                    <div
                       v-if="currentScreenshotIndex !== index"
                       class="absolute inset-0 bg-black/30"
                     ></div>
@@ -602,7 +648,11 @@
           class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3"
         >
           <button @click="closeModal" class="btn-secondary">Close</button>
-          <button v-if="!isInLibrary" @click="openAddToLibraryModal" class="btn-primary">
+          <button
+            v-if="!isInLibrary"
+            @click="openAddToLibraryModal"
+            class="btn-primary"
+          >
             Add to Library
           </button>
           <button
@@ -674,10 +724,6 @@ const closeModal = () => {
   emit("close");
 };
 
-const addToLibrary = () => {
-  emit("add-to-library", props.item);
-};
-
 const openAddToLibraryModal = () => {
   showAddToLibraryModal.value = true;
 };
@@ -708,7 +754,10 @@ const toggleQuickReview = (reviewValue) => {
 
 // Screenshot carousel functions
 const nextScreenshot = () => {
-  if (props.item?.screenshots && currentScreenshotIndex.value < props.item.screenshots.length - 1) {
+  if (
+    props.item?.screenshots &&
+    currentScreenshotIndex.value < props.item.screenshots.length - 1
+  ) {
     currentScreenshotIndex.value++;
   }
 };

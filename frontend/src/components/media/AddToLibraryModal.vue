@@ -4,9 +4,7 @@
     class="fixed inset-0 z-50 overflow-y-auto"
     @click.self="closeModal"
   >
-    <div
-      class="flex items-center justify-center min-h-screen px-4 py-4"
-    >
+    <div class="flex items-center justify-center min-h-screen px-4 py-4">
       <!-- Background overlay -->
       <div
         class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
@@ -18,9 +16,13 @@
         class="relative w-full max-w-xs sm:max-w-md mx-auto overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg max-h-[90vh] flex flex-col"
       >
         <!-- Header -->
-        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div
+          class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+        >
           <div class="flex items-center justify-between">
-            <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 pr-2 truncate">
+            <h3
+              class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 pr-2 truncate"
+            >
               Add "{{ item?.name || item?.title }}" to Library
             </h3>
             <button
@@ -45,7 +47,10 @@
         </div>
 
         <!-- Content -->
-        <div v-if="item" class="px-4 sm:px-6 py-4 sm:py-6 space-y-4 overflow-y-auto flex-1">
+        <div
+          v-if="item"
+          class="px-4 sm:px-6 py-4 sm:py-6 space-y-4 overflow-y-auto flex-1"
+        >
           <!-- Game info preview -->
           <div class="flex items-center space-x-3 mb-4 sm:mb-6">
             <img
@@ -58,16 +63,25 @@
               v-else
               class="w-16 h-20 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center"
             >
-              <span class="text-gray-400 dark:text-gray-500 text-xs">No Image</span>
+              <span class="text-gray-400 dark:text-gray-500 text-xs"
+                >No Image</span
+              >
             </div>
             <div class="flex-1">
               <h4 class="font-medium text-gray-900 dark:text-gray-100">
                 {{ item.name || item.title }}
               </h4>
-              <p v-if="getDateField(item)" class="text-sm text-gray-500 dark:text-gray-400">
-                {{ getDateLabel() }}: {{ new Date(getDateField(item)).getFullYear() }}
+              <p
+                v-if="getDateField(item)"
+                class="text-sm text-gray-500 dark:text-gray-400"
+              >
+                {{ getDateLabel() }}:
+                {{ new Date(getDateField(item)).getFullYear() }}
               </p>
-              <p v-if="item.genres && item.genres.length > 0" class="text-sm text-gray-500 dark:text-gray-400">
+              <p
+                v-if="item.genres && item.genres.length > 0"
+                class="text-sm text-gray-500 dark:text-gray-400"
+              >
                 {{ item.genres.slice(0, 2).join(", ") }}
               </p>
             </div>
@@ -75,7 +89,9 @@
 
           <!-- Status Selection -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Status *
             </label>
             <select
@@ -94,7 +110,9 @@
 
           <!-- My Rating -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               My Rating (optional)
             </label>
             <div class="flex items-center space-x-2">
@@ -124,7 +142,9 @@
 
           <!-- Platform Selection (for games) -->
           <div v-if="mediaType === 'game' && getPlatformOptions().length > 0">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Platform Played (optional)
             </label>
             <select
@@ -144,7 +164,9 @@
 
           <!-- Notes -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Notes (optional)
             </label>
             <textarea
@@ -161,7 +183,11 @@
           class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3"
         >
           <button @click="closeModal" class="btn-secondary">Cancel</button>
-          <button @click="addToLibrary" class="btn-primary" :disabled="!selectedStatus">
+          <button
+            @click="addToLibrary"
+            class="btn-primary"
+            :disabled="!selectedStatus"
+          >
             Add to Library
           </button>
         </div>
@@ -209,13 +235,14 @@ const addToLibrary = () => {
     user_platform: selectedPlatform.value || null,
     notes: selectedNotes.value || null,
   };
-  
+
   emit("add-to-library", libraryData);
   closeModal();
 };
 
 const toggleQuickReview = (reviewValue) => {
-  selectedReview.value = selectedReview.value === reviewValue ? null : reviewValue;
+  selectedReview.value =
+    selectedReview.value === reviewValue ? null : reviewValue;
 };
 
 const getImageUrl = (item) => {
@@ -304,11 +331,12 @@ watch(
   (newVal) => {
     if (newVal) {
       // Set default status based on media type
-      selectedStatus.value = props.mediaType === "game" ? "want_to_play" : "want_to_watch";
+      selectedStatus.value =
+        props.mediaType === "game" ? "want_to_play" : "want_to_watch";
       selectedReview.value = null;
       selectedPlatform.value = "";
       selectedNotes.value = "";
-      
+
       // Prevent body scrolling
       if (typeof document !== "undefined") {
         document.body.style.overflow = "hidden";

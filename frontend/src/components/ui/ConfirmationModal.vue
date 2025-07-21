@@ -4,9 +4,7 @@
     class="fixed inset-0 z-50 overflow-y-auto"
     @click.self="cancel"
   >
-    <div
-      class="flex items-center justify-center min-h-screen px-4 py-4"
-    >
+    <div class="flex items-center justify-center min-h-screen px-4 py-4">
       <!-- Background overlay -->
       <div
         class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"

@@ -1,5 +1,27 @@
 <template>
   <div class="space-y-6">
+    <!-- Error Message -->
+    <div
+      v-if="errorMessage"
+      class="fixed top-4 right-4 z-50 max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
+    >
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium">{{ errorMessage }}</p>
+        <button
+          @click="errorMessage = null"
+          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Search Section -->
     <MediaSearch
       :media-type="'game'"
@@ -47,7 +69,6 @@
 </template>
 
 <script setup>
-/* global alert */
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useGamesStore } from "@/stores/games";
@@ -61,6 +82,17 @@ const gamesStore = useGamesStore();
 // Modal state
 const showModal = ref(false);
 const selectedGame = ref(null);
+
+// Error handling
+const errorMessage = ref(null);
+
+const showError = (message) => {
+  errorMessage.value = message;
+  // Auto-clear error after 5 seconds
+  setTimeout(() => {
+    errorMessage.value = null;
+  }, 5000);
+};
 
 // Computed properties
 const allUserGames = computed(() => gamesStore.games);
@@ -93,7 +125,7 @@ watch(
 const showGameDetails = async (game) => {
   // Check if this is a library game or search result
   // Library games have status and igdb_id fields, search results have id (IGDB ID) but no status
-  const isLibraryGame = 
+  const isLibraryGame =
     Object.prototype.hasOwnProperty.call(game, "status") &&
     Object.prototype.hasOwnProperty.call(game, "igdb_id");
 
@@ -128,7 +160,7 @@ const closeModal = () => {
 const addGameToLibrary = async (libraryData) => {
   // Handle both old format (just game object) and new format (enhanced data from modal)
   let gameData, status, quickReview, userPlatform, notes;
-  
+
   if (libraryData.item) {
     // New format from AddToLibraryModal
     gameData = libraryData.item;
@@ -173,7 +205,7 @@ const addGameToLibrary = async (libraryData) => {
   });
 
   if (!result.success) {
-    alert(result.error);
+    showError(result.error);
   }
 };
 
@@ -191,19 +223,19 @@ const removeGameFromLibrary = async (game) => {
   if (libraryGame) {
     const result = await gamesStore.removeGame(libraryGame.id);
     if (!result.success) {
-      alert(result.error);
+      showError(result.error);
     } else {
       closeModal();
     }
   } else {
-    alert("Game not found in your library");
+    showError("Game not found in your library");
   }
 };
 
 const updateStatus = async (gameId, status) => {
   const result = await gamesStore.updateGameStatus(gameId, status);
   if (!result.success) {
-    alert(result.error);
+    showError(result.error);
   }
 };
 
@@ -250,7 +282,7 @@ const updateUserPlatform = async (gameId, platform) => {
         selectedGame.value.user_platform = platform;
       }
     } else {
-      alert(result.error);
+      showError(result.error);
     }
   }
 };
@@ -270,7 +302,7 @@ const updateQuickReview = async (gameId, reviewValue) => {
         selectedGame.value.quick_review = reviewValue;
       }
     } else {
-      alert(result.error);
+      showError(result.error);
     }
   }
 };

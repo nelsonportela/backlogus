@@ -17,6 +17,8 @@ export default [
         window: "readonly",
         localStorage: "readonly",
         console: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
       },
     },
     rules: {
