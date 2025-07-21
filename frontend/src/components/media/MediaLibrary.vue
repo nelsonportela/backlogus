@@ -1,11 +1,29 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-        My {{ mediaTypeLabel }} Library
-      </h3>
-      <button @click="refreshLibrary" class="btn-secondary text-sm">
-        Refresh
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4 gap-2">
+      <div class="bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
+          {{ mediaTypeLabel }}
+        </h3>
+      </div>
+      <button 
+        @click="refreshLibrary" 
+        class="flex items-center justify-center w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 group"
+        title="Refresh library"
+      >
+        <svg 
+          class="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:rotate-180 transition-transform duration-300"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+          />
+        </svg>
       </button>
     </div>
 
@@ -19,7 +37,7 @@
 
     <div
       v-else
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4"
     >
       <div
         v-for="item in libraryItems"
@@ -30,7 +48,7 @@
         <!-- Remove Button -->
         <button
           @click.stop="removeFromLibrary(item)"
-          class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
+          class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 min-w-[24px] min-h-[24px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg flex-shrink-0"
           title="Remove from library"
         >
           <svg
@@ -112,7 +130,10 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 import ConfirmationModal from "../ui/ConfirmationModal.vue";
+
+const route = useRoute();
 
 const props = defineProps({
   mediaType: {
@@ -145,13 +166,39 @@ const confirmationModal = ref({
 });
 
 const mediaTypeLabel = computed(() => {
-  const labels = {
-    game: "Game",
-    movie: "Movie",
-    book: "Book",
-    show: "Show",
+  // Get the route name (e.g., 'games')
+  const routeName = route.name;
+  
+  // Get the status from query parameters
+  const status = route.query.status;
+  
+  // Map status values to display names
+  const statusLabels = {
+    playing: "Playing",
+    completed: "Completed", 
+    want_to_play: "Want to Play",
+    dropped: "Dropped",
+    watching: "Watching",
+    want_to_watch: "Want to Watch",
+    watched: "Watched",
+    reading: "Reading",
+    want_to_read: "Want to Read",
+    read: "Read"
   };
-  return labels[props.mediaType] || "Media";
+  
+  // Capitalize first letter of route name
+  const baseLabel = routeName ? routeName.charAt(0).toUpperCase() + routeName.slice(1) : "Media";
+  
+  // If there's a status and it's not 'all', append it
+  if (status && status !== "all" && statusLabels[status]) {
+    return `${statusLabels[status]}`;
+  } else if (status === "all") {
+    // If status is 'all', just return the base label
+    return `All ${baseLabel}`;
+  }
+  
+  // Default fallback - return the base label
+  return baseLabel;
 });
 
 const refreshLibrary = () => {

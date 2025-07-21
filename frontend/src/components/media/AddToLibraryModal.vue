@@ -5,7 +5,7 @@
     @click.self="closeModal"
   >
     <div
-      class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+      class="flex items-center justify-center min-h-screen px-4 py-4"
     >
       <!-- Background overlay -->
       <div
@@ -15,17 +15,17 @@
 
       <!-- Modal panel -->
       <div
-        class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg sm:align-middle"
+        class="relative w-full max-w-xs sm:max-w-md mx-auto overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg max-h-[90vh] flex flex-col"
       >
         <!-- Header -->
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 pr-2 truncate">
               Add "{{ item?.name || item?.title }}" to Library
             </h3>
             <button
               @click="closeModal"
-              class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 transition-colors"
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 transition-colors flex-shrink-0"
             >
               <svg
                 class="w-6 h-6"
@@ -45,9 +45,9 @@
         </div>
 
         <!-- Content -->
-        <div v-if="item" class="px-6 py-6 space-y-4">
+        <div v-if="item" class="px-4 sm:px-6 py-4 sm:py-6 space-y-4 overflow-y-auto flex-1">
           <!-- Game info preview -->
-          <div class="flex items-center space-x-3 mb-6">
+          <div class="flex items-center space-x-3 mb-4 sm:mb-6">
             <img
               v-if="getImageUrl(item)"
               :src="getImageUrl(item)"

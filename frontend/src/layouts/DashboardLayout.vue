@@ -1,9 +1,50 @@
 <template>
   <div class="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Mobile Menu Button -->
+    <button
+      @click="toggleMobileMenu"
+      class="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg md:hidden"
+    >
+      <svg
+        class="w-6 h-6 text-gray-600 dark:text-gray-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          v-if="!mobileMenuOpen"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+        <path
+          v-else
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div
+      v-if="mobileMenuOpen"
+      @click="closeMobileMenu"
+      class="fixed inset-0 bg-black/50 z-30 md:hidden"
+    ></div>
+
     <!-- Sidebar -->
-    <div class="w-64 bg-white dark:bg-gray-800 shadow-lg">
+    <div
+      class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
+      :class="{
+        '-translate-x-full': !mobileMenuOpen,
+        'translate-x-0': mobileMenuOpen,
+      }"
+    >
       <div
-        class="flex items-center justify-center h-16 border-b dark:border-gray-700"
+        class="flex items-center justify-center h-16 border-b dark:border-gray-700 pt-2 md:pt-0"
       >
         <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">
           Media Tracker
@@ -15,9 +56,9 @@
           <div>
             <div
               @click="toggleGamesSubmenu"
-              class="flex items-center justify-between px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+              class="flex items-center justify-between px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
               :class="{
-                'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300':
+                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
                   isGamesRoute,
               }"
             >
@@ -62,17 +103,13 @@
                 v-for="status in gameStatuses"
                 :key="status.value"
                 :to="{ name: 'games', query: { status: status.value } }"
-                class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 :class="{
-                  'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium':
+                  'bg-primary-100 dark:bg-gray-600 text-primary-700 dark:text-gray-100 font-medium':
                     $route.query.status === status.value ||
                     (!$route.query.status && status.value === 'all'),
                 }"
               >
-                <span
-                  class="w-2 h-2 rounded-full mr-3"
-                  :class="status.color"
-                ></span>
                 {{ status.label }}
               </router-link>
             </div>
@@ -109,59 +146,64 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden md:ml-0">
       <!-- Header -->
       <header
-        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-6 py-4"
+        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 pl-16 md:pl-6"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-            {{ pageTitle }}
+          <h2 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 truncate">
+            {{ dynamicTitle }}
           </h2>
 
-          <!-- Theme Toggle -->
-          <button
-            @click="toggleTheme"
-            class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-          >
+          <!-- Theme Toggle Switch -->
+          <div class="flex items-center space-x-3 flex-shrink-0">
             <!-- Sun Icon (Light Mode) -->
             <svg
-              v-if="isDark"
-              class="w-5 h-5 text-gray-600 dark:text-gray-300"
+              class="w-5 h-5 transition-colors"
+              :class="{
+                'text-yellow-500': !isDark,
+                'text-gray-400 dark:text-gray-500': isDark
+              }"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              strokeWidth="2"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-              />
+              <circle cx="12" cy="12" r="5"></circle>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
             </svg>
+            
+            <!-- Switch -->
+            <input
+              type="checkbox"
+              :checked="isDark"
+              @change="toggleTheme"
+              class="relative h-5 w-10 appearance-none rounded-full bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 cursor-pointer
+                     after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-lg after:transition-transform after:duration-200 after:ease-in-out after:content-[''] 
+                     checked:bg-primary-600 checked:after:translate-x-5"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            />
+            
             <!-- Moon Icon (Dark Mode) -->
             <svg
-              v-else
-              class="w-5 h-5 text-gray-600 dark:text-gray-300"
-              fill="none"
-              stroke="currentColor"
+              class="w-5 h-5 transition-colors"
+              :class="{
+                'text-blue-500 dark:text-blue-400': isDark,
+                'text-gray-400 dark:text-gray-500': !isDark
+              }"
+              fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-              />
+              <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
             </svg>
-          </button>
+          </div>
         </div>
       </header>
 
       <!-- Page Content -->
       <main
-        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6"
+        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6"
       >
         <router-view />
       </main>
@@ -169,83 +211,71 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useTheme } from "@/composables/useTheme";
 
-export default {
-  name: "DashboardLayout",
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const authStore = useAuthStore();
-    const { isDark, toggleTheme } = useTheme();
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const { isDark, toggleTheme } = useTheme();
 
-    // Submenu state - keep games submenu open when on games page
-    const gamesSubmenuOpen = ref(route.name === "games");
+// Submenu state - keep games submenu open when on games page
+const gamesSubmenuOpen = ref(route.name === "games");
 
-    // Game statuses configuration
-    const gameStatuses = [
-      { value: "all", label: "All Games", color: "bg-gray-400" },
-      { value: "playing", label: "Playing", color: "bg-green-400" },
-      { value: "completed", label: "Completed", color: "bg-blue-400" },
-      { value: "want_to_play", label: "Want to Play", color: "bg-yellow-400" },
-      { value: "dropped", label: "Dropped", color: "bg-red-400" },
-    ];
+// Mobile menu state
+const mobileMenuOpen = ref(false);
 
-    const isGamesRoute = computed(() => {
-      return route.name === "games";
-    });
+// Game statuses configuration
+const gameStatuses = [
+  { value: "all", label: "All Games" },
+  { value: "playing", label: "Playing" },
+  { value: "completed", label: "Completed" },
+  { value: "want_to_play", label: "Want to Play" },
+  { value: "dropped", label: "Dropped" },
+];
 
-    const pageTitle = computed(() => {
-      switch (route.name) {
-        case "games": {
-          const statusFilter = route.query.status;
-          const statusConfig = gameStatuses.find(
-            (s) => s.value === statusFilter,
-          );
+const isGamesRoute = computed(() => {
+  return route.name === "games";
+});
 
-          if (statusConfig && statusFilter !== "all") {
-            return `Games - ${statusConfig.label}`;
-          }
-          return "Games";
-        }
-        default:
-          return "Dashboard";
-      }
-    });
+const dynamicTitle = computed(() => {
+  if (route.name && route.name !== 'dashboard') {
+    // Capitalize first letter of route name and add "Dashboard"
+    const routeName = route.name.charAt(0).toUpperCase() + route.name.slice(1);
+    return `${routeName} Dashboard`;
+  }
+  return "Dashboard";
+});
 
-    const toggleGamesSubmenu = () => {
-      gamesSubmenuOpen.value = !gamesSubmenuOpen.value;
-    };
+const toggleGamesSubmenu = () => {
+  gamesSubmenuOpen.value = !gamesSubmenuOpen.value;
+};
 
-    // Watch for route changes to auto-open games submenu
-    watch(
-      () => route.name,
-      (newRouteName) => {
-        if (newRouteName === "games") {
-          gamesSubmenuOpen.value = true;
-        }
-      },
-    );
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
 
-    const logout = () => {
-      authStore.logout();
-      router.push({ name: "login" });
-    };
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+};
 
-    return {
-      pageTitle,
-      logout,
-      gamesSubmenuOpen,
-      gameStatuses,
-      isGamesRoute,
-      toggleGamesSubmenu,
-      isDark,
-      toggleTheme,
-    };
+// Watch for route changes to auto-open games submenu and close mobile menu
+watch(
+  () => route.name,
+  (newRouteName) => {
+    if (newRouteName === "games") {
+      gamesSubmenuOpen.value = true;
+    }
+    // Close mobile menu on route change
+    mobileMenuOpen.value = false;
   },
+);
+
+const logout = () => {
+  authStore.logout();
+  router.push({ name: "login" });
 };
 </script>

@@ -5,7 +5,7 @@
     @click.self="cancel"
   >
     <div
-      class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+      class="flex items-center justify-center min-h-screen px-4 py-4"
     >
       <!-- Background overlay -->
       <div
@@ -15,16 +15,16 @@
 
       <!-- Modal panel -->
       <div
-        class="inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg sm:align-middle"
+        class="relative w-full max-w-xs sm:max-w-md mx-auto overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg"
       >
         <!-- Header -->
-        <div class="px-6 py-4">
+        <div class="px-4 sm:px-6 py-4">
           <div class="flex items-center">
             <div
-              class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/50 sm:mx-0 sm:h-10 sm:w-10"
+              class="mx-auto flex-shrink-0 flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-red-100 dark:bg-red-900/50 sm:mx-0"
             >
               <svg
-                class="h-6 w-6 text-red-600 dark:text-red-400"
+                class="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -39,7 +39,7 @@
             </div>
             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
               <h3
-                class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
+                class="text-base sm:text-lg leading-6 font-medium text-gray-900 dark:text-gray-100"
               >
                 {{ title }}
               </h3>

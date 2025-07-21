@@ -5,7 +5,7 @@
     @click.self="closeModal"
   >
     <div
-      class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+      class="flex items-center justify-center min-h-screen px-4 py-4"
     >
       <!-- Background overlay -->
       <div
@@ -15,17 +15,17 @@
 
       <!-- Modal panel -->
       <div
-        class="inline-block w-full max-w-2xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg sm:align-middle"
+        class="relative w-full max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg max-h-[90vh] flex flex-col"
       >
         <!-- Header -->
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3 class="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 truncate pr-2">
               {{ item?.name || "Media Details" }}
             </h3>
             <button
               @click="closeModal"
-              class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 transition-colors"
+              class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:text-gray-600 dark:focus:text-gray-300 transition-colors flex-shrink-0"
             >
               <svg
                 class="w-6 h-6"
@@ -45,10 +45,10 @@
         </div>
 
         <!-- Content -->
-        <div v-if="item">
+        <div v-if="item" class="overflow-y-auto flex-1">
           <!-- Hero Section -->
           <div
-            class="relative h-64 bg-gray-200 dark:bg-gray-700 overflow-hidden"
+            class="relative h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 overflow-hidden"
           >
             <!-- Banner Image (full height) -->
             <div class="absolute inset-0">
@@ -62,7 +62,7 @@
                 v-else
                 class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center"
               >
-                <span class="text-white text-lg font-medium">
+                <span class="text-white text-sm sm:text-lg font-medium px-4 text-center">
                   {{ item.name || item.title }}
                 </span>
               </div>
@@ -72,19 +72,19 @@
             <div class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/30 to-transparent pointer-events-none"></div>
 
             <!-- Game Cover (left side, overlapping) -->
-            <div class="absolute left-6 top-16 z-10">
+            <div class="absolute left-3 sm:left-6 top-12 sm:top-16 z-10">
               <img
                 v-if="item.cover_url || item.poster_url || item.image_url"
                 :src="item.cover_url || item.poster_url || item.image_url"
                 :alt="item.name || item.title"
-                class="w-24 h-36 object-cover rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10"
+                class="w-16 h-24 sm:w-24 sm:h-36 object-cover rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10"
               />
               <div
                 v-else
-                class="w-24 h-36 bg-gray-300 dark:bg-gray-600 rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10 flex items-center justify-center"
+                class="w-16 h-24 sm:w-24 sm:h-36 bg-gray-300 dark:bg-gray-600 rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10 flex items-center justify-center"
               >
                 <span
-                  class="text-gray-500 dark:text-gray-400 text-xs text-center"
+                  class="text-gray-500 dark:text-gray-400 text-xs text-center px-1"
                   >No Image</span
                 >
               </div>
@@ -92,7 +92,7 @@
 
             <!-- Quick Info Card (bottom right) -->
             <div
-              class="absolute bottom-4 right-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-4 max-w-xs backdrop-blur-sm bg-white/95 dark:bg-gray-800/95"
+              class="absolute bottom-2 sm:bottom-4 right-2 sm:right-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-2 sm:p-4 max-w-[140px] sm:max-w-xs backdrop-blur-sm bg-white/95 dark:bg-gray-800/95"
             >
               <!-- <h5
                 class="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm"
@@ -396,14 +396,76 @@
               <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Screenshots
               </h4>
-              <div class="flex gap-2 overflow-x-auto pb-2">
-                <img
-                  v-for="(screenshot, index) in item.screenshots.slice(0, 5)"
-                  :key="index"
-                  :src="screenshot"
-                  :alt="`Screenshot ${index + 1}`"
-                  class="w-32 h-20 object-cover rounded flex-shrink-0 border border-gray-200 dark:border-gray-600"
-                />
+              <div class="relative">
+                <!-- Carousel Container -->
+                <div class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+                  <div 
+                    class="flex transition-transform duration-300 ease-in-out"
+                    :style="{ transform: `translateX(-${currentScreenshotIndex * 100}%)` }"
+                  >
+                    <img
+                      v-for="(screenshot, index) in item.screenshots"
+                      :key="index"
+                      :src="screenshot"
+                      :alt="`Screenshot ${index + 1}`"
+                      class="w-full h-64 sm:h-80 object-cover flex-shrink-0"
+                    />
+                  </div>
+                  
+                  <!-- Navigation Arrows -->
+                  <button
+                    v-if="item.screenshots.length > 1"
+                    @click="previousScreenshot"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                    :disabled="currentScreenshotIndex === 0"
+                    :class="{ 'opacity-50 cursor-not-allowed': currentScreenshotIndex === 0 }"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  
+                  <button
+                    v-if="item.screenshots.length > 1"
+                    @click="nextScreenshot"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                    :disabled="currentScreenshotIndex === item.screenshots.length - 1"
+                    :class="{ 'opacity-50 cursor-not-allowed': currentScreenshotIndex === item.screenshots.length - 1 }"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                  
+                  <!-- Image Counter -->
+                  <div class="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                    {{ currentScreenshotIndex + 1 }} / {{ item.screenshots.length }}
+                  </div>
+                </div>
+                
+                <!-- Thumbnail Navigation -->
+                <div v-if="item.screenshots.length > 1" class="flex justify-center mt-3 space-x-2 overflow-x-auto pb-2">
+                  <button
+                    v-for="(screenshot, index) in item.screenshots"
+                    :key="index"
+                    @click="goToScreenshot(index)"
+                    class="flex-shrink-0 relative overflow-hidden rounded border-2 transition-all"
+                    :class="{
+                      'border-primary-500 dark:border-primary-400': currentScreenshotIndex === index,
+                      'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500': currentScreenshotIndex !== index
+                    }"
+                  >
+                    <img
+                      :src="screenshot"
+                      :alt="`Screenshot ${index + 1}`"
+                      class="w-16 h-10 sm:w-20 sm:h-12 object-cover"
+                    />
+                    <div 
+                      v-if="currentScreenshotIndex !== index"
+                      class="absolute inset-0 bg-black/30"
+                    ></div>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -462,14 +524,41 @@
                       :key="review.value"
                       @click="toggleQuickReview(review.value)"
                       :class="[
-                        'p-2 rounded-md transition-colors text-lg border',
+                        'p-2 rounded-md transition-colors border flex items-center justify-center',
                         item.quick_review === review.value
-                          ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-500 dark:border-primary-400 ring-1 ring-primary-500 dark:ring-primary-400'
-                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
+                          ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-500 dark:border-primary-400 ring-1 ring-primary-500 dark:ring-primary-400 text-primary-600 dark:text-primary-400'
+                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                       ]"
                       :title="review.label"
                     >
-                      {{ review.emoji }}
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          v-if="review.value === 'positive'"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                        />
+                        <path
+                          v-else-if="review.value === 'negative'"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
+                        />
+                        <path
+                          v-else
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 12H4"
+                        />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -578,6 +667,9 @@ const emit = defineEmits([
 // Add to Library Modal state
 const showAddToLibraryModal = ref(false);
 
+// Screenshot carousel state
+const currentScreenshotIndex = ref(0);
+
 const closeModal = () => {
   emit("close");
 };
@@ -612,6 +704,23 @@ const toggleQuickReview = (reviewValue) => {
   const newReview =
     props.item.quick_review === reviewValue ? null : reviewValue;
   emit("update-quick-review", props.item.id, newReview);
+};
+
+// Screenshot carousel functions
+const nextScreenshot = () => {
+  if (props.item?.screenshots && currentScreenshotIndex.value < props.item.screenshots.length - 1) {
+    currentScreenshotIndex.value++;
+  }
+};
+
+const previousScreenshot = () => {
+  if (currentScreenshotIndex.value > 0) {
+    currentScreenshotIndex.value--;
+  }
+};
+
+const goToScreenshot = (index) => {
+  currentScreenshotIndex.value = index;
 };
 
 const formatRuntime = (minutes) => {
@@ -761,9 +870,9 @@ const getUserPlatformOptions = () => {
 
 const getQuickReviewOptions = () => {
   return [
-    { value: "negative", emoji: "👎", label: "Disliked" },
-    { value: "neutral", emoji: "😐", label: "It was okay" },
-    { value: "positive", emoji: "👍", label: "Liked it" },
+    { value: "negative", label: "Disliked" },
+    { value: "neutral", label: "It was okay" },
+    { value: "positive", label: "Liked it" },
   ];
 };
 
@@ -782,12 +891,22 @@ watch(
         document.addEventListener("keydown", handleKeydown);
         document.body.style.overflow = "hidden";
       }
+      // Reset carousel when modal opens
+      currentScreenshotIndex.value = 0;
     } else {
       if (typeof document !== "undefined") {
         document.removeEventListener("keydown", handleKeydown);
         document.body.style.overflow = "";
       }
     }
+  },
+);
+
+// Reset carousel when item changes
+watch(
+  () => props.item?.id,
+  () => {
+    currentScreenshotIndex.value = 0;
   },
 );
 </script>

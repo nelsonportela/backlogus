@@ -6,14 +6,72 @@
   body {
     @apply bg-gray-50;
   }
+  
+  /* Ensure touch targets are at least 44px */
+  button, 
+  [role="button"], 
+  input[type="button"], 
+  input[type="submit"] {
+    min-height: 44px;
+  }
+  
+  /* Improve touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Modern scrollbar styling */
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(156, 163, 175, 0.1); /* gray-400 with opacity */
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.5); /* gray-500 with opacity */
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.8); /* gray-500 with more opacity */
+  }
+  
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    background: rgba(55, 65, 81, 0.3); /* gray-700 with opacity */
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4); /* gray-400 with opacity */
+  }
+  
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.6); /* gray-400 with more opacity */
+  }
+  
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(107, 114, 128, 0.5) rgba(156, 163, 175, 0.1);
+  }
+  
+  .dark * {
+    scrollbar-color: rgba(156, 163, 175, 0.4) rgba(55, 65, 81, 0.3);
+  }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors;
+    @apply bg-primary-500 hover:bg-primary-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors;
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base;
   }
 }
