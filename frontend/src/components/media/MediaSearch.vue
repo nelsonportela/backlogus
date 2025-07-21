@@ -2,7 +2,7 @@
   <div class="relative">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
       <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-        Search {{ mediaTypeLabel }}
+        Add {{ mediaTypeLabel }}
       </h3>
       <div class="flex gap-2 sm:gap-4">
         <div class="flex-1">

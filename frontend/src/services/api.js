@@ -45,6 +45,14 @@ export const gamesApi = {
   getStats: () => api.get("/games/stats"),
 };
 
+// Media API methods (unified across all media types)
+export const mediaApi = {
+  getStats: (mediaType = null) => {
+    const params = mediaType ? `?mediaType=${mediaType}` : '';
+    return api.get(`/media/stats${params}`);
+  },
+};
+
 // Auth API methods
 export const authApi = {
   login: (credentials) => api.post("/auth/login", credentials),

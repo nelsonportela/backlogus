@@ -121,14 +121,41 @@
                 :key="review.value"
                 @click="toggleQuickReview(review.value)"
                 :class="[
-                  'p-2 rounded-md transition-colors text-lg border',
+                  'p-2 rounded-md transition-colors border flex items-center justify-center',
                   selectedReview === review.value
-                    ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-500 dark:border-primary-400 ring-1 ring-primary-500 dark:ring-primary-400'
-                    : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
+                    ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-500 dark:border-primary-400 ring-1 ring-primary-500 dark:ring-primary-400 text-primary-600 dark:text-primary-400'
+                    : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                 ]"
                 :title="review.label"
               >
-                {{ review.emoji }}
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    v-if="review.value === 'positive'"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                  />
+                  <path
+                    v-else-if="review.value === 'negative'"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
+                  />
+                  <path
+                    v-else
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M20 12H4"
+                  />
+                </svg>
               </button>
               <button
                 v-if="selectedReview"
@@ -312,9 +339,9 @@ const getStatusOptions = () => {
 
 const getQuickReviewOptions = () => {
   return [
-    { value: "negative", emoji: "👎", label: "Disliked" },
-    { value: "neutral", emoji: "😐", label: "It was okay" },
-    { value: "positive", emoji: "👍", label: "Liked it" },
+    { value: "negative", label: "Disliked" },
+    { value: "neutral", label: "It was okay" },
+    { value: "positive", label: "Liked it" },
   ];
 };
 

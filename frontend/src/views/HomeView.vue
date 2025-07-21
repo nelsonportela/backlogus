@@ -37,13 +37,13 @@
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Game Status Distribution -->
+      <!-- Media Status Distribution -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-          Game Status Distribution
+          {{ activeMediaType ? `${getMediaConfig(activeMediaType)?.name || 'Media'} Status Distribution` : 'Media Collection Overview' }}
         </h3>
-        <div class="relative">
-          <canvas ref="statusChart" class="max-h-64"></canvas>
+        <div class="relative h-64">
+          <canvas ref="statusChart" class="w-full h-full"></canvas>
           <div v-if="statsLoading" class="absolute inset-0 flex items-center justify-center">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
@@ -69,15 +69,15 @@
       </div>
     </div>
 
-    <!-- Games Progress Section -->
+    <!-- Media Progress Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Monthly Progress Chart -->
       <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-          Games Added This Year
+          {{ activeMediaType ? `${getMediaConfig(activeMediaType)?.name || 'Media'} Added This Year` : 'Media Added This Year' }}
         </h3>
-        <div class="relative">
-          <canvas ref="monthlyChart" class="max-h-64"></canvas>
+        <div class="relative h-64">
+          <canvas ref="monthlyChart" class="w-full h-full"></canvas>
           <div v-if="statsLoading" class="absolute inset-0 flex items-center justify-center">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
@@ -87,7 +87,7 @@
       <!-- Top Genres -->
       <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-          Favorite Genres
+          Popular {{ activeMediaType ? (getMediaConfig(activeMediaType)?.name === 'Games' ? 'Genres' : 'Categories') : 'Genres' }}
         </h3>
         <div class="space-y-3">
           <GenreItem
@@ -98,7 +98,7 @@
             :loading="statsLoading"
           />
           <div v-if="topGenres.length === 0 && !statsLoading" class="text-center text-gray-500 dark:text-gray-400 py-8">
-            No genre data available
+            No data available
           </div>
         </div>
       </div>
@@ -112,27 +112,27 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <ActionButton
           icon="search"
-          label="Find Games"
-          description="Search for new games"
-          @click="navigateToGames"
+          label="Discover"
+          description="Find new media"
+          @click="navigateToDiscover"
         />
         <ActionButton
           icon="library"
-          label="My Library"
-          description="View all games"
-          @click="navigateToLibrary"
+          label="My Collection"
+          description="View all items"
+          @click="navigateToCollection"
         />
         <ActionButton
           icon="trending"
           label="Trending"
-          description="Popular games"
+          description="Popular content"
           @click="navigateToTrending"
         />
         <ActionButton
           icon="random"
           label="Surprise Me"
-          description="Random game picker"
-          @click="pickRandomGame"
+          description="Random picker"
+          @click="pickRandomItem"
         />
       </div>
     </div>
@@ -151,7 +151,9 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import { useMediaStore } from '@/stores/media';
 import { useGamesStore } from '@/stores/games';
+import { useMediaTypes } from '@/composables/useMediaTypes';
 import Chart from 'chart.js/auto';
 import StatCard from '@/components/home/StatCard.vue';
 import ActivityItem from '@/components/home/ActivityItem.vue';
@@ -160,173 +162,144 @@ import ActionButton from '@/components/home/ActionButton.vue';
 import RandomGameModal from '@/components/ui/RandomGameModal.vue';
 
 const router = useRouter();
+const mediaStore = useMediaStore();
 const gamesStore = useGamesStore();
+const { getMediaConfig, generateStatsCards, getStatusChartLabels, getStatusChartColors, formatRelativeTime } = useMediaTypes();
 
 const statsLoading = ref(true);
 const statusChart = ref(null);
 const monthlyChart = ref(null);
 const showRandomGameModal = ref(false);
 const randomGame = ref(null);
+const activeMediaType = ref('games'); // Default to games for now
 let statusChartInstance = null;
 let monthlyChartInstance = null;
 
 // Stats data
 const stats = ref({
-  totalGames: 0,
-  completedGames: 0,
-  currentlyPlaying: 0,
-  wantToPlay: 0,
-  statusDistribution: {},
-  monthlyData: [],
-  recentActivity: [],
-  topGenres: []
+  unified: {
+    totalItems: 0,
+    mediaBreakdown: {},
+    recentActivity: [],
+    monthlyData: []
+  },
+  games: {
+    totalItems: 0,
+    statusDistribution: {},
+    topGenres: [],
+    monthlyData: [],
+    recentActivity: []
+  }
 });
 
-// Computed stats
-const quickStats = computed(() => [
-  {
-    icon: 'collection',
-    label: 'Total Games',
-    value: stats.value.totalGames,
-    change: '+5 this week',
-    color: 'blue'
-  },
-  {
-    icon: 'play',
-    label: 'Currently Playing',
-    value: stats.value.currentlyPlaying,
-    change: '2 active sessions',
-    color: 'green'
-  },
-  {
-    icon: 'check',
-    label: 'Completed',
-    value: stats.value.completedGames,
-    change: `${Math.round((stats.value.completedGames / stats.value.totalGames) * 100) || 0}% of library`,
-    color: 'purple'
-  },
-  {
-    icon: 'bookmark',
-    label: 'Want to Play',
-    value: stats.value.wantToPlay,
-    change: 'Your backlog',
-    color: 'yellow'
-  }
-]);
+// Computed stats using media-agnostic approach
+const quickStats = computed(() => {
+  const currentStats = stats.value[activeMediaType.value] || stats.value.games;
+  return generateStatsCards(currentStats, activeMediaType.value);
+});
 
-const recentActivities = computed(() => stats.value.recentActivity || []);
-const topGenres = computed(() => stats.value.topGenres || []);
+const recentActivities = computed(() => {
+  const currentStats = stats.value[activeMediaType.value] || stats.value.games;
+  return (currentStats.recentActivity || []).map(activity => ({
+    id: activity.id,
+    type: `${activeMediaType.value}_added`,
+    title: activity.title,
+    subtitle: `${activity.status?.replace('_', ' ') || ''} • ${formatRelativeTime(activity.updatedAt)}`,
+    time: formatRelativeTime(activity.updatedAt),
+    coverUrl: activity.coverUrl
+  }));
+});
+
+const topGenres = computed(() => {
+  const currentStats = stats.value[activeMediaType.value] || stats.value.games;
+  return currentStats.topGenres || [];
+});
 
 const loadStats = async () => {
   statsLoading.value = true;
   
   try {
-    // Get stats from backend
-    const statsResult = await gamesStore.getStats();
+    // Try to get unified media stats from new API first
+    const statsResult = await mediaStore.getStats();
     
-    if (statsResult.success) {
+    if (statsResult.success && statsResult.data) {
       const serverStats = statsResult.data;
       
-      // Update stats with server data
-      stats.value.totalGames = serverStats.totalGames;
-      stats.value.completedGames = serverStats.statusDistribution.completed || 0;
-      stats.value.currentlyPlaying = serverStats.statusDistribution.playing || 0;
-      stats.value.wantToPlay = serverStats.statusDistribution.want_to_play || 0;
-      stats.value.statusDistribution = serverStats.statusDistribution;
-      stats.value.monthlyData = serverStats.monthlyData;
-      stats.value.topGenres = serverStats.topGenres;
+      // Update unified stats
+      if (serverStats.unified) {
+        stats.value.unified = serverStats.unified;
+      }
       
-      // Transform recent activity
-      stats.value.recentActivity = serverStats.recentActivity.map(activity => ({
-        id: activity.id,
-        type: 'game_added',
-        title: activity.gameName,
-        subtitle: `${activity.status.replace('_', ' ')} • ${formatRelativeTime(activity.updatedAt)}`,
-        time: formatRelativeTime(activity.updatedAt),
-        coverUrl: activity.coverUrl
-      }));
+      // Update individual media type stats
+      if (serverStats.games) {
+        stats.value.games = {
+          totalItems: serverStats.games.totalItems || 0,
+          statusDistribution: serverStats.games.statusDistribution || {},
+          topGenres: serverStats.games.topGenres || [],
+          monthlyData: serverStats.games.monthlyData || new Array(12).fill(0),
+          recentActivity: (serverStats.games.recentActivity || []).map(activity => ({
+            id: activity.id,
+            title: activity.title,
+            subtitle: `${activity.status?.replace('_', ' ') || ''} • ${formatRelativeTime(activity.updatedAt)}`,
+            time: formatRelativeTime(activity.updatedAt),
+            coverUrl: activity.coverUrl,
+            status: activity.status,
+            updatedAt: activity.updatedAt
+          }))
+        };
+      }
       
     } else {
-      // Fallback to client-side calculation if API fails
-      await gamesStore.getUserGames();
-      const games = gamesStore.games;
+      // Fallback to games-specific API if unified API fails
+      console.log('Unified media API failed, falling back to games API:', statsResult.error);
+      const gamesResult = await gamesStore.getStats();
       
-      // Calculate basic stats
-      stats.value.totalGames = games.length;
-      stats.value.completedGames = games.filter(g => g.status === 'completed').length;
-      stats.value.currentlyPlaying = games.filter(g => g.status === 'playing').length;
-      stats.value.wantToPlay = games.filter(g => g.status === 'want_to_play').length;
-      
-      // Status distribution for pie chart
-      const statusCounts = {};
-      games.forEach(game => {
-        statusCounts[game.status] = (statusCounts[game.status] || 0) + 1;
-      });
-      stats.value.statusDistribution = statusCounts;
-      
-      // Monthly data (games added per month this year)
-      const monthlyData = new Array(12).fill(0);
-      const currentYear = new Date().getFullYear();
-      games.forEach(game => {
-        if (game.created_at) {
-          const gameDate = new Date(game.created_at);
-          if (gameDate.getFullYear() === currentYear) {
-            monthlyData[gameDate.getMonth()]++;
-          }
-        }
-      });
-      stats.value.monthlyData = monthlyData;
-      
-      // Top genres
-      const genreCounts = {};
-      games.forEach(game => {
-        if (game.genres && Array.isArray(game.genres)) {
-          game.genres.forEach(genre => {
-            genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-          });
-        }
-      });
-      
-      stats.value.topGenres = Object.entries(genreCounts)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 5)
-        .map(([name, count]) => ({ name, count }));
-      
-      // Recent activity (last 5 games added/updated)
-      const recentGames = [...games]
-        .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
-        .slice(0, 5);
+      if (gamesResult.success && gamesResult.data) {
+        const gameStats = gamesResult.data;
         
-      stats.value.recentActivity = recentGames.map(game => ({
-        id: game.id,
-        type: 'game_added',
-        title: game.name,
-        subtitle: `${game.status.replace('_', ' ')} • ${formatRelativeTime(game.created_at || game.updated_at)}`,
-        time: formatRelativeTime(game.created_at || game.updated_at),
-        coverUrl: game.cover_url
-      }));
+        stats.value.games = {
+          totalItems: gameStats.totalGames || 0,
+          statusDistribution: gameStats.statusDistribution || {},
+          topGenres: gameStats.topGenres || [],
+          monthlyData: gameStats.monthlyData || new Array(12).fill(0),
+          recentActivity: (gameStats.recentActivity || []).map(activity => ({
+            id: activity.id,
+            title: activity.gameName,
+            subtitle: `${activity.status?.replace('_', ' ') || ''} • ${formatRelativeTime(activity.updatedAt)}`,
+            time: formatRelativeTime(activity.updatedAt),
+            coverUrl: activity.coverUrl,
+            status: activity.status,
+            updatedAt: activity.updatedAt
+          }))
+        };
+        
+        // Create unified stats from games data
+        stats.value.unified = {
+          totalItems: gameStats.totalGames || 0,
+          mediaBreakdown: {
+            games: gameStats.totalGames || 0,
+            movies: 0,
+            books: 0
+          },
+          recentActivity: stats.value.games.recentActivity,
+          monthlyData: gameStats.monthlyData || new Array(12).fill(0),
+          primaryMediaType: 'games'
+        };
+      } else {
+        console.error('Both media and games APIs failed:', gamesResult.error);
+      }
     }
     
   } catch (error) {
-    console.error('Error loading stats:', error);
+    console.error('Failed to load stats:', error);
   } finally {
     statsLoading.value = false;
+    
+    // Initialize charts after data is loaded
+    nextTick(() => {
+      initializeCharts();
+    });
   }
-};
-
-const formatRelativeTime = (dateString) => {
-  if (!dateString) return 'Recently';
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return `${Math.floor(diffDays / 30)} months ago`;
 };
 
 const initializeCharts = async () => {
@@ -342,18 +315,18 @@ const initializeCharts = async () => {
     monthlyChartInstance.destroy();
   }
   
-  // Status Distribution Pie Chart
-  const statusLabels = {
-    'want_to_play': 'Want to Play',
-    'playing': 'Currently Playing',
-    'completed': 'Completed',
-    'dropped': 'Dropped'
-  };
+  const currentStats = stats.value[activeMediaType.value] || stats.value.games;
   
-  const statusData = Object.entries(stats.value.statusDistribution).map(([key, value]) => ({
-    label: statusLabels[key] || key,
-    value
-  }));
+  // Status Distribution Pie Chart
+  const statusLabels = getStatusChartLabels(activeMediaType.value);
+  const statusColors = getStatusChartColors(activeMediaType.value);
+  
+  const statusData = Object.entries(currentStats.statusDistribution || {})
+    .filter(([key, value]) => value > 0)
+    .map(([key, value]) => ({
+      label: key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      value
+    }));
   
   if (statusData.length > 0) {
     statusChartInstance = new Chart(statusChart.value, {
@@ -362,12 +335,7 @@ const initializeCharts = async () => {
         labels: statusData.map(d => d.label),
         datasets: [{
           data: statusData.map(d => d.value),
-          backgroundColor: [
-            '#3b82f6', // blue - want to play
-            '#10b981', // green - playing
-            '#8b5cf6', // purple - completed
-            '#ef4444', // red - dropped
-          ],
+          backgroundColor: statusColors,
           borderWidth: 2,
           borderColor: '#ffffff'
         }]
@@ -410,18 +378,18 @@ const initializeCharts = async () => {
     data: {
       labels: monthNames,
       datasets: [{
-        label: 'Games Added',
-        data: stats.value.monthlyData,
+        label: `${getMediaConfig(activeMediaType.value)?.name || 'Items'} Added`,
+        data: currentStats.monthlyData || new Array(12).fill(0),
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        borderWidth: 3,
+        borderWidth: 2,
         fill: true,
         tension: 0.4,
         pointBackgroundColor: '#3b82f6',
         pointBorderColor: '#ffffff',
         pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7
+        pointRadius: 4,
+        pointHoverRadius: 6
       }]
     },
     options: {
@@ -430,34 +398,22 @@ const initializeCharts = async () => {
       plugins: {
         legend: {
           display: false
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: '#ffffff',
-          bodyColor: '#ffffff',
-          borderColor: '#3b82f6',
-          borderWidth: 1
         }
       },
       scales: {
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#6b7280'
-          }
-        },
         y: {
           beginAtZero: true,
-          grid: {
-            color: 'rgba(107, 114, 128, 0.1)'
-          },
           ticks: {
-            color: '#6b7280',
-            stepSize: 1
+            stepSize: 1,
+            precision: 0
+          },
+          grid: {
+            color: 'rgba(156, 163, 175, 0.1)'
+          }
+        },
+        x: {
+          grid: {
+            color: 'rgba(156, 163, 175, 0.1)'
           }
         }
       },
@@ -469,46 +425,64 @@ const initializeCharts = async () => {
   });
 };
 
-// Navigation methods
+// Navigation functions - updated to be media-agnostic
+const navigateToDiscover = () => {
+  // For now, default to games. Later, could show a media type selector
+  router.push({ name: 'games' });
+};
+
+const navigateToCollection = () => {
+  // For now, default to games. Later, could show unified collection view
+  router.push({ name: 'games' });
+};
+
 const navigateToGames = () => {
   router.push({ name: 'games' });
 };
 
-const navigateToLibrary = () => {
-  router.push({ name: 'games', query: { status: 'all' } });
+const navigateToTrending = () => {
+  // Placeholder for trending content
+  console.log('Navigate to trending - not implemented yet');
 };
 
-const navigateToTrending = () => {
-  // TODO: Implement trending games feature
-  router.push({ name: 'games' });
+const pickRandomItem = async () => {
+  // For now, only pick random games. Later, could pick from all media types
+  pickRandomGame();
 };
 
 const pickRandomGame = async () => {
-  // Ensure we have the latest games data
-  await gamesStore.getUserGames();
-  const games = gamesStore.games.filter(g => g.status === 'want_to_play');
-  
-  if (games.length > 0) {
-    randomGame.value = games[Math.floor(Math.random() * games.length)];
-  } else {
-    randomGame.value = null;
+  try {
+    await gamesStore.getUserGames();
+    const games = gamesStore.games.filter(game => 
+      game.status === 'want_to_play' || game.status === 'playing'
+    );
+    
+    if (games.length === 0) {
+      alert('No games available to pick from. Add some games to your library first!');
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * games.length);
+    randomGame.value = games[randomIndex];
+    showRandomGameModal.value = true;
+  } catch (error) {
+    console.error('Error picking random game:', error);
+    alert('Failed to pick a random game. Please try again.');
   }
-  
-  showRandomGameModal.value = true;
 };
 
 const handleStartPlaying = async (game) => {
-  // Update the game status to "playing"
-  const result = await gamesStore.updateGameStatus(game.id, 'playing');
-  if (result.success) {
-    // Reload stats to reflect the change
+  try {
+    await gamesStore.updateUserGame(game.id, { status: 'playing' });
+    showRandomGameModal.value = false;
+    // Refresh stats
     await loadStats();
-    await initializeCharts();
+  } catch (error) {
+    console.error('Error updating game status:', error);
   }
 };
 
 onMounted(async () => {
   await loadStats();
-  await initializeCharts();
 });
 </script>
