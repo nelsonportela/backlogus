@@ -42,6 +42,7 @@ export const gamesApi = {
   updateGame: (gameId, updateData) => api.patch(`/games/${gameId}`, updateData),
   removeGame: (gameId) => api.delete(`/games/${gameId}`),
   getGameDetails: (igdbId) => api.get(`/games/details/${igdbId}`),
+  getStats: () => api.get("/games/stats"),
 };
 
 // Auth API methods

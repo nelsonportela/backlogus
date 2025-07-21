@@ -108,6 +108,18 @@ export const useGamesStore = defineStore("games", () => {
     }
   };
 
+  const getStats = async () => {
+    try {
+      const response = await gamesApi.getStats();
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to get statistics",
+      };
+    }
+  };
+
   const updateGameDetails = async (gameId, updateData) => {
     try {
       const response = await gamesApi.updateGame(gameId, updateData);
@@ -140,5 +152,6 @@ export const useGamesStore = defineStore("games", () => {
     updateGameDetails,
     removeGame,
     getGameDetails,
+    getStats,
   };
 });

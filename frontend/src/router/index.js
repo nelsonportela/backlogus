@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import LoginView from "@/views/LoginView.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
+import HomeView from "@/views/HomeView.vue";
 import GamesView from "@/views/GamesView.vue";
 
 const router = createRouter({
@@ -20,7 +21,12 @@ const router = createRouter({
         {
           path: "",
           name: "dashboard",
-          redirect: { name: "games" },
+          redirect: { name: "home" },
+        },
+        {
+          path: "home",
+          name: "home",
+          component: HomeView,
         },
         {
           path: "games",
@@ -38,7 +44,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: "login" });
   } else if (to.name === "login" && authStore.isAuthenticated) {
-    next({ name: "dashboard" });
+    next({ name: "home" });
   } else {
     next();
   }
