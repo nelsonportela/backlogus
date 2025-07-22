@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,64 +8,85 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  userGames UserGame[]
-  
+  id              Int                 @id @default(autoincrement())
+  email           String              @unique
+  password        String
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  firstName       String?             @map("first_name") @db.VarChar(255)
+  lastName        String?             @map("last_name") @db.VarChar(255)
+  avatarUrl       String?             @map("avatar_url")
+  timezone        String?             @default("UTC") @db.VarChar(50)
+  themePreference String?             @default("system") @map("theme_preference") @db.VarChar(20)
+  apiCredentials  UserApiCredential[]
+  userGames       UserGame[]
+
   @@map("users")
 }
 
 model Game {
-  id              Int      @id @default(autoincrement())
-  igdbId          Int      @unique @map("igdb_id")
-  name            String
-  coverUrl        String?  @map("cover_url")
-  bannerUrl       String?  @map("banner_url")
-  artworks        String[] @default([]) // All artworks from IGDB
-  releaseDate     DateTime? @map("release_date")
-  genres          String[] @default([])
-  summary         String?
-  platforms       String[] @default([])
-  developer       String?
-  publisher       String?
-  gameEngine      String?  @map("game_engine")
-  esrbRating      String?  @map("esrb_rating")
-  website         String?
-  screenshots     String[] @default([])
-  franchise       String?
-  rating          Float?   // IGDB rating
-  totalRating     Float?   @map("total_rating") // IGDB total rating
-  aggregatedRating Float? @map("aggregated_rating") // IGDB aggregated rating
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  userGames       UserGame[]
-  
+  id               Int        @id @default(autoincrement())
+  igdbId           Int        @unique @map("igdb_id")
+  name             String
+  coverUrl         String?    @map("cover_url")
+  bannerUrl        String?    @map("banner_url")
+  releaseDate      DateTime?  @map("release_date")
+  genres           String[]   @default([])
+  summary          String?
+  platforms        String[]   @default([])
+  developer        String?
+  publisher        String?
+  gameEngine       String?    @map("game_engine")
+  esrbRating       String?    @map("esrb_rating")
+  website          String?
+  screenshots      String[]   @default([])
+  franchise        String?
+  rating           Float?
+  totalRating      Float?     @map("total_rating")
+  aggregatedRating Float?     @map("aggregated_rating")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  artworks         String[]   @default([])
+  userGames        UserGame[]
+
   @@map("games")
 }
 
 model UserGame {
-  id             Int      @id @default(autoincrement())
-  status         GameStatus @default(WANT_TO_PLAY)
-  personalRating Int?     @map("personal_rating") // 1-10 user rating
-  quickReview    QuickReview? @map("quick_review") // Emoji-based review
-  userPlatform   String?  @map("user_platform") // Platform user played on
+  id             Int          @id @default(autoincrement())
+  status         GameStatus   @default(WANT_TO_PLAY)
+  personalRating Int?         @map("personal_rating")
+  quickReview    QuickReview? @map("quick_review")
+  userPlatform   String?      @map("user_platform")
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  userId         Int      @map("user_id")
-  gameId         Int      @map("game_id")
-  
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  game           Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  userId         Int          @map("user_id")
+  gameId         Int          @map("game_id")
+  game           Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, gameId])
   @@map("user_games")
+}
+
+model UserApiCredential {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  apiProvider  String    @map("api_provider") @db.VarChar(50)
+  apiKey       String?   @map("api_key")
+  clientId     String?   @map("client_id")
+  clientSecret String?   @map("client_secret")
+  accessToken  String?   @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiresAt    DateTime? @map("expires_at")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, apiProvider])
+  @@map("user_api_credentials")
 }
 
 enum GameStatus {

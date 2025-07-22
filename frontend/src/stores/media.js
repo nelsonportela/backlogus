@@ -1,70 +1,69 @@
-import { defineStore } from 'pinia';
-import { mediaApi } from '@/services/api';
+import { defineStore } from "pinia";
+import { mediaApi } from "@/services/api";
 
-export const useMediaStore = defineStore('media', () => {
-  
+export const useMediaStore = defineStore("media", () => {
   // Get unified statistics across all media types
   const getStats = async (mediaType = null) => {
     try {
       const response = await mediaApi.getStats(mediaType);
       return { success: true, data: response.data };
     } catch (error) {
-      console.error('Error fetching media stats:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || error.message 
+      console.error("Error fetching media stats:", error);
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
       };
     }
   };
 
   // Get stats for specific media type
   const getGameStats = async () => {
-    return await getStats('games');
+    return await getStats("games");
   };
 
   const getMovieStats = async () => {
-    return await getStats('movies');
+    return await getStats("movies");
   };
 
   const getBookStats = async () => {
-    return await getStats('books');
+    return await getStats("books");
   };
 
   // Media type configuration
   const mediaTypes = {
     games: {
-      name: 'Games',
-      icon: 'gamepad',
+      name: "Games",
+      icon: "gamepad",
       statuses: [
-        { value: 'want_to_play', label: 'Want to Play', color: 'yellow' },
-        { value: 'playing', label: 'Playing', color: 'green' },
-        { value: 'completed', label: 'Completed', color: 'purple' },
-        { value: 'dropped', label: 'Dropped', color: 'red' }
+        { value: "want_to_play", label: "Want to Play", color: "yellow" },
+        { value: "playing", label: "Playing", color: "green" },
+        { value: "completed", label: "Completed", color: "purple" },
+        { value: "dropped", label: "Dropped", color: "red" },
       ],
-      route: 'games'
+      route: "games",
     },
     movies: {
-      name: 'Movies',
-      icon: 'film',
+      name: "Movies",
+      icon: "film",
       statuses: [
-        { value: 'want_to_watch', label: 'Want to Watch', color: 'yellow' },
-        { value: 'watching', label: 'Watching', color: 'green' },
-        { value: 'watched', label: 'Watched', color: 'purple' },
-        { value: 'dropped', label: 'Dropped', color: 'red' }
+        { value: "want_to_watch", label: "Want to Watch", color: "yellow" },
+        { value: "watching", label: "Watching", color: "green" },
+        { value: "watched", label: "Watched", color: "purple" },
+        { value: "dropped", label: "Dropped", color: "red" },
       ],
-      route: 'movies'
+      route: "movies",
     },
     books: {
-      name: 'Books',
-      icon: 'book',
+      name: "Books",
+      icon: "book",
       statuses: [
-        { value: 'want_to_read', label: 'Want to Read', color: 'yellow' },
-        { value: 'reading', label: 'Reading', color: 'green' },
-        { value: 'read', label: 'Read', color: 'purple' },
-        { value: 'dropped', label: 'Dropped', color: 'red' }
+        { value: "want_to_read", label: "Want to Read", color: "yellow" },
+        { value: "reading", label: "Reading", color: "green" },
+        { value: "read", label: "Read", color: "purple" },
+        { value: "dropped", label: "Dropped", color: "red" },
       ],
-      route: 'books'
-    }
+      route: "books",
+    },
   };
 
   // Get media type configuration
@@ -75,7 +74,7 @@ export const useMediaStore = defineStore('media', () => {
   // Get all implemented media types
   const getImplementedMediaTypes = () => {
     // For now, only games are implemented
-    return ['games'];
+    return ["games"];
   };
 
   // Get all planned media types
@@ -92,8 +91,8 @@ export const useMediaStore = defineStore('media', () => {
     getMediaTypeConfig,
     getImplementedMediaTypes,
     getAllMediaTypes,
-    
+
     // Configuration
-    mediaTypes
+    mediaTypes,
   };
 });

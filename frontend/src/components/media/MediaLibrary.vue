@@ -1,5 +1,6 @@
 <template>
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+    <!-- Header with Title and Refresh -->
     <div class="flex items-center justify-between mb-4 gap-2">
       <div
         class="bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30"
@@ -8,6 +9,12 @@
           class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate"
         >
           {{ mediaTypeLabel }}
+          <span
+            v-if="totalItems > 0"
+            class="text-sm text-gray-500 dark:text-gray-400 ml-2"
+          >
+            ({{ totalItems }})
+          </span>
         </h3>
       </div>
       <button
@@ -31,92 +38,54 @@
       </button>
     </div>
 
-    <div
-      v-if="libraryItems.length === 0"
-      class="text-center text-gray-500 dark:text-gray-400 py-8"
-    >
-      No {{ mediaTypeLabel.toLowerCase() }} in your library yet. Search and add
-      some {{ mediaTypeLabel.toLowerCase() }}!
+    <!-- Filters -->
+    <MediaLibraryFilters
+      :media-type="mediaType"
+      :library-items="libraryItems"
+      v-model:search-query="searchQuery"
+      v-model:sort-by="sortBy"
+      v-model:platform-filter="platformFilter"
+      v-model:items-per-page="itemsPerPage"
+      @clear-search="clearSearch"
+    />
+
+    <!-- Empty State -->
+    <MediaLibraryEmptyState
+      v-if="filteredItems.length === 0 && !isLoading"
+      :media-type-label="mediaTypeLabel.toLowerCase()"
+      :has-active-filters="!!(searchQuery || platformFilter)"
+      @clear-filters="clearAllFilters"
+    />
+
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-8">
+      <div
+        class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
+      ></div>
     </div>
 
-    <div
-      v-else
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4"
-    >
+    <!-- Items Grid -->
+    <div v-else-if="paginatedItems.length > 0" class="space-y-4">
       <div
-        v-for="item in libraryItems"
-        :key="item.id"
-        class="relative group cursor-pointer"
-        @click="showItemDetails(item)"
+        class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4"
       >
-        <!-- Remove Button -->
-        <button
-          @click.stop="removeFromLibrary(item)"
-          class="absolute -top-2 -right-2 z-10 bg-red-500 text-white rounded-full w-6 h-6 min-w-[24px] min-h-[24px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg flex-shrink-0"
-          title="Remove from library"
-        >
-          <svg
-            class="w-3 h-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            stroke-width="3"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-
-        <!-- Cover Image Container -->
-        <div
-          class="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        >
-          <img
-            v-if="getImageUrl(item)"
-            :src="getImageUrl(item)"
-            :alt="item.name || item.title"
-            class="w-full h-full object-cover"
-          />
-          <div
-            v-else
-            class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center"
-          >
-            <svg
-              class="w-8 h-8 text-gray-400 dark:text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          </div>
-
-          <!-- Full Cover Gradient Overlay (appears on hover) -->
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          ></div>
-
-          <!-- Title Text (appears on hover) -->
-          <div
-            class="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <h4 class="text-white font-medium text-sm leading-tight">
-              {{ item.name || item.title }}
-            </h4>
-            <p v-if="getDateField(item)" class="text-white/80 text-xs mt-1">
-              {{ new Date(getDateField(item)).getFullYear() }}
-            </p>
-          </div>
-        </div>
+        <MediaLibraryItem
+          v-for="item in paginatedItems"
+          :key="item.id"
+          :item="item"
+          @click="showItemDetails"
+          @remove="removeFromLibrary"
+        />
       </div>
+
+      <!-- Pagination -->
+      <PaginationControls
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :total-items="filteredItems.length"
+        :items-per-page="itemsPerPage"
+        @page-change="goToPage"
+      />
     </div>
 
     <!-- Confirmation Modal -->
@@ -133,13 +102,17 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import ConfirmationModal from "../ui/ConfirmationModal.vue";
+import MediaLibraryFilters from "./MediaLibraryFilters.vue";
+import MediaLibraryItem from "./MediaLibraryItem.vue";
+import MediaLibraryEmptyState from "./MediaLibraryEmptyState.vue";
+import PaginationControls from "../ui/PaginationControls.vue";
 
 const route = useRoute();
 
-const { libraryItems } = defineProps({
+const props = defineProps({
   mediaType: {
     type: String,
     required: true,
@@ -149,6 +122,10 @@ const { libraryItems } = defineProps({
     type: Array,
     default: () => [],
   },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
@@ -157,7 +134,20 @@ const emit = defineEmits([
   "update-status",
   "remove-from-library",
   "update-quick-review",
+  "search",
+  "sort-change",
+  "platform-filter",
 ]);
+
+// Search and filter state
+const searchQuery = ref("");
+const sortBy = ref("name_asc");
+const platformFilter = ref("");
+const itemsPerPage = ref(20);
+const currentPage = ref(1);
+
+// Debounced search
+let searchTimeout = null;
 
 // Confirmation modal state
 const confirmationModal = ref({
@@ -167,6 +157,87 @@ const confirmationModal = ref({
   confirmText: "Remove",
   cancelText: "Cancel",
   itemToRemove: null,
+});
+
+// Computed properties
+const totalItems = computed(() => props.libraryItems.length);
+
+const filteredItems = computed(() => {
+  let items = [...props.libraryItems];
+
+  // Apply search filter
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim();
+    items = items.filter((item) => {
+      const name = (item.name || item.title || "").toLowerCase();
+      const genres = item.genres ? item.genres.join(" ").toLowerCase() : "";
+      return name.includes(query) || genres.includes(query);
+    });
+  }
+
+  // Apply platform filter (for games)
+  if (platformFilter.value && props.mediaType === "game") {
+    items = items.filter((item) => {
+      return (
+        item.user_platform === platformFilter.value ||
+        (item.platforms && item.platforms.includes(platformFilter.value))
+      );
+    });
+  }
+
+  // Apply sorting
+  items.sort((a, b) => {
+    const [field, direction] = sortBy.value.split("_");
+    const isDesc = direction === "desc";
+
+    let aValue, bValue;
+
+    switch (field) {
+      case "name":
+        aValue = (a.name || a.title || "").toLowerCase();
+        bValue = (b.name || b.title || "").toLowerCase();
+        break;
+      case "date":
+        if (sortBy.value.includes("added")) {
+          aValue = new Date(a.updated_at || a.created_at);
+          bValue = new Date(b.updated_at || b.created_at);
+        } else if (sortBy.value.includes("release")) {
+          aValue = new Date(a.release_date || 0);
+          bValue = new Date(b.release_date || 0);
+        } else if (sortBy.value.includes("publication")) {
+          aValue = new Date(a.publication_date || 0);
+          bValue = new Date(b.publication_date || 0);
+        }
+        break;
+      case "rating":
+        aValue = a.rating || a.total_rating || 0;
+        bValue = b.rating || b.total_rating || 0;
+        break;
+      case "author":
+        aValue = (a.author || "").toLowerCase();
+        bValue = (b.author || "").toLowerCase();
+        break;
+      default:
+        aValue = a[field] || "";
+        bValue = b[field] || "";
+    }
+
+    if (aValue < bValue) return isDesc ? 1 : -1;
+    if (aValue > bValue) return isDesc ? -1 : 1;
+    return 0;
+  });
+
+  return items;
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredItems.value.length / itemsPerPage.value),
+);
+
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredItems.value.slice(start, end);
 });
 
 const mediaTypeLabel = computed(() => {
@@ -207,6 +278,27 @@ const mediaTypeLabel = computed(() => {
   return baseLabel;
 });
 
+// Methods
+const clearSearch = () => {
+  searchQuery.value = "";
+  currentPage.value = 1;
+  emit("search", "");
+};
+
+const clearAllFilters = () => {
+  searchQuery.value = "";
+  platformFilter.value = "";
+  currentPage.value = 1;
+  emit("search", "");
+  emit("platform-filter", "");
+};
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
 const refreshLibrary = () => {
   emit("refresh-library");
 };
@@ -244,11 +336,35 @@ const cancelRemove = () => {
   };
 };
 
-const getImageUrl = (item) => {
-  return item.cover_url || item.poster_url || item.image_url;
-};
+// Watch for filter changes to emit events and reset pagination
+watch(searchQuery, (newValue) => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1;
+    emit("search", newValue);
+  }, 300);
+});
 
-const getDateField = (item) => {
-  return item.release_date || item.publication_date || item.air_date;
-};
+watch(sortBy, (newValue) => {
+  currentPage.value = 1;
+  emit("sort-change", newValue);
+});
+
+watch(platformFilter, (newValue) => {
+  currentPage.value = 1;
+  emit("platform-filter", newValue);
+});
+
+watch(itemsPerPage, () => {
+  currentPage.value = 1;
+});
+
+// Watch for external changes to reset pagination
+watch(
+  () => props.libraryItems,
+  () => {
+    currentPage.value = 1;
+  },
+  { deep: true },
+);
 </script>

@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // Listen on all addresses including LAN and public
     port: 5173, // Standard Vite port
     proxy: {
       "/api": {

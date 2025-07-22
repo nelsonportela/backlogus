@@ -1,13 +1,17 @@
 import axios from 'axios'
 
 class IGDBService {
-  constructor() {
-    this.clientId = process.env.IGDB_CLIENT_ID
-    this.accessToken = process.env.IGDB_ACCESS_TOKEN
+  constructor(clientId = null, accessToken = null) {
+    this.clientId = clientId
+    this.accessToken = accessToken
     this.baseUrl = 'https://api.igdb.com/v4'
   }
 
   async searchGames(query, limit = 15) {
+    if (!this.clientId || !this.accessToken) {
+      throw new Error('IGDB credentials not configured. Please add your IGDB API credentials in Settings.')
+    }
+
     try {
       const response = await axios({
         url: `${this.baseUrl}/games`,
@@ -37,6 +41,10 @@ class IGDBService {
   }
 
   async getGameById(gameId) {
+    if (!this.clientId || !this.accessToken) {
+      throw new Error('IGDB credentials not configured. Please add your IGDB API credentials in Settings.')
+    }
+
     try {
       const response = await axios({
         url: `${this.baseUrl}/games`,
@@ -157,4 +165,4 @@ class IGDBService {
   }
 }
 
-export default new IGDBService()
+export default IGDBService

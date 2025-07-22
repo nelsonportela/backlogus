@@ -26,6 +26,27 @@ const reverseQuickReviewMap = {
   'NEGATIVE': 'negative'
 }
 
+// Helper function to get user's IGDB credentials
+async function getUserIGDBCredentials(fastify, userId) {
+  const credentials = await fastify.prisma.userApiCredential.findUnique({
+    where: {
+      userId_apiProvider: {
+        userId: userId,
+        apiProvider: 'igdb'
+      }
+    }
+  })
+
+  if (!credentials || !credentials.isActive) {
+    return null
+  }
+
+  return {
+    clientId: credentials.clientId,
+    accessToken: credentials.accessToken
+  }
+}
+
 async function gamesRoutes(fastify, options) {
   // Search games from IGDB
   fastify.get('/search', {
@@ -40,12 +61,30 @@ async function gamesRoutes(fastify, options) {
     }
 
     try {
-      const games = await IGDBService.searchGames(q.trim(), 20)
+      // Get user's IGDB credentials
+      const credentials = await getUserIGDBCredentials(fastify, request.user.userId)
+      
+      if (!credentials) {
+        return reply.status(400).send({ 
+          message: 'IGDB API credentials not configured. Please add your IGDB credentials in Settings to search for games.' 
+        })
+      }
+
+      const igdbService = new IGDBService(credentials.clientId, credentials.accessToken)
+      const games = await igdbService.searchGames(q.trim(), 20)
       return reply.send(games)
     } catch (error) {
       fastify.log.error(error)
+      
+      // Check if it's a credentials error
+      if (error.message && error.message.includes('credentials not configured')) {
+        return reply.status(400).send({ 
+          message: error.message 
+        })
+      }
+      
       return reply.status(500).send({ 
-        message: 'Failed to search games' 
+        message: 'Failed to search games. Please check your IGDB credentials in Settings.' 
       })
     }
   })
@@ -114,7 +153,16 @@ async function gamesRoutes(fastify, options) {
     }
 
     try {
-      const gameDetails = await IGDBService.getGameById(parseInt(igdbId))
+      const userCredentials = await getUserIGDBCredentials(fastify, request.user.userId)
+      
+      if (!userCredentials) {
+        return reply.status(400).send({ 
+          message: 'IGDB API credentials not configured. Please add your IGDB credentials in Settings to get game details.' 
+        })
+      }
+
+      const igdbService = new IGDBService(userCredentials.clientId, userCredentials.accessToken)
+      const gameDetails = await igdbService.getGameById(parseInt(igdbId))
       return reply.send(gameDetails)
     } catch (error) {
       fastify.log.error(error)

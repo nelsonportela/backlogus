@@ -6,19 +6,23 @@ export const useGamesStore = defineStore("games", () => {
   const games = ref([]);
   const searchResults = ref([]);
   const loading = ref(false);
+  const searchError = ref(null);
 
   const searchGames = async (query) => {
     if (!query.trim()) {
       searchResults.value = [];
+      searchError.value = null;
       return;
     }
 
     loading.value = true;
+    searchError.value = null;
     try {
       const response = await gamesApi.search(query);
       searchResults.value = response.data;
-    } catch {
+    } catch (error) {
       searchResults.value = [];
+      searchError.value = error.response?.data?.message || "Failed to search games";
     } finally {
       loading.value = false;
     }
@@ -144,6 +148,7 @@ export const useGamesStore = defineStore("games", () => {
     games,
     searchResults,
     loading,
+    searchError,
     searchGames,
     getUserGames,
     addGame,

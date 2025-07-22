@@ -3,7 +3,7 @@
     <!-- Error Message -->
     <div
       v-if="errorMessage"
-      class="fixed top-4 right-4 z-50 max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
+      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
     >
       <div class="flex items-center justify-between">
         <p class="text-sm font-medium">{{ errorMessage }}</p>
@@ -22,17 +22,6 @@
       </div>
     </div>
 
-    <!-- Search Section -->
-    <MediaSearch
-      :media-type="'game'"
-      :search-results="searchResults"
-      :loading="loading"
-      :library-items="userGames"
-      @search="handleSearch"
-      @add-to-library="addGameToLibrary"
-      @show-details="showGameDetails"
-    />
-
     <!-- User Library -->
     <MediaLibrary
       :media-type="'game'"
@@ -42,6 +31,18 @@
       @update-status="updateStatus"
       @remove-from-library="removeGameFromLibrary"
       @update-quick-review="updateQuickReview"
+    />
+
+    <!-- Floating Action Button for adding games -->
+    <FloatingActionButton
+      :media-type="'game'"
+      :search-results="searchResults"
+      :loading="loading"
+      :library-items="userGames"
+      @search="handleSearch"
+      @add-to-library="addGameToLibrary"
+      @show-details="showGameDetails"
+      @refresh-library="refreshLibrary"
     />
 
     <!-- Media Details Modal -->
@@ -73,8 +74,8 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useGamesStore } from "@/stores/games";
 import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
-import MediaSearch from "@/components/media/MediaSearch.vue";
 import MediaLibrary from "@/components/media/MediaLibrary.vue";
+import FloatingActionButton from "@/components/ui/FloatingActionButton.vue";
 
 const route = useRoute();
 const gamesStore = useGamesStore();
@@ -98,6 +99,14 @@ const showError = (message) => {
 const allUserGames = computed(() => gamesStore.games);
 const searchResults = computed(() => gamesStore.searchResults);
 const loading = computed(() => gamesStore.loading);
+const searchError = computed(() => gamesStore.searchError);
+
+// Watch for search errors
+watch(searchError, (newError) => {
+  if (newError) {
+    showError(newError);
+  }
+});
 
 // Filtered games based on route query
 const userGames = computed(() => {
