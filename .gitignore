@@ -54,3 +54,7 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Backend Image Cache
+
+/backend/cache/

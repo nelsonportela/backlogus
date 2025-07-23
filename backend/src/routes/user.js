@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import imageCacheService from '../services/imageCache.js';
 
 async function userRoutes(fastify, options) {
   // Get user profile
@@ -304,6 +305,19 @@ async function userRoutes(fastify, options) {
     } catch (error) {
       fastify.log.error(error);
       return reply.status(500).send({ message: 'Failed to delete API credentials' });
+    }
+  });
+
+  // Get image cache statistics
+  fastify.get('/cache/stats', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    try {
+      const stats = await imageCacheService.getCacheStats();
+      return reply.send(stats);
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ message: 'Failed to get cache statistics' });
     }
   });
 }

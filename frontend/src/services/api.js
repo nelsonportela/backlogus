@@ -83,6 +83,16 @@ export const userApi = {
     api.put(`/user/api-credentials/${provider}`, credentials),
   deleteApiCredentials: (provider) =>
     api.delete(`/user/api-credentials/${provider}`),
+  createBackup: () => api.get("/user/backup", { responseType: 'blob' }),
+  importBackup: (file) => {
+    const formData = new FormData();
+    formData.append('backup', file);
+    return api.post("/user/backup/import", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
 
 export default api;

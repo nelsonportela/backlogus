@@ -53,7 +53,11 @@
 
           <!-- Security Tab -->
           <div v-if="activeTab === 'security'" class="space-y-6">
-            <SecuritySettings @change-password="handleChangePassword" />
+            <SecuritySettings 
+              @change-password="handleChangePassword"
+              @backup-data="handleBackupData"
+              @import-data="handleImportData"
+              @delete-account="handleDeleteAccount" />
           </div>
 
           <!-- API Credentials Tab -->
@@ -81,6 +85,8 @@
         'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg z-50',
         message.type === 'success'
           ? 'bg-green-500 text-white'
+          : message.type === 'info'
+          ? 'bg-blue-500 text-white'
           : 'bg-red-500 text-white',
       ]">
       {{ message.text }}
@@ -174,6 +180,65 @@ const handleDeleteCredentials = async (provider) => {
     showMessage(`${provider.toUpperCase()} credentials removed successfully`);
   } else {
     showMessage(result.error, "error");
+  }
+};
+
+const handleExportData = async () => {
+  try {
+    // TODO: Implement data export functionality
+    showMessage("Data export feature coming soon!", "info");
+  } catch (error) {
+    showMessage("Failed to export data", "error");
+  }
+};
+
+const handleBackupData = async () => {
+  try {
+    const result = await userStore.createBackup();
+    if (result.success) {
+      // Create and download the backup file
+      const blob = new Blob([result.data], { type: 'application/zip' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `backlogus-backup-${new Date().toISOString().split('T')[0]}.backlogus`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      showMessage("Backup created and downloaded successfully!");
+    } else {
+      showMessage(result.error || "Failed to create backup", "error");
+    }
+  } catch (error) {
+    showMessage("Failed to create backup", "error");
+  }
+};
+
+const handleImportData = async (file) => {
+  try {
+    const result = await userStore.importBackup(file);
+    if (result.success) {
+      showMessage("Backup imported successfully! Please refresh the page to see your restored data.");
+      // Optionally reload the page after a delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      showMessage(result.error || "Failed to import backup", "error");
+    }
+  } catch (error) {
+    showMessage("Failed to import backup", "error");
+  }
+};
+
+const handleDeleteAccount = async () => {
+  try {
+    // TODO: Implement account deletion functionality
+    showMessage("Account deletion feature coming soon!", "info");
+  } catch (error) {
+    showMessage("Failed to delete account", "error");
   }
 };
 

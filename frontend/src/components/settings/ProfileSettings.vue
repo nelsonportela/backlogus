@@ -18,7 +18,7 @@
         </label>
         <div class="mt-2 flex items-center space-x-4">
           <div
-            class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
+            class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
             <img
               v-if="formData.avatar_url"
               :src="formData.avatar_url"
@@ -37,14 +37,14 @@
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <div>
+          <div class="flex-1">
             <input
               v-model="formData.avatar_url"
               type="url"
               placeholder="Enter avatar URL"
               class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Enter a URL for your profile picture
+              Your profile picture will be displayed in the sidebar and dashboard
             </p>
           </div>
         </div>
@@ -63,6 +63,9 @@
             v-model="formData.first_name"
             type="text"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Used for personalized greetings and display
+          </p>
         </div>
 
         <div>
@@ -76,6 +79,9 @@
             v-model="formData.last_name"
             type="text"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Used for personalized greetings and display
+          </p>
         </div>
       </div>
 
@@ -117,6 +123,9 @@
           <option value="Asia/Shanghai">Shanghai</option>
           <option value="Australia/Sydney">Sydney</option>
         </select>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Used for personalizing dates, times, and greetings throughout the app
+        </p>
       </div>
 
       <!-- Save Button -->

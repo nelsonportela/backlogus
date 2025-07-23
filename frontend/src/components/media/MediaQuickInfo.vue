@@ -3,20 +3,10 @@
     class="absolute bottom-2 sm:bottom-4 right-2 sm:right-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-2 sm:p-4 max-w-[140px] sm:max-w-xs backdrop-blur-sm bg-white/95 dark:bg-gray-800/95">
     <div class="space-y-1 text-xs">
       <!-- Rating/Score -->
-      <div
-        v-if="
-          item.rating || item.score || item.total_rating || item.vote_average
-        ">
+      <div v-if="displayRating">
         <span class="text-gray-600 dark:text-gray-400">Rating:</span>
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
-          {{
-            Math.round(
-              (item.rating ||
-                item.score ||
-                item.total_rating ||
-                item.vote_average) / 10
-            )
-          }}/10
+          {{ displayRating }}
         </span>
       </div>
 
@@ -63,6 +53,8 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+
 const props = defineProps({
   item: {
     type: Object,
@@ -72,6 +64,35 @@ const props = defineProps({
     type: String,
     required: true,
   },
+});
+
+const displayRating = computed(() => {
+  const rating =
+    props.item.rating ||
+    props.item.score ||
+    props.item.total_rating ||
+    props.item.vote_average;
+
+  if (!rating) return null;
+
+  // Different rating systems for different media types
+  switch (props.mediaType) {
+    case "movie":
+    case "show":
+      // TMDB ratings are already 0-10 scale (e.g., 6.5)
+      return `${rating.toFixed(1)}/10`;
+    case "game":
+      // IGDB ratings are 0-100 scale, need to convert to 0-10
+      return `${Math.round(rating / 10)}/10`;
+    case "book":
+      // Books might use different scales, handle accordingly
+      return rating > 10
+        ? `${Math.round(rating / 10)}/10`
+        : `${rating.toFixed(1)}/10`;
+    default:
+      // Default: assume 0-10 scale
+      return `${rating.toFixed(1)}/10`;
+  }
 });
 
 const formatRuntime = (minutes) => {

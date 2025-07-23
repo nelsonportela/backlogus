@@ -23,12 +23,19 @@ const prisma = new PrismaClient()
 
 // Register plugins
 await fastify.register(cors, {
-  origin: ['http://localhost:3000'],
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 })
 
 await fastify.register(jwt, {
   secret: process.env.JWT_SECRET
+})
+
+// Register multipart for file uploads
+await fastify.register(import('@fastify/multipart'), {
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit for backup files
+  }
 })
 
 // Serve static files (for platform logos)

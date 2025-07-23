@@ -91,7 +91,7 @@ export const useUserStore = defineStore("user", () => {
       const response = await userApi.deleteApiCredentials(provider);
       // Remove from local state
       apiCredentials.value = apiCredentials.value.filter(
-        (cred) => cred.api_provider !== provider
+        (cred) => cred.provider !== provider
       );
       return { success: true, message: response.data.message };
     } catch (error) {
@@ -99,6 +99,33 @@ export const useUserStore = defineStore("user", () => {
         success: false,
         error:
           error.response?.data?.message || "Failed to delete API credentials",
+      };
+    }
+  };
+
+  const createBackup = async () => {
+    try {
+      const response = await userApi.createBackup();
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to create backup",
+      };
+    }
+  };
+
+  const importBackup = async (file) => {
+    try {
+      const response = await userApi.importBackup(file);
+      // Refresh profile after successful import
+      await getProfile();
+      await getApiCredentials();
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to import backup",
       };
     }
   };
@@ -113,5 +140,7 @@ export const useUserStore = defineStore("user", () => {
     getApiCredentials,
     saveApiCredentials,
     deleteApiCredentials,
+    createBackup,
+    importBackup,
   };
 });

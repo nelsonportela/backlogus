@@ -107,41 +107,72 @@
       </form>
     </div>
 
-    <!-- Account Information -->
+    <!-- Account Options -->
     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
       <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
-        Account Information
+        Account Options
       </h3>
 
-      <div class="space-y-4">
-        <div class="flex items-center justify-between py-2">
+      <div class="space-y-6">
+        <!-- Social Login Integration -->
+        <div class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
           <div>
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Two-Factor Authentication
+              Social Login Integration
             </span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Add an extra layer of security to your account
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Connect with Google, GitHub, or other providers for easier login
             </p>
           </div>
           <span
-            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
-            Coming Soon
+            class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+            Planned
           </span>
         </div>
 
-        <div class="flex items-center justify-between py-2">
+        <!-- Account Deletion -->
+        <div class="flex items-center justify-between py-3">
           <div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Login Sessions
+            <span class="text-sm font-medium text-red-600 dark:text-red-400">
+              Delete Account
             </span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Manage your active login sessions
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Permanently delete your account and all associated data
             </p>
           </div>
-          <span
-            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
-            Coming Soon
-          </span>
+          <button
+            @click="showDeleteConfirmation = true"
+            class="px-3 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-800 transition-colors">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div
+      v-if="showDeleteConfirmation"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div
+        class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+        <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Delete Account
+        </h4>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          This action cannot be undone. All your media data, preferences, and
+          account information will be permanently deleted.
+        </p>
+        <div class="flex justify-end space-x-3">
+          <button
+            @click="showDeleteConfirmation = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Cancel
+          </button>
+          <button
+            @click="handleAccountDeletion"
+            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
+            Delete Account
+          </button>
         </div>
       </div>
     </div>
@@ -151,9 +182,10 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const emit = defineEmits(["change-password"]);
+const emit = defineEmits(["change-password", "delete-account"]);
 
 const loading = ref(false);
+const showDeleteConfirmation = ref(false);
 
 const passwordForm = ref({
   current_password: "",
@@ -191,5 +223,10 @@ const submitPasswordChange = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleAccountDeletion = async () => {
+  showDeleteConfirmation.value = false;
+  emit("delete-account");
 };
 </script>
