@@ -1,21 +1,22 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: media-tracker-db
+    container_name: backlogus-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: media_tracker_db
-      POSTGRES_USER: media_tracker_user
-      POSTGRES_PASSWORD: media_tracker_password
+      POSTGRES_DB: backlogus_db
+      POSTGRES_USER: backlogus_user
+      POSTGRES_PASSWORD: backlogus_password
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - backlogus-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U media_tracker_user -d media_tracker_db"]
+      test: ["CMD-SHELL", "pg_isready -U backlogus_user -d backlogus_db"]
       interval: 30s
       timeout: 10s
       retries: 3
 
 volumes:
-  postgres_data:
+  backlogus-db:
+    external: true

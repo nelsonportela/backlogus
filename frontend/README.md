@@ -1,6 +1,6 @@
-# Media Tracker Frontend
+# BackLogus Frontend
 
-Vue 3 frontend application for the Media Tracker app.
+Vue 3 frontend application for the BackLogus app.
 
 ## Features
 

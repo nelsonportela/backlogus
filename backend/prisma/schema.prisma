@@ -20,6 +20,7 @@ model User {
   themePreference String?             @default("system") @map("theme_preference") @db.VarChar(20)
   apiCredentials  UserApiCredential[]
   userGames       UserGame[]
+  userMovies      UserMovie[]
 
   @@map("users")
 }
@@ -50,6 +51,56 @@ model Game {
   userGames        UserGame[]
 
   @@map("games")
+}
+
+model Movie {
+  id               Int         @id @default(autoincrement())
+  tmdbId           Int         @unique @map("tmdb_id")
+  name             String
+  originalTitle    String?     @map("original_title")
+  coverUrl         String?     @map("cover_url")
+  backdropUrl      String?     @map("backdrop_url")
+  releaseDate      DateTime?   @map("release_date")
+  genres           String[]    @default([])
+  summary          String?
+  director         String?
+  cast             Json?
+  runtime          Int?
+  rating           Float?
+  voteCount        Int?        @map("vote_count")
+  budget           BigInt?
+  revenue          BigInt?
+  homepage         String?
+  imdbId           String?     @map("imdb_id")
+  tagline          String?
+  status           String?
+  originalLanguage String?     @map("original_language")
+  popularity       Float?
+  certification    String?
+  trailerKey       String?     @map("trailer_key")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  userMovies       UserMovie[]
+
+  @@map("movies")
+}
+
+model UserMovie {
+  id             Int          @id @default(autoincrement())
+  status         MovieStatus  @default(WANT_TO_WATCH)
+  personalRating Int?         @map("personal_rating")
+  quickReview    QuickReview? @map("quick_review")
+  notes          String?
+  watchedDate    DateTime?    @map("watched_date")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  userId         Int          @map("user_id")
+  movieId        Int          @map("movie_id")
+  movie          Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+  @@map("user_movies")
 }
 
 model UserGame {
@@ -93,6 +144,13 @@ enum GameStatus {
   WANT_TO_PLAY
   PLAYING
   COMPLETED
+  DROPPED
+}
+
+enum MovieStatus {
+  WANT_TO_WATCH
+  WATCHING
+  WATCHED
   DROPPED
 }
 

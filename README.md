@@ -1,13 +1,14 @@
-# Media Tracker
+# BackLogus
 
-A modern, responsive web application for tracking your games and media collection. Built with Vue 3 and Node.js with a focus on clean architecture and user experience.
+A modern, responsive web application for tracking your media backlog across games, movies, books, and more. Built with Vue 3 and Node.js with a focus on clean architecture and user experience.
 
 ## ✨ Features
 
 - 🎮 **Game Library Management**: Search and add games from the IGDB database
+- 🎬 **Movie Tracking**: Search and manage movies with TMDB integration
 - 🔐 **Secure Authentication**: JWT-based user authentication with password hashing
 - 📱 **Fully Responsive**: Mobile-first design with dark/light theme support
-- 📊 **Status Tracking**: Track games as Want to Play, Playing, Completed, or Dropped  
+- 📊 **Status Tracking**: Track media as Want to Play/Watch, Playing/Watching, Completed, or Dropped  
 - ⭐ **Rating System**: Quick review system with thumbs up/down/neutral
 - 🖼️ **Rich Media**: Game screenshots, cover art, and detailed information
 - 🎯 **Modern UI**: Clean interface with Tailwind CSS and smooth animations

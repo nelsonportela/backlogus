@@ -56,7 +56,8 @@ export const useUserStore = defineStore("user", () => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || "Failed to fetch API credentials",
+        error:
+          error.response?.data?.message || "Failed to fetch API credentials",
       };
     }
   };
@@ -66,20 +67,21 @@ export const useUserStore = defineStore("user", () => {
       const response = await userApi.saveApiCredentials(provider, credentials);
       // Update local state
       const existingIndex = apiCredentials.value.findIndex(
-        (cred) => cred.api_provider === provider
+        (cred) => cred.api_provider === provider,
       );
-      
+
       if (existingIndex >= 0) {
         apiCredentials.value[existingIndex] = response.data;
       } else {
         apiCredentials.value.push(response.data);
       }
-      
+
       return { success: true, data: response.data };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || "Failed to save API credentials",
+        error:
+          error.response?.data?.message || "Failed to save API credentials",
       };
     }
   };
@@ -89,13 +91,14 @@ export const useUserStore = defineStore("user", () => {
       const response = await userApi.deleteApiCredentials(provider);
       // Remove from local state
       apiCredentials.value = apiCredentials.value.filter(
-        (cred) => cred.api_provider !== provider
+        (cred) => cred.api_provider !== provider,
       );
       return { success: true, message: response.data.message };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || "Failed to delete API credentials",
+        error:
+          error.response?.data?.message || "Failed to delete API credentials",
       };
     }
   };

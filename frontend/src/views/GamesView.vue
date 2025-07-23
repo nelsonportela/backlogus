@@ -30,7 +30,6 @@
       @show-details="showGameDetails"
       @update-status="updateStatus"
       @remove-from-library="removeGameFromLibrary"
-      @update-quick-review="updateQuickReview"
     />
 
     <!-- Floating Action Button for adding games -->
@@ -61,10 +60,7 @@
       @close="closeModal"
       @add-to-library="addGameToLibraryFromModal"
       @remove-from-library="removeGameFromLibrary"
-      @update-status="updateGameStatusFromModal"
-      @update-personal-rating="updatePersonalRating"
-      @update-user-platform="updateUserPlatform"
-      @update-quick-review="updateQuickReview"
+      @update-item="updateGameItem"
     />
   </div>
 </template>
@@ -248,71 +244,37 @@ const updateStatus = async (gameId, status) => {
   }
 };
 
-const updateGameStatusFromModal = async (gameId, status) => {
-  // For library games, use the library game ID
+const updateGameItem = async (gameId, updateData) => {
+  // Find the library game by igdb_id
   const libraryGame = userGames.value.find(
     (g) => g.igdb_id === gameId || g.id === gameId,
   );
-  if (libraryGame) {
-    await updateStatus(libraryGame.id, status);
-    // Update the selected game status for the modal
-    if (selectedGame.value) {
-      selectedGame.value.status = status;
-    }
+  
+  if (!libraryGame) {
+    showError("Game not found in your library");
+    return;
   }
-};
 
-const updatePersonalRating = async (gameId, rating) => {
-  // For library games, use the library game ID
-  const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === gameId || g.id === gameId,
-  );
-  if (libraryGame) {
-    // This would need to be implemented in the store/backend
-    // For now, just update locally
-    if (selectedGame.value) {
-      selectedGame.value.personal_rating = rating;
-    }
+  let result;
+
+  // Handle status updates through the specific status endpoint
+  if (updateData.status) {
+    result = await gamesStore.updateGameStatus(libraryGame.id, updateData.status);
+  } else {
+    // Handle other field updates through the general details endpoint
+    result = await gamesStore.updateGameDetails(libraryGame.id, updateData);
   }
-};
 
-const updateUserPlatform = async (gameId, platform) => {
-  const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === gameId || g.id === gameId,
-  );
-  if (libraryGame) {
-    const result = await gamesStore.updateGameDetails(libraryGame.id, {
-      user_platform: platform,
-    });
-    if (result.success) {
-      // Update local state
-      libraryGame.user_platform = platform;
+  if (result.success) {
+    // Update local state
+    Object.keys(updateData).forEach(key => {
+      libraryGame[key] = updateData[key];
       if (selectedGame.value) {
-        selectedGame.value.user_platform = platform;
+        selectedGame.value[key] = updateData[key];
       }
-    } else {
-      showError(result.error);
-    }
-  }
-};
-
-const updateQuickReview = async (gameId, reviewValue) => {
-  const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === gameId || g.id === gameId,
-  );
-  if (libraryGame) {
-    const result = await gamesStore.updateGameDetails(libraryGame.id, {
-      quick_review: reviewValue,
     });
-    if (result.success) {
-      // Update local state
-      libraryGame.quick_review = reviewValue;
-      if (selectedGame.value) {
-        selectedGame.value.quick_review = reviewValue;
-      }
-    } else {
-      showError(result.error);
-    }
+  } else {
+    showError(result.error);
   }
 };
 

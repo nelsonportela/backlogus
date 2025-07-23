@@ -53,6 +53,7 @@ fastify.decorate('authenticate', async (request, reply) => {
 await fastify.register(import('./routes/auth.js'), { prefix: '/api/auth' })
 await fastify.register(import('./routes/user.js'), { prefix: '/api/user' })
 await fastify.register(import('./routes/games.js'), { prefix: '/api/games' })
+await fastify.register(import('./routes/movies.js'), { prefix: '/api/movies' })
 await fastify.register(import('./routes/media.js'), { prefix: '/api/media' })
 
 // Health check

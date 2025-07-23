@@ -4,8 +4,11 @@
   >
     <div class="max-w-md w-full space-y-8">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Welcome to Media Tracker
+        <h1 class="mt-6 text-center text-4xl font-extrabold text-gray-900">
+          BackLogus
+        </h1>
+        <h2 class="mt-2 text-center text-lg font-medium text-gray-700">
+          Track Your Media Backlog
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600">
           {{ isLogin ? "Sign in to your account" : "Create your account" }}

@@ -1,8 +1,8 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# Media Tracker Project Instructions
+# BackLogus Project Instructions
 
-A general media tracking application with Vue 3 frontend and Fastify backend. Currently supports games via IGDB API, designed for expansion to movies, TV shows, books, and other media types.
+A modern media backlog tracking application with Vue 3 frontend and Fastify backend. Supports games via IGDB API and movies via TMDB API, designed for expansion to TV shows, books, and other media types.
 
 ## Architecture Overview
 
@@ -124,10 +124,11 @@ fastify.log.error(error)
 ### Required Environment Variables
 ```env
 # Backend (.env)
-DATABASE_URL="postgresql://user:password@localhost:5432/media_tracker_db"
+DATABASE_URL="postgresql://user:password@localhost:5432/backlogus_db"
 JWT_SECRET="your-super-secret-jwt-key"
 IGDB_CLIENT_ID="your-igdb-client-id" 
 IGDB_ACCESS_TOKEN="your-igdb-access-token"
+TMDB_API_KEY="your-tmdb-api-key"
 ```
 
 ### Docker Development

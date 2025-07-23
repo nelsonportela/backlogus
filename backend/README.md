@@ -1,6 +1,6 @@
-# Media Tracker Backend
+# BackLogus Backend
 
-Fastify-based backend API for the Media Tracker app.
+Fastify-based backend API for the BackLogus app.
 
 ## Features
 
@@ -50,12 +50,13 @@ npm run db:studio
 ## Environment Variables
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/media_tracker_db"
+DATABASE_URL="postgresql://username:password@localhost:5432/backlogus_db"
 JWT_SECRET="your-super-secret-jwt-key"
 PORT=3001
 NODE_ENV=development
 IGDB_CLIENT_ID="your-igdb-client-id"
 IGDB_ACCESS_TOKEN="your-igdb-access-token"
+TMDB_API_KEY="your-tmdb-api-key"
 ```
 
 ## API Documentation

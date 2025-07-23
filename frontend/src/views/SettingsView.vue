@@ -16,66 +16,66 @@
 
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
-          <!-- Tab Navigation -->
-          <div class="border-b border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
-                  'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap',
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-                ]"
-              >
-                <div class="flex items-center">
-                  <component
-                    :is="tab.icon"
-                    class="mr-2 h-5 w-5"
-                    aria-hidden="true"
-                  />
-                  {{ tab.name }}
-                </div>
-              </button>
-            </nav>
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200 dark:border-gray-700">
+          <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              :class="[
+                'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap',
+                activeTab === tab.id
+                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+              ]"
+            >
+              <div class="flex items-center">
+                <component
+                  :is="tab.icon"
+                  class="mr-2 h-5 w-5"
+                  aria-hidden="true"
+                />
+                {{ tab.name }}
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+          <!-- Profile Tab -->
+          <div v-if="activeTab === 'profile'" class="space-y-6">
+            <ProfileSettings
+              :profile="userStore.profile"
+              :loading="userStore.loading"
+              @update-profile="handleUpdateProfile"
+            />
           </div>
 
-          <!-- Tab Content -->
-          <div class="p-6">
-            <!-- Profile Tab -->
-            <div v-if="activeTab === 'profile'" class="space-y-6">
-              <ProfileSettings
-                :profile="userStore.profile"
-                :loading="userStore.loading"
-                @update-profile="handleUpdateProfile"
-              />
-            </div>
-
-            <!-- Security Tab -->
-            <div v-if="activeTab === 'security'" class="space-y-6">
-              <SecuritySettings @change-password="handleChangePassword" />
-            </div>
-
-            <!-- API Credentials Tab -->
-            <div v-if="activeTab === 'api'" class="space-y-6">
-              <ApiCredentialsSettings
-                :credentials="userStore.apiCredentials"
-                @save-credentials="handleSaveCredentials"
-                @delete-credentials="handleDeleteCredentials"
-              />
-            </div>
-
-            <!-- Preferences Tab -->
-            <div v-if="activeTab === 'preferences'" class="space-y-6">
-              <PreferencesSettings
-                :profile="userStore.profile"
-                @update-preferences="handleUpdatePreferences"
-              />
-            </div>
+          <!-- Security Tab -->
+          <div v-if="activeTab === 'security'" class="space-y-6">
+            <SecuritySettings @change-password="handleChangePassword" />
           </div>
+
+          <!-- API Credentials Tab -->
+          <div v-if="activeTab === 'api'" class="space-y-6">
+            <ApiCredentialsSettings
+              :credentials="userStore.apiCredentials"
+              @save-credentials="handleSaveCredentials"
+              @delete-credentials="handleDeleteCredentials"
+            />
+          </div>
+
+          <!-- Preferences Tab -->
+          <div v-if="activeTab === 'preferences'" class="space-y-6">
+            <PreferencesSettings
+              :profile="userStore.profile"
+              @update-preferences="handleUpdatePreferences"
+            />
+          </div>
+        </div>
       </div>
     </div>
 

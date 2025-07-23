@@ -133,7 +133,6 @@ const emit = defineEmits([
   "show-details",
   "update-status",
   "remove-from-library",
-  "update-quick-review",
   "search",
   "sort-change",
   "platform-filter",

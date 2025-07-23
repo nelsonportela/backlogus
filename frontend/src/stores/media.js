@@ -8,7 +8,6 @@ export const useMediaStore = defineStore("media", () => {
       const response = await mediaApi.getStats(mediaType);
       return { success: true, data: response.data };
     } catch (error) {
-      console.error("Error fetching media stats:", error);
       return {
         success: false,
         error: error.response?.data?.message || error.message,
@@ -73,8 +72,8 @@ export const useMediaStore = defineStore("media", () => {
 
   // Get all implemented media types
   const getImplementedMediaTypes = () => {
-    // For now, only games are implemented
-    return ["games"];
+    // Now both games and movies are implemented
+    return ["games", "movies"];
   };
 
   // Get all planned media types

@@ -35,8 +35,8 @@ class IGDBService {
 
       return response.data.map(game => this.formatGameData(game))
     } catch (error) {
-      console.error('IGDB API Error:', error.response?.data || error.message)
-      throw new Error('Failed to search games')
+      const errorMessage = error.response?.data || error.message
+      throw new Error(`Failed to search games: ${errorMessage}`)
     }
   }
 
@@ -71,8 +71,8 @@ class IGDBService {
 
       return this.formatGameData(game)
     } catch (error) {
-      console.error('IGDB API Error:', error.response?.data || error.message)
-      throw new Error('Failed to get game details')
+      const errorMessage = error.response?.data || error.message
+      throw new Error(`Failed to get game details: ${errorMessage}`)
     }
   }
 

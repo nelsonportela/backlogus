@@ -1,5 +1,5 @@
 {
-  "name": "media-tracker-backend",
+  "name": "backlogus-backend",
   "version": "1.0.0",
   "type": "module",
   "main": "src/index.js",
@@ -13,13 +13,16 @@
   },
   "keywords": [
     "fastify",
+    "backlogus",
     "media-tracker",
     "games",
+    "movies",
+    "backlog",
     "api"
   ],
   "author": "",
   "license": "ISC",
-  "description": "Media Tracker Backend - Fastify API for tracking games and media",
+  "description": "BackLogus API - Backend for media backlog tracking application",
   "dependencies": {
     "@fastify/cors": "^11.0.1",
     "@fastify/jwt": "^9.1.0",

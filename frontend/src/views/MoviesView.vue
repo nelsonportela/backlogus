@@ -1,0 +1,245 @@
+<template>
+  <div class="space-y-6">
+    <!-- Error Message -->
+    <div
+      v-if="errorMessage"
+      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
+    >
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium">{{ errorMessage }}</p>
+        <button
+          @click="errorMessage = null"
+          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- User Library -->
+    <MediaLibrary
+      :media-type="'movie'"
+      :library-items="userMovies"
+      @refresh-library="refreshLibrary"
+      @show-details="showMovieDetails"
+      @update-status="updateStatus"
+      @remove-from-library="removeMovieFromLibrary"
+    />
+
+    <!-- Floating Action Button for adding movies -->
+    <FloatingActionButton
+      :media-type="'movie'"
+      :search-results="searchResults"
+      :loading="loading"
+      :library-items="userMovies"
+      @search="handleSearch"
+      @add-to-library="addMovieToLibrary"
+      @show-details="showMovieDetails"
+      @refresh-library="refreshLibrary"
+    />
+
+    <!-- Media Details Modal -->
+    <MediaDetailsModal
+      :is-open="showModal"
+      :item="selectedMovie"
+      :media-type="'movie'"
+      :library-items="userMovies"
+      :current-status="selectedMovie?.status"
+      @close="closeModal"
+      @add-to-library="addMovieToLibraryFromModal"
+      @remove-from-library="removeMovieFromLibrary"
+      @update-item="updateMovieItem"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useMoviesStore } from "@/stores/movies";
+import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
+import MediaLibrary from "@/components/media/MediaLibrary.vue";
+import FloatingActionButton from "@/components/ui/FloatingActionButton.vue";
+
+const route = useRoute();
+const moviesStore = useMoviesStore();
+
+// Modal state
+const showModal = ref(false);
+const selectedMovie = ref(null);
+
+// Error handling
+const errorMessage = ref(null);
+
+const showError = (message) => {
+  errorMessage.value = message;
+  // Auto-clear error after 5 seconds
+  setTimeout(() => {
+    errorMessage.value = null;
+  }, 5000);
+};
+
+// Computed properties
+const allUserMovies = computed(() => moviesStore.movies);
+const searchResults = computed(() => moviesStore.searchResults);
+const loading = computed(() => moviesStore.loading);
+const searchError = computed(() => moviesStore.searchError);
+
+// Watch for search errors
+watch(searchError, (newError) => {
+  if (newError) {
+    showError(newError);
+  }
+});
+
+// Filtered movies based on route query
+const userMovies = computed(() => {
+  const statusFilter = route.query.status;
+
+  if (!statusFilter || statusFilter === "all") {
+    return allUserMovies.value;
+  }
+
+  return allUserMovies.value.filter((movie) => movie.status === statusFilter);
+});
+
+const handleSearch = (query) => {
+  moviesStore.searchMovies(query);
+};
+
+// Watch route changes to handle status filtering
+watch(
+  () => route.query.status,
+  () => {
+    // Filter status changed - no action needed as computed property handles this
+  },
+);
+
+// Modal methods
+const showMovieDetails = (movie) => {
+  selectedMovie.value = movie;
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  selectedMovie.value = null;
+};
+
+// Library management methods
+const addMovieToLibrary = async (libraryData) => {
+  // Handle both old format (just movie object) and new format (enhanced data from modal)
+  let movieData, status, quickReview, notes;
+
+  if (libraryData.item) {
+    // New format from AddToLibraryModal
+    movieData = libraryData.item;
+    status = libraryData.status;
+    quickReview = libraryData.quick_review;
+    notes = libraryData.notes;
+  } else {
+    // Old format - direct movie object
+    movieData = libraryData;
+    status = "want_to_watch"; // default status
+    quickReview = null;
+    notes = null;
+  }
+
+  const result = await moviesStore.addMovie({
+    tmdbId: movieData.tmdbId,
+    name: movieData.name,
+    original_title: movieData.original_title,
+    summary: movieData.summary,
+    release_date: movieData.release_date,
+    cover_url: movieData.cover_url,
+    backdrop_url: movieData.backdrop_url,
+    genres: movieData.genres,
+    rating: movieData.rating,
+    vote_count: movieData.vote_count,
+    runtime: movieData.runtime,
+    original_language: movieData.original_language,
+    popularity: movieData.popularity,
+    status: status,
+    quick_review: quickReview,
+    notes: notes,
+  });
+
+  if (!result.success) {
+    showError(result.error);
+  }
+};
+
+const addMovieToLibraryFromModal = async (libraryData) => {
+  await addMovieToLibrary(libraryData);
+  closeModal();
+};
+
+const updateStatus = async (movieId, newStatus) => {
+  const result = await moviesStore.updateMovieStatus(movieId, newStatus);
+  if (!result.success) {
+    showError(result.error);
+  }
+};
+
+const updateMovieItem = async (movieId, updateData) => {
+  let result;
+
+  // Handle status updates through the specific status endpoint
+  if (updateData.status) {
+    result = await moviesStore.updateMovieStatus(movieId, updateData.status);
+  } else if (updateData.quick_review !== undefined) {
+    // Handle quick review updates through the specific quick review endpoint
+    result = await moviesStore.updateMovieQuickReview(movieId, updateData.quick_review);
+  } else {
+    // Handle other field updates through the general details endpoint
+    result = await moviesStore.updateMovieDetails(movieId, updateData);
+  }
+
+  if (result.success) {
+    // Update local state
+    const movie = userMovies.value.find(m => m.id === movieId);
+    if (movie) {
+      Object.keys(updateData).forEach(key => {
+        movie[key] = updateData[key];
+      });
+    }
+    if (selectedMovie.value && selectedMovie.value.id === movieId) {
+      Object.keys(updateData).forEach(key => {
+        selectedMovie.value[key] = updateData[key];
+      });
+    }
+  } else {
+    showError(result.error);
+  }
+};
+
+const removeMovieFromLibrary = async (movie) => {
+  // Handle both cases: direct ID or movie object
+  const movieId = typeof movie === "object" ? movie.id : movie;
+
+  const result = await moviesStore.removeMovie(movieId);
+  if (result.success) {
+    // Close modal if the removed movie was being displayed
+    if (selectedMovie.value && selectedMovie.value.id === movieId) {
+      closeModal();
+    }
+  } else {
+    showError(result.error);
+  }
+};
+
+const refreshLibrary = () => {
+  moviesStore.getUserMovies();
+};
+
+// Load user movies on component mount
+onMounted(() => {
+  refreshLibrary();
+});
+</script>

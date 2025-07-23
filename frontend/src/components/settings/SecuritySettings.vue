@@ -14,7 +14,7 @@
       <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
         Change Password
       </h3>
-      
+
       <form @submit.prevent="submitPasswordChange" class="space-y-4">
         <div>
           <label
@@ -66,11 +66,18 @@
             required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
             :class="{
-              'border-red-500 dark:border-red-400': passwordForm.new_password && passwordForm.confirm_password && passwordForm.new_password !== passwordForm.confirm_password
+              'border-red-500 dark:border-red-400':
+                passwordForm.new_password &&
+                passwordForm.confirm_password &&
+                passwordForm.new_password !== passwordForm.confirm_password,
             }"
           />
-          <p 
-            v-if="passwordForm.new_password && passwordForm.confirm_password && passwordForm.new_password !== passwordForm.confirm_password"
+          <p
+            v-if="
+              passwordForm.new_password &&
+              passwordForm.confirm_password &&
+              passwordForm.new_password !== passwordForm.confirm_password
+            "
             class="mt-1 text-xs text-red-500 dark:text-red-400"
           >
             Passwords do not match
@@ -116,7 +123,7 @@
       <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
         Account Information
       </h3>
-      
+
       <div class="space-y-4">
         <div class="flex items-center justify-between py-2">
           <div>
@@ -127,7 +134,9 @@
               Add an extra layer of security to your account
             </p>
           </div>
-          <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
+          <span
+            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded"
+          >
             Coming Soon
           </span>
         </div>
@@ -141,7 +150,9 @@
               Manage your active login sessions
             </p>
           </div>
-          <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
+          <span
+            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded"
+          >
             Coming Soon
           </span>
         </div>
@@ -177,13 +188,13 @@ const submitPasswordChange = async () => {
   if (!isPasswordFormValid.value) return;
 
   loading.value = true;
-  
+
   try {
     await emit("change-password", {
       current_password: passwordForm.value.current_password,
       new_password: passwordForm.value.new_password,
     });
-    
+
     // Reset form on success
     passwordForm.value = {
       current_password: "",

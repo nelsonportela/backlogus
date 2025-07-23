@@ -21,7 +21,7 @@ export function useMediaTypes() {
         icon: "collection",
         label: `Total ${config.name}`,
         value: totalItems,
-        change: "+5 this week", // TODO: Calculate actual change
+        change: "+5 this week", // TODO: Implement change calculation
         color: "blue",
       },
       {
@@ -35,7 +35,7 @@ export function useMediaTypes() {
           ) -
           (statusDistribution.completed || 0) -
           (statusDistribution.dropped || 0),
-        change: "2 active sessions", // TODO: Calculate actual sessions
+        change: "2 active sessions", // TODO: Implement session tracking
         color: "green",
       },
       {

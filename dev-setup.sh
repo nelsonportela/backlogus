@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Media Tracker Development Helper Script
+# BackLogus Development Helper Script
 
 set -e
 
@@ -51,6 +51,7 @@ start_db() {
     sleep 5
     
     # Check if database is ready
+    if $DOCKER_COMPOSE -f docker-compose.dev.yml ps | grep -q "healthy\|running"; then
         print_status "Database is ready!"
     else
         print_warning "Database might still be starting up. Please wait a moment and try again."
@@ -93,7 +94,7 @@ start_dev() {
 
 # Show usage
 show_help() {
-    echo "Media Tracker Development Helper"
+    echo "BackLogus Development Helper"
     echo ""
     echo "Usage: $0 [command]"
     echo ""

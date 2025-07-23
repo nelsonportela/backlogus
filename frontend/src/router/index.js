@@ -4,6 +4,7 @@ import LoginView from "@/views/LoginView.vue";
 import DashboardLayout from "@/layouts/DashboardLayout.vue";
 import HomeView from "@/views/HomeView.vue";
 import GamesView from "@/views/GamesView.vue";
+import MoviesView from "@/views/MoviesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 
 const router = createRouter({
@@ -33,6 +34,11 @@ const router = createRouter({
           path: "games",
           name: "games",
           component: GamesView,
+        },
+        {
+          path: "movies",
+          name: "movies",
+          component: MoviesView,
         },
         {
           path: "settings",

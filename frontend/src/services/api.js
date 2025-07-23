@@ -45,6 +45,18 @@ export const gamesApi = {
   getStats: () => api.get("/games/stats"),
 };
 
+// Movies API methods
+export const moviesApi = {
+  search: (query) => api.get(`/movies/search?q=${encodeURIComponent(query)}`),
+  getUserMovies: () => api.get("/movies/user"),
+  addMovie: (movieData) => api.post("/movies", movieData),
+  updateMovie: (movieId, updateData) =>
+    api.patch(`/movies/${movieId}`, updateData),
+  removeMovie: (movieId) => api.delete(`/movies/${movieId}`),
+  getMovieDetails: (tmdbId) => api.get(`/movies/details/${tmdbId}`),
+  getStats: () => api.get("/movies/stats"),
+};
+
 // Media API methods (unified across all media types)
 export const mediaApi = {
   getStats: (mediaType = null) => {
@@ -67,8 +79,10 @@ export const userApi = {
   updateProfile: (userData) => api.patch("/user/profile", userData),
   changePassword: (passwordData) => api.patch("/user/password", passwordData),
   getApiCredentials: () => api.get("/user/api-credentials"),
-  saveApiCredentials: (provider, credentials) => api.put(`/user/api-credentials/${provider}`, credentials),
-  deleteApiCredentials: (provider) => api.delete(`/user/api-credentials/${provider}`),
+  saveApiCredentials: (provider, credentials) =>
+    api.put(`/user/api-credentials/${provider}`, credentials),
+  deleteApiCredentials: (provider) =>
+    api.delete(`/user/api-credentials/${provider}`),
 };
 
 export default api;

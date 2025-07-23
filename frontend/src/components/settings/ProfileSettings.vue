@@ -12,11 +12,15 @@
     <form @submit.prevent="submitForm" class="space-y-6">
       <!-- Avatar Section -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Profile Picture
         </label>
         <div class="mt-2 flex items-center space-x-4">
-          <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
+          <div
+            class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center"
+          >
             <img
               v-if="formData.avatar_url"
               :src="formData.avatar_url"
@@ -206,7 +210,7 @@ watch(
       originalData.value = { ...formData.value };
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const hasChanges = computed(() => {
@@ -216,7 +220,7 @@ const hasChanges = computed(() => {
 const getDisplayName = () => {
   const firstName = formData.value.first_name;
   const lastName = formData.value.last_name;
-  
+
   if (firstName && lastName) {
     return `${firstName} ${lastName}`;
   } else if (firstName) {
@@ -230,7 +234,7 @@ const getDisplayName = () => {
 
 const submitForm = () => {
   if (!hasChanges.value) return;
-  
+
   emit("update-profile", { ...formData.value });
   originalData.value = { ...formData.value };
 };

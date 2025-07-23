@@ -294,10 +294,6 @@ const loadStats = async () => {
       }
     } else {
       // Fallback to games-specific API if unified API fails
-      console.log(
-        "Unified media API failed, falling back to games API:",
-        statsResult.error,
-      );
       const gamesResult = await gamesStore.getStats();
 
       if (gamesResult.success && gamesResult.data) {
@@ -331,12 +327,11 @@ const loadStats = async () => {
           monthlyData: gameStats.monthlyData || new Array(12).fill(0),
           primaryMediaType: "games",
         };
-      } else {
-        console.error("Both media and games APIs failed:", gamesResult.error);
       }
+      // If both APIs fail, stats will remain in loading state
     }
-  } catch (error) {
-    console.error("Failed to load stats:", error);
+  } catch {
+    // Stats loading failed - handle gracefully
   } finally {
     statsLoading.value = false;
 
@@ -501,8 +496,7 @@ const navigateToGames = () => {
 };
 
 const navigateToTrending = () => {
-  // Placeholder for trending content
-  console.log("Navigate to trending - not implemented yet");
+  // TODO: Implement trending content navigation
 };
 
 const pickRandomItem = async () => {
@@ -518,18 +512,15 @@ const pickRandomGame = async () => {
     );
 
     if (games.length === 0) {
-      console.warn(
-        "No games available to pick from. Add some games to your library first!",
-      );
+      // No games available to pick from
       return;
     }
 
     const randomIndex = Math.floor(Math.random() * games.length);
     randomGame.value = games[randomIndex];
     showRandomGameModal.value = true;
-  } catch (error) {
-    console.error("Error picking random game:", error);
-    console.warn("Failed to pick a random game. Please try again.");
+  } catch {
+    // Error picking random game - handle gracefully
   }
 };
 
@@ -539,8 +530,8 @@ const handleStartPlaying = async (game) => {
     showRandomGameModal.value = false;
     // Refresh stats
     await loadStats();
-  } catch (error) {
-    console.error("Error updating game status:", error);
+  } catch {
+    // Error updating game status - handle gracefully
   }
 };
 

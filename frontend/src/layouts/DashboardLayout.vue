@@ -47,7 +47,7 @@
         class="flex items-center justify-center h-16 border-b dark:border-gray-700 pt-2 md:pt-0"
       >
         <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">
-          Media Tracker
+          BackLogus
         </h1>
       </div>
       <nav class="mt-8">
@@ -140,8 +140,67 @@
             </div>
           </div>
 
-          <div class="px-4 py-2 text-gray-400 dark:text-gray-500 text-sm">
-            More media types coming soon...
+          <!-- Movies Section -->
+          <div>
+            <div
+              @click="toggleMoviesSubmenu"
+              class="flex items-center justify-between px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+              :class="{
+                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
+                  isMoviesRoute,
+              }"
+            >
+              <div class="flex items-center">
+                <svg
+                  class="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 4v16l13-8L7 4z"
+                  />
+                </svg>
+                Movies
+              </div>
+              <svg
+                class="w-4 h-4 transition-transform duration-200"
+                :class="{ 'rotate-180': moviesSubmenuOpen }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+
+            <!-- Movies Submenu -->
+            <div
+              v-show="moviesSubmenuOpen"
+              class="ml-6 mt-2 space-y-1 transition-all duration-200"
+            >
+              <router-link
+                v-for="status in movieStatuses"
+                :key="status.value"
+                :to="{ name: 'movies', query: { status: status.value } }"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                :class="{
+                  'bg-primary-100 dark:bg-gray-600 text-primary-700 dark:text-gray-100 font-medium':
+                    $route.query.status === status.value ||
+                    (!$route.query.status && status.value === 'all'),
+                }"
+              >
+                {{ status.label }}
+              </router-link>
+            </div>
           </div>
         </div>
       </nav>
@@ -287,6 +346,7 @@ const { isDark, toggleTheme } = useTheme();
 
 // Submenu state - keep games submenu open when on games page
 const gamesSubmenuOpen = ref(route.name === "games");
+const moviesSubmenuOpen = ref(route.name === "movies");
 
 // Mobile menu state
 const mobileMenuOpen = ref(false);
@@ -300,8 +360,21 @@ const gameStatuses = [
   { value: "dropped", label: "Dropped" },
 ];
 
+// Movie statuses configuration
+const movieStatuses = [
+  { value: "all", label: "All Movies" },
+  { value: "watching", label: "Watching" },
+  { value: "watched", label: "Watched" },
+  { value: "want_to_watch", label: "Want to Watch" },
+  { value: "dropped", label: "Dropped" },
+];
+
 const isGamesRoute = computed(() => {
   return route.name === "games";
+});
+
+const isMoviesRoute = computed(() => {
+  return route.name === "movies";
 });
 
 const dynamicTitle = computed(() => {
@@ -320,6 +393,10 @@ const toggleGamesSubmenu = () => {
   gamesSubmenuOpen.value = !gamesSubmenuOpen.value;
 };
 
+const toggleMoviesSubmenu = () => {
+  moviesSubmenuOpen.value = !moviesSubmenuOpen.value;
+};
+
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
@@ -328,12 +405,14 @@ const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
 };
 
-// Watch for route changes to auto-open games submenu and close mobile menu
+// Watch for route changes to auto-open submenus and close mobile menu
 watch(
   () => route.name,
   (newRouteName) => {
     if (newRouteName === "games") {
       gamesSubmenuOpen.value = true;
+    } else if (newRouteName === "movies") {
+      moviesSubmenuOpen.value = true;
     }
     // Close mobile menu on route change
     mobileMenuOpen.value = false;

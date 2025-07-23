@@ -22,7 +22,8 @@ export const useGamesStore = defineStore("games", () => {
       searchResults.value = response.data;
     } catch (error) {
       searchResults.value = [];
-      searchError.value = error.response?.data?.message || "Failed to search games";
+      searchError.value =
+        error.response?.data?.message || "Failed to search games";
     } finally {
       loading.value = false;
     }
