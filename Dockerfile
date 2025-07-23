@@ -23,6 +23,8 @@ FROM node:20-alpine AS production
 WORKDIR /app/backend
 ENV NODE_ENV=production
 COPY --from=backend-build /app/backend .
+# Generate Prisma client for production
+RUN npx prisma generate
 # Expose Fastify port
 EXPOSE 3001
 CMD ["node", "src/index.js"]
