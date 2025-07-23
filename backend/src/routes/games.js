@@ -1,4 +1,6 @@
 import IGDBService from '../services/igdb.js'
+import imageCacheService from '../services/imageCache.js'
+import { cacheAllMediaImages } from '../services/mediaImageCache.js'
 
 const statusMap = {
   'want_to_play': 'WANT_TO_PLAY',
@@ -100,36 +102,48 @@ async function gamesRoutes(fastify, options) {
         orderBy: { updatedAt: 'desc' }
       })
 
-      // Transform for frontend
-      const transformedGames = userGames.map(userGame => ({
-        // UserGame fields
-        id: userGame.id, // This is now the userGame ID for updates
-        status: reverseStatusMap[userGame.status],
-        quick_review: userGame.quickReview ? reverseQuickReviewMap[userGame.quickReview] : null,
-        personal_rating: userGame.personalRating,
-        user_platform: userGame.userPlatform,
-        notes: userGame.notes,
-        // Game fields
-        igdb_id: userGame.game.igdbId,
-        name: userGame.game.name,
-        cover_url: userGame.game.coverUrl,
-        banner_url: userGame.game.bannerUrl,
-        artworks: userGame.game.artworks,
-        release_date: userGame.game.releaseDate?.toISOString() || null,
-        genres: userGame.game.genres,
-        summary: userGame.game.summary,
-        platforms: userGame.game.platforms,
-        developer: userGame.game.developer,
-        publisher: userGame.game.publisher,
-        game_engine: userGame.game.gameEngine,
-        esrb_rating: userGame.game.esrbRating,
-        website: userGame.game.website,
-        screenshots: userGame.game.screenshots,
-        franchise: userGame.game.franchise,
-        rating: userGame.game.rating,
-        total_rating: userGame.game.totalRating,
-        aggregated_rating: userGame.game.aggregatedRating
-      }))
+      // Transform for frontend with local image URLs where available
+      const transformedGames = await Promise.all(userGames.map(async (userGame) => {
+        const game = userGame.game;
+        
+        // Convert image URLs to local URLs where cached
+        const [coverUrl, bannerUrl, artworks, screenshots] = await Promise.all([
+          imageCacheService.getLocalUrl(game.coverUrl),
+          imageCacheService.getLocalUrl(game.bannerUrl),
+          imageCacheService.getLocalUrls(game.artworks),
+          imageCacheService.getLocalUrls(game.screenshots)
+        ]);
+
+        return {
+          // UserGame fields
+          id: userGame.id, // This is now the userGame ID for updates
+          status: reverseStatusMap[userGame.status],
+          quick_review: userGame.quickReview ? reverseQuickReviewMap[userGame.quickReview] : null,
+          personal_rating: userGame.personalRating,
+          user_platform: userGame.userPlatform,
+          notes: userGame.notes,
+          // Game fields with local URLs
+          igdb_id: game.igdbId,
+          name: game.name,
+          cover_url: coverUrl,
+          banner_url: bannerUrl,
+          artworks: artworks,
+          release_date: game.releaseDate?.toISOString() || null,
+          genres: game.genres,
+          summary: game.summary,
+          platforms: game.platforms,
+          developer: game.developer,
+          publisher: game.publisher,
+          game_engine: game.gameEngine,
+          esrb_rating: game.esrbRating,
+          website: game.website,
+          screenshots: screenshots,
+          franchise: game.franchise,
+          rating: game.rating,
+          total_rating: game.totalRating,
+          aggregated_rating: game.aggregatedRating
+        };
+      }));
 
       return reply.send(transformedGames)
     } catch (error) {
@@ -251,6 +265,11 @@ async function gamesRoutes(fastify, options) {
             totalRating: total_rating ? parseFloat(total_rating) : null,
             aggregatedRating: aggregated_rating ? parseFloat(aggregated_rating) : null
           }
+        })
+
+        // Cache all images for this game (unified approach)
+        cacheAllMediaImages('game', game).catch((err) => {
+          fastify.log.warn('Failed to cache some game images:', err);
         })
       }
 

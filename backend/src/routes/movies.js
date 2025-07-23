@@ -1,4 +1,6 @@
 import TMDBService from '../services/tmdb.js'
+import imageCacheService from '../services/imageCache.js'
+import { cacheAllMediaImages } from '../services/mediaImageCache.js'
 
 const statusMap = {
   'want_to_watch': 'WANT_TO_WATCH',
@@ -102,30 +104,36 @@ async function moviesRoutes(fastify, options) {
         orderBy: { updatedAt: 'desc' }
       })
 
-      const formattedMovies = userMovies.map(userMovie => ({
-        id: userMovie.id,
-        tmdbId: userMovie.movie.tmdbId,
-        name: userMovie.movie.name,
-        original_title: userMovie.movie.originalTitle,
-        summary: userMovie.movie.summary,
-        cover_url: userMovie.movie.coverUrl,
-        backdrop_url: userMovie.movie.backdropUrl,
-        release_date: userMovie.movie.releaseDate,
-        genres: userMovie.movie.genres,
-        director: userMovie.movie.director,
-        cast: userMovie.movie.cast,
-        runtime: userMovie.movie.runtime,
-        rating: userMovie.movie.rating,
-        vote_count: userMovie.movie.voteCount,
-        certification: userMovie.movie.certification,
-        trailer_key: userMovie.movie.trailerKey,
-        status: reverseStatusMap[userMovie.status],
-        personal_rating: userMovie.personalRating,
-        quick_review: userMovie.quickReview ? reverseQuickReviewMap[userMovie.quickReview] : null,
-        notes: userMovie.notes,
-        watched_date: userMovie.watchedDate,
-        added_at: userMovie.createdAt,
-        updated_at: userMovie.updatedAt
+      const formattedMovies = await Promise.all(userMovies.map(async userMovie => {
+        const [coverUrl, backdropUrl] = await Promise.all([
+          imageCacheService.getLocalUrl(userMovie.movie.coverUrl),
+          imageCacheService.getLocalUrl(userMovie.movie.backdropUrl)
+        ]);
+        return {
+          id: userMovie.id,
+          tmdbId: userMovie.movie.tmdbId,
+          name: userMovie.movie.name,
+          original_title: userMovie.movie.originalTitle,
+          summary: userMovie.movie.summary,
+          cover_url: coverUrl,
+          backdrop_url: backdropUrl,
+          release_date: userMovie.movie.releaseDate,
+          genres: userMovie.movie.genres,
+          director: userMovie.movie.director,
+          cast: userMovie.movie.cast,
+          runtime: userMovie.movie.runtime,
+          rating: userMovie.movie.rating,
+          vote_count: userMovie.movie.voteCount,
+          certification: userMovie.movie.certification,
+          trailer_key: userMovie.movie.trailerKey,
+          status: reverseStatusMap[userMovie.status],
+          personal_rating: userMovie.personalRating,
+          quick_review: userMovie.movie.quickReview ? reverseQuickReviewMap[userMovie.movie.quickReview] : null,
+          notes: userMovie.notes,
+          watched_date: userMovie.watchedDate,
+          added_at: userMovie.createdAt,
+          updated_at: userMovie.updatedAt
+        }
       }))
 
       return reply.send(formattedMovies)
@@ -263,6 +271,11 @@ async function moviesRoutes(fastify, options) {
         }
       })
 
+      // Cache all images for this movie (unified approach)
+      cacheAllMediaImages('movie', movieData).catch((err) => {
+        fastify.log.warn('Failed to cache some movie images:', err);
+      })
+
       // Create user movie entry
       const userMovie = await fastify.prisma.userMovie.create({
         data: {
@@ -285,8 +298,8 @@ async function moviesRoutes(fastify, options) {
         name: userMovie.movie.name,
         original_title: userMovie.movie.originalTitle,
         summary: userMovie.movie.summary,
-        cover_url: userMovie.movie.coverUrl,
-        backdrop_url: userMovie.movie.backdropUrl,
+        cover_url: await imageCacheService.getLocalUrl(userMovie.movie.coverUrl),
+        backdrop_url: await imageCacheService.getLocalUrl(userMovie.movie.backdropUrl),
         release_date: userMovie.movie.releaseDate,
         genres: userMovie.movie.genres,
         director: userMovie.movie.director,

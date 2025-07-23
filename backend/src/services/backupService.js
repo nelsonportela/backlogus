@@ -104,6 +104,8 @@ class BackupService {
             themePreference: userData.themePreference,
             createdAt: userData.createdAt,
             updatedAt: userData.updatedAt
+            // Note: hashedPassword is NOT included for security reasons
+            // During disaster recovery, the user will need to reset their password
           },
           apiCredentials: userData.apiCredentials || []
         };
@@ -141,6 +143,7 @@ User ID: ${userId}
 
 ## Restore:
 Use the "Import Backup" feature in BackLogus Settings to restore this backup.
+All data will be linked to the user performing the restore.
 `;
 
         archive.append(readme, { name: 'README.md' });
@@ -238,28 +241,24 @@ Use the "Import Backup" feature in BackLogus Settings to restore this backup.
       // Parse the backup
       const backupData = await this.parseBackup(fileBuffer);
 
-      // Restore in transaction
-      await this.prisma.$transaction(async (prisma) => {
+      // Everything in one transaction to ensure atomicity
+      const result = await this.prisma.$transaction(async (prisma) => {
         // Clear existing user data
         await prisma.userGame.deleteMany({ where: { userId } });
         await prisma.userMovie.deleteMany({ where: { userId } });
         await prisma.userApiCredential.deleteMany({ where: { userId } });
 
-        // Clear orphaned games and movies
-        await prisma.game.deleteMany({});
-        await prisma.movie.deleteMany({});
-
-        // Update user profile
+        // Update user profile with backup data (optional - only if user wants to restore profile)
         if (backupData.userData.profile) {
           await prisma.user.update({
             where: { id: userId },
             data: {
-              email: backupData.userData.profile.email,
               firstName: backupData.userData.profile.firstName,
               lastName: backupData.userData.profile.lastName,
               avatarUrl: backupData.userData.profile.avatarUrl,
               timezone: backupData.userData.profile.timezone,
               themePreference: backupData.userData.profile.themePreference
+              // Note: email is NOT updated to avoid conflicts
             }
           });
         }
@@ -282,8 +281,15 @@ Use the "Import Backup" feature in BackLogus Settings to restore this backup.
         if (backupData.dbDump.games) {
           for (const game of backupData.dbDump.games) {
             const { id: oldId, ...gameData } = game;
-            const newGame = await prisma.game.create({ data: gameData });
-            gameIdMapping.set(oldId, newGame.id);
+            
+            // Use upsert to handle existing games
+            const existingOrNewGame = await prisma.game.upsert({
+              where: { igdbId: gameData.igdbId },
+              update: {}, // Don't update existing games, just use them
+              create: gameData
+            });
+            
+            gameIdMapping.set(oldId, existingOrNewGame.id);
           }
         }
 
@@ -292,21 +298,28 @@ Use the "Import Backup" feature in BackLogus Settings to restore this backup.
         if (backupData.dbDump.movies) {
           for (const movie of backupData.dbDump.movies) {
             const { id: oldId, ...movieData } = movie;
-            const newMovie = await prisma.movie.create({ data: movieData });
-            movieIdMapping.set(oldId, newMovie.id);
+            
+            // Use upsert to handle existing movies
+            const existingOrNewMovie = await prisma.movie.upsert({
+              where: { tmdbId: movieData.tmdbId },
+              update: {}, // Don't update existing movies, just use them
+              create: movieData
+            });
+            
+            movieIdMapping.set(oldId, existingOrNewMovie.id);
           }
         }
 
         // Restore user games
         if (backupData.dbDump.userGames) {
           for (const userGame of backupData.dbDump.userGames) {
-            const { id, userId: _, gameId, ...userGameData } = userGame;
+            const { id, userId: _, gameId, game, ...userGameData } = userGame;
             const newGameId = gameIdMapping.get(gameId);
             if (newGameId) {
               await prisma.userGame.create({
                 data: {
                   ...userGameData,
-                  userId,
+                  userId: userId,
                   gameId: newGameId
                 }
               });
@@ -317,30 +330,22 @@ Use the "Import Backup" feature in BackLogus Settings to restore this backup.
         // Restore user movies
         if (backupData.dbDump.userMovies) {
           for (const userMovie of backupData.dbDump.userMovies) {
-            const { id, userId: _, movieId, ...userMovieData } = userMovie;
+            const { id, userId: _, movieId, movie, ...userMovieData } = userMovie;
             const newMovieId = movieIdMapping.get(movieId);
             if (newMovieId) {
               await prisma.userMovie.create({
                 data: {
                   ...userMovieData,
-                  userId,
+                  userId: userId,
                   movieId: newMovieId
                 }
               });
             }
           }
         }
-      });
 
-      // Restore images (outside transaction)
-      if (backupData.images && backupData.images.length > 0) {
-        await this.imageCache.restoreImages(backupData.images);
-      }
-
-      return {
-        success: true,
-        message: 'Backup imported successfully',
-        imported: {
+        // Return summary data for response
+        return {
           profile: !!backupData.userData.profile,
           apiCredentials: backupData.userData.apiCredentials?.length || 0,
           games: backupData.dbDump.games?.length || 0,
@@ -348,7 +353,26 @@ Use the "Import Backup" feature in BackLogus Settings to restore this backup.
           userGames: backupData.dbDump.userGames?.length || 0,
           userMovies: backupData.dbDump.userMovies?.length || 0,
           images: backupData.images?.length || 0
+        };
+      }, {
+        maxWait: 60000, // 60 seconds max wait time for transaction
+        timeout: 300000 // 5 minutes timeout for transaction
+      });
+
+      // Only restore images after successful database transaction
+      if (backupData.images && backupData.images.length > 0) {
+        try {
+          await this.imageCache.restoreImages(backupData.images);
+        } catch (imageError) {
+          console.warn('Image restoration failed, but database restore was successful:', imageError);
+          // Continue - database restore was successful, image failure is not critical
         }
+      }
+
+      return {
+        success: true,
+        message: 'Backup imported successfully',
+        imported: result
       };
 
     } catch (error) {

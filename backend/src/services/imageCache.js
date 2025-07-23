@@ -174,6 +174,35 @@ class ImageCacheService {
     return path.join(this.cacheDir, filename);
   }
 
+  // Convert external URL to local URL if cached
+  async getLocalUrl(externalUrl, baseUrl = 'http://localhost:3001') {
+    if (!externalUrl) return null;
+    const filename = this.getFilenameFromUrl(externalUrl);
+    if (!filename) return externalUrl;
+    const localPath = this.getLocalPath(filename);
+    try {
+      await fs.access(localPath);
+      // File exists, return absolute URL in dev, relative in prod
+      const isDev = process.env.NODE_ENV !== 'production';
+      const base = isDev ? `http://localhost:3001` : '';
+      return `${base}/images/${filename}`;
+    } catch {
+      // File doesn't exist, return original URL
+      return externalUrl;
+    }
+  }
+
+  // Convert multiple URLs to local URLs where possible
+  async getLocalUrls(urls, baseUrl = 'http://localhost:3001') {
+    if (!Array.isArray(urls)) return urls;
+    const results = await Promise.allSettled(
+      urls.map(url => this.getLocalUrl(url))
+    );
+    return results.map((result, index) => 
+      result.status === 'fulfilled' ? result.value : urls[index]
+    );
+  }
+
   // Get cache statistics
   async getCacheStats() {
     try {

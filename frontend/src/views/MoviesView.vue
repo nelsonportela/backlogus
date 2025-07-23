@@ -44,7 +44,7 @@
       :is-open="showModal"
       :item="selectedMovie"
       :media-type="'movie'"
-      :library-items="userMovies"
+      :is-in-library="isMovieInLibrary(selectedMovie)"
       :current-status="selectedMovie?.status"
       @close="closeModal"
       @add-to-library="addMovieToLibraryFromModal"
@@ -119,6 +119,14 @@ watch(
 const showMovieDetails = (movie) => {
   selectedMovie.value = movie;
   showModal.value = true;
+};
+
+const isMovieInLibrary = (movie) => {
+  if (!movie) return false;
+  // Try to match by id or tmdbId
+  return userMovies.value.some(
+    (m) => m.id === movie.id || m.tmdbId === movie.tmdbId
+  );
 };
 
 const closeModal = () => {

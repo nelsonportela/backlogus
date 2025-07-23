@@ -84,7 +84,7 @@
               v-model="selectedStatus"
               class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400">
               <option
-                v-for="status in getStatusOptions()"
+                v-for="status in statusOptions"
                 :key="status.value"
                 :value="status.value">
                 {{ status.label }}
@@ -194,7 +194,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
+import { getStatusOptions } from "@/composables/useStatusOptions";
 
 const props = defineProps({
   isOpen: {
@@ -270,42 +271,7 @@ const getDateLabel = () => {
   }
 };
 
-const getStatusOptions = () => {
-  switch (props.mediaType) {
-    case "game":
-      return [
-        { value: "want_to_play", label: "Want to Play" },
-        { value: "playing", label: "Playing" },
-        { value: "completed", label: "Completed" },
-        { value: "dropped", label: "Dropped" },
-      ];
-    case "movie":
-      return [
-        { value: "want_to_watch", label: "Want to Watch" },
-        { value: "watched", label: "Watched" },
-      ];
-    case "book":
-      return [
-        { value: "want_to_read", label: "Want to Read" },
-        { value: "reading", label: "Reading" },
-        { value: "read", label: "Read" },
-        { value: "dropped", label: "Dropped" },
-      ];
-    case "show":
-      return [
-        { value: "want_to_watch", label: "Want to Watch" },
-        { value: "watching", label: "Watching" },
-        { value: "watched", label: "Watched" },
-        { value: "dropped", label: "Dropped" },
-      ];
-    default:
-      return [
-        { value: "want", label: "Want" },
-        { value: "current", label: "Current" },
-        { value: "completed", label: "Completed" },
-      ];
-  }
-};
+const statusOptions = computed(() => getStatusOptions(props.mediaType));
 
 const getQuickReviewOptions = () => {
   return [

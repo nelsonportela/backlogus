@@ -49,6 +49,21 @@ await fastify.register(import('@fastify/static'), {
 // Add prisma to fastify instance
 fastify.decorate('prisma', prisma)
 
+// Add image cache service
+import imageCacheService from './services/imageCache.js'
+
+// Serve cached images
+fastify.get('/images/:filename', async (request, reply) => {
+  const { filename } = request.params
+  
+  try {
+    const imagePath = imageCacheService.getLocalPath(filename)
+    return reply.sendFile(filename, path.join(__dirname, '../cache/images'))
+  } catch (error) {
+    return reply.status(404).send({ message: 'Image not found' })
+  }
+})
+
 // Auth decorator
 fastify.decorate('authenticate', async (request, reply) => {
   try {
