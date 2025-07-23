@@ -29,14 +29,12 @@
                 activeTab === tab.id
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-              ]"
-            >
+              ]">
               <div class="flex items-center">
                 <component
                   :is="tab.icon"
                   class="mr-2 h-5 w-5"
-                  aria-hidden="true"
-                />
+                  aria-hidden="true" />
                 {{ tab.name }}
               </div>
             </button>
@@ -50,8 +48,7 @@
             <ProfileSettings
               :profile="userStore.profile"
               :loading="userStore.loading"
-              @update-profile="handleUpdateProfile"
-            />
+              @update-profile="handleUpdateProfile" />
           </div>
 
           <!-- Security Tab -->
@@ -64,16 +61,14 @@
             <ApiCredentialsSettings
               :credentials="userStore.apiCredentials"
               @save-credentials="handleSaveCredentials"
-              @delete-credentials="handleDeleteCredentials"
-            />
+              @delete-credentials="handleDeleteCredentials" />
           </div>
 
           <!-- Preferences Tab -->
           <div v-if="activeTab === 'preferences'" class="space-y-6">
             <PreferencesSettings
               :profile="userStore.profile"
-              @update-preferences="handleUpdatePreferences"
-            />
+              @update-preferences="handleUpdatePreferences" />
           </div>
         </div>
       </div>
@@ -87,8 +82,7 @@
         message.type === 'success'
           ? 'bg-green-500 text-white'
           : 'bg-red-500 text-white',
-      ]"
-    >
+      ]">
       {{ message.text }}
     </div>
   </div>

@@ -9,8 +9,7 @@
         <span
           v-for="platform in item.platforms"
           :key="platform"
-          class="px-3 py-1 text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-full"
-        >
+          class="px-3 py-1 text-sm font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 rounded-full">
           {{ platform }}
         </span>
       </div>
@@ -79,8 +78,7 @@
         <a
           :href="item.website"
           target="_blank"
-          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-        >
+          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
           Official Website
         </a>
       </div>

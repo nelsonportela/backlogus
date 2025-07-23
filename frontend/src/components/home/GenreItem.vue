@@ -1,11 +1,9 @@
 <template>
   <div
-    class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-  >
+    class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
     <div
       v-if="loading"
-      class="animate-pulse flex items-center justify-between w-full"
-    >
+      class="animate-pulse flex items-center justify-between w-full">
       <div class="flex items-center space-x-3">
         <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
         <div class="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -18,8 +16,7 @@
         <div class="flex items-center space-x-2">
           <div
             class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-            :class="rankColor"
-          >
+            :class="rankColor">
             {{ rank }}
           </div>
           <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -38,8 +35,7 @@
           <div
             class="h-2 rounded-full transition-all duration-500"
             :class="progressColor"
-            :style="{ width: progressWidth }"
-          ></div>
+            :style="{ width: progressWidth }"></div>
         </div>
       </div>
     </div>

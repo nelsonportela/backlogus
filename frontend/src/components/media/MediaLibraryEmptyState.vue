@@ -4,8 +4,7 @@
       <p class="mb-2">No items found matching your search criteria.</p>
       <button
         @click="$emit('clear-filters')"
-        class="text-primary-600 dark:text-primary-400 hover:underline text-sm"
-      >
+        class="text-primary-600 dark:text-primary-400 hover:underline text-sm">
         Clear all filters
       </button>
     </div>

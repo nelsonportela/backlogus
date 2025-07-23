@@ -3,16 +3,13 @@
     <!-- Header with Title and Refresh -->
     <div class="flex items-center justify-between mb-4 gap-2">
       <div
-        class="bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30"
-      >
+        class="bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30">
         <h3
-          class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate"
-        >
+          class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
           {{ mediaTypeLabel }}
           <span
             v-if="totalItems > 0"
-            class="text-sm text-gray-500 dark:text-gray-400 ml-2"
-          >
+            class="text-sm text-gray-500 dark:text-gray-400 ml-2">
             ({{ totalItems }})
           </span>
         </h3>
@@ -20,20 +17,17 @@
       <button
         @click="refreshLibrary"
         class="flex items-center justify-center w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 group"
-        title="Refresh library"
-      >
+        title="Refresh library">
         <svg
           class="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:rotate-180 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+          viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
       </button>
     </div>
@@ -46,36 +40,31 @@
       v-model:sort-by="sortBy"
       v-model:platform-filter="platformFilter"
       v-model:items-per-page="itemsPerPage"
-      @clear-search="clearSearch"
-    />
+      @clear-search="clearSearch" />
 
     <!-- Empty State -->
     <MediaLibraryEmptyState
       v-if="filteredItems.length === 0 && !isLoading"
       :media-type-label="mediaTypeLabel.toLowerCase()"
       :has-active-filters="!!(searchQuery || platformFilter)"
-      @clear-filters="clearAllFilters"
-    />
+      @clear-filters="clearAllFilters" />
 
     <!-- Loading State -->
     <div v-if="isLoading" class="flex items-center justify-center py-8">
       <div
-        class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
-      ></div>
+        class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
     </div>
 
     <!-- Items Grid -->
     <div v-else-if="paginatedItems.length > 0" class="space-y-4">
       <div
-        class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4"
-      >
+        class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4">
         <MediaLibraryItem
           v-for="item in paginatedItems"
           :key="item.id"
           :item="item"
           @click="showItemDetails"
-          @remove="removeFromLibrary"
-        />
+          @remove="removeFromLibrary" />
       </div>
 
       <!-- Pagination -->
@@ -84,8 +73,7 @@
         :total-pages="totalPages"
         :total-items="filteredItems.length"
         :items-per-page="itemsPerPage"
-        @page-change="goToPage"
-      />
+        @page-change="goToPage" />
     </div>
 
     <!-- Confirmation Modal -->
@@ -96,8 +84,7 @@
       :confirm-text="confirmationModal.confirmText"
       :cancel-text="confirmationModal.cancelText"
       @confirm="handleConfirmRemove"
-      @cancel="cancelRemove"
-    />
+      @cancel="cancelRemove" />
   </div>
 </template>
 
@@ -230,7 +217,7 @@ const filteredItems = computed(() => {
 });
 
 const totalPages = computed(() =>
-  Math.ceil(filteredItems.value.length / itemsPerPage.value),
+  Math.ceil(filteredItems.value.length / itemsPerPage.value)
 );
 
 const paginatedItems = computed(() => {
@@ -364,6 +351,6 @@ watch(
   () => {
     currentPage.value = 1;
   },
-  { deep: true },
+  { deep: true }
 );
 </script>

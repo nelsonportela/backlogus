@@ -3,20 +3,17 @@
     <!-- Error Message -->
     <div
       v-if="errorMessage"
-      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
-    >
+      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg">
       <div class="flex items-center justify-between">
         <p class="text-sm font-medium">{{ errorMessage }}</p>
         <button
           @click="errorMessage = null"
-          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100"
-        >
+          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
+              clip-rule="evenodd" />
           </svg>
         </button>
       </div>
@@ -29,8 +26,7 @@
       @refresh-library="refreshLibrary"
       @show-details="showGameDetails"
       @update-status="updateStatus"
-      @remove-from-library="removeGameFromLibrary"
-    />
+      @remove-from-library="removeGameFromLibrary" />
 
     <!-- Floating Action Button for adding games -->
     <FloatingActionButton
@@ -41,8 +37,7 @@
       @search="handleSearch"
       @add-to-library="addGameToLibrary"
       @show-details="showGameDetails"
-      @refresh-library="refreshLibrary"
-    />
+      @refresh-library="refreshLibrary" />
 
     <!-- Media Details Modal -->
     <MediaDetailsModal
@@ -52,7 +47,7 @@
       :is-in-library="
         selectedGame
           ? isGameInLibrary(
-              selectedGame.igdb_id || selectedGame.igdbId || selectedGame.id,
+              selectedGame.igdb_id || selectedGame.igdbId || selectedGame.id
             )
           : false
       "
@@ -60,8 +55,7 @@
       @close="closeModal"
       @add-to-library="addGameToLibraryFromModal"
       @remove-from-library="removeGameFromLibrary"
-      @update-item="updateGameItem"
-    />
+      @update-item="updateGameItem" />
   </div>
 </template>
 
@@ -124,7 +118,7 @@ watch(
   () => route.query.status,
   () => {
     // Filter status changed - no action needed as computed property handles this
-  },
+  }
 );
 
 const showGameDetails = async (game) => {
@@ -222,7 +216,7 @@ const addGameToLibraryFromModal = async (game) => {
 const removeGameFromLibrary = async (game) => {
   // Find the game in library by igdb_id
   const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === (game.igdb_id || game.igdbId || game.id),
+    (g) => g.igdb_id === (game.igdb_id || game.igdbId || game.id)
   );
 
   if (libraryGame) {
@@ -247,9 +241,9 @@ const updateStatus = async (gameId, status) => {
 const updateGameItem = async (gameId, updateData) => {
   // Find the library game by igdb_id
   const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === gameId || g.id === gameId,
+    (g) => g.igdb_id === gameId || g.id === gameId
   );
-  
+
   if (!libraryGame) {
     showError("Game not found in your library");
     return;
@@ -259,7 +253,10 @@ const updateGameItem = async (gameId, updateData) => {
 
   // Handle status updates through the specific status endpoint
   if (updateData.status) {
-    result = await gamesStore.updateGameStatus(libraryGame.id, updateData.status);
+    result = await gamesStore.updateGameStatus(
+      libraryGame.id,
+      updateData.status
+    );
   } else {
     // Handle other field updates through the general details endpoint
     result = await gamesStore.updateGameDetails(libraryGame.id, updateData);
@@ -267,7 +264,7 @@ const updateGameItem = async (gameId, updateData) => {
 
   if (result.success) {
     // Update local state
-    Object.keys(updateData).forEach(key => {
+    Object.keys(updateData).forEach((key) => {
       libraryGame[key] = updateData[key];
       if (selectedGame.value) {
         selectedGame.value[key] = updateData[key];
@@ -280,7 +277,7 @@ const updateGameItem = async (gameId, updateData) => {
 
 const isGameInLibrary = (gameId) => {
   return userGames.value.some(
-    (game) => game.igdb_id === gameId || game.igdbId === gameId,
+    (game) => game.igdb_id === gameId || game.igdbId === gameId
   );
 };
 

@@ -67,7 +67,7 @@ export const useUserStore = defineStore("user", () => {
       const response = await userApi.saveApiCredentials(provider, credentials);
       // Update local state
       const existingIndex = apiCredentials.value.findIndex(
-        (cred) => cred.api_provider === provider,
+        (cred) => cred.api_provider === provider
       );
 
       if (existingIndex >= 0) {
@@ -91,7 +91,7 @@ export const useUserStore = defineStore("user", () => {
       const response = await userApi.deleteApiCredentials(provider);
       // Remove from local state
       apiCredentials.value = apiCredentials.value.filter(
-        (cred) => cred.api_provider !== provider,
+        (cred) => cred.api_provider !== provider
       );
       return { success: true, message: response.data.message };
     } catch (error) {

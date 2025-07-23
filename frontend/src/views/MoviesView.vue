@@ -3,20 +3,17 @@
     <!-- Error Message -->
     <div
       v-if="errorMessage"
-      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg"
-    >
+      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg">
       <div class="flex items-center justify-between">
         <p class="text-sm font-medium">{{ errorMessage }}</p>
         <button
           @click="errorMessage = null"
-          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100"
-        >
+          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
+              clip-rule="evenodd" />
           </svg>
         </button>
       </div>
@@ -29,8 +26,7 @@
       @refresh-library="refreshLibrary"
       @show-details="showMovieDetails"
       @update-status="updateStatus"
-      @remove-from-library="removeMovieFromLibrary"
-    />
+      @remove-from-library="removeMovieFromLibrary" />
 
     <!-- Floating Action Button for adding movies -->
     <FloatingActionButton
@@ -41,8 +37,7 @@
       @search="handleSearch"
       @add-to-library="addMovieToLibrary"
       @show-details="showMovieDetails"
-      @refresh-library="refreshLibrary"
-    />
+      @refresh-library="refreshLibrary" />
 
     <!-- Media Details Modal -->
     <MediaDetailsModal
@@ -54,8 +49,7 @@
       @close="closeModal"
       @add-to-library="addMovieToLibraryFromModal"
       @remove-from-library="removeMovieFromLibrary"
-      @update-item="updateMovieItem"
-    />
+      @update-item="updateMovieItem" />
   </div>
 </template>
 
@@ -118,7 +112,7 @@ watch(
   () => route.query.status,
   () => {
     // Filter status changed - no action needed as computed property handles this
-  },
+  }
 );
 
 // Modal methods
@@ -195,7 +189,10 @@ const updateMovieItem = async (movieId, updateData) => {
     result = await moviesStore.updateMovieStatus(movieId, updateData.status);
   } else if (updateData.quick_review !== undefined) {
     // Handle quick review updates through the specific quick review endpoint
-    result = await moviesStore.updateMovieQuickReview(movieId, updateData.quick_review);
+    result = await moviesStore.updateMovieQuickReview(
+      movieId,
+      updateData.quick_review
+    );
   } else {
     // Handle other field updates through the general details endpoint
     result = await moviesStore.updateMovieDetails(movieId, updateData);
@@ -203,14 +200,14 @@ const updateMovieItem = async (movieId, updateData) => {
 
   if (result.success) {
     // Update local state
-    const movie = userMovies.value.find(m => m.id === movieId);
+    const movie = userMovies.value.find((m) => m.id === movieId);
     if (movie) {
-      Object.keys(updateData).forEach(key => {
+      Object.keys(updateData).forEach((key) => {
         movie[key] = updateData[key];
       });
     }
     if (selectedMovie.value && selectedMovie.value.id === movieId) {
-      Object.keys(updateData).forEach(key => {
+      Object.keys(updateData).forEach((key) => {
         selectedMovie.value[key] = updateData[key];
       });
     }

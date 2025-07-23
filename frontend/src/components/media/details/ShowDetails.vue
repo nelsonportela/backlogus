@@ -83,8 +83,7 @@
         <a
           :href="item.official_url"
           target="_blank"
-          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-        >
+          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
           Official Website
         </a>
       </div>

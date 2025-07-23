@@ -6,21 +6,18 @@
     <div class="relative">
       <!-- Carousel Container -->
       <div
-        class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700"
-      >
+        class="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
         <div
           class="flex transition-transform duration-300 ease-in-out"
           :style="{
             transform: `translateX(-${currentIndex * 100}%)`,
-          }"
-        >
+          }">
           <img
             v-for="(screenshot, index) in screenshots"
             :key="index"
             :src="screenshot"
             :alt="`Screenshot ${index + 1}`"
-            class="w-full h-64 sm:h-80 object-cover flex-shrink-0"
-          />
+            class="w-full h-64 sm:h-80 object-cover flex-shrink-0" />
         </div>
 
         <!-- Navigation Arrows -->
@@ -31,20 +28,17 @@
           :disabled="currentIndex === 0"
           :class="{
             'opacity-50 cursor-not-allowed': currentIndex === 0,
-          }"
-        >
+          }">
           <svg
             class="w-5 h-5"
             fill="none"
             stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+            viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M15 19l-7-7 7-7"
-            />
+              d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
@@ -56,27 +50,23 @@
           :class="{
             'opacity-50 cursor-not-allowed':
               currentIndex === screenshots.length - 1,
-          }"
-        >
+          }">
           <svg
             class="w-5 h-5"
             fill="none"
             stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+            viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M9 5l7 7-7 7"
-            />
+              d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
         <!-- Image Counter -->
         <div
-          class="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm"
-        >
+          class="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
           {{ currentIndex + 1 }} / {{ screenshots.length }}
         </div>
       </div>
@@ -84,8 +74,7 @@
       <!-- Thumbnail Navigation -->
       <div
         v-if="screenshots.length > 1"
-        class="flex justify-center mt-3 space-x-2 overflow-x-auto pb-2"
-      >
+        class="flex justify-center mt-3 space-x-2 overflow-x-auto pb-2">
         <button
           v-for="(screenshot, index) in screenshots"
           :key="index"
@@ -96,17 +85,14 @@
               currentIndex === index,
             'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500':
               currentIndex !== index,
-          }"
-        >
+          }">
           <img
             :src="screenshot"
             :alt="`Screenshot ${index + 1}`"
-            class="w-16 h-10 sm:w-20 sm:h-12 object-cover"
-          />
+            class="w-16 h-10 sm:w-20 sm:h-12 object-cover" />
           <div
             v-if="currentIndex !== index"
-            class="absolute inset-0 bg-black/30"
-          ></div>
+            class="absolute inset-0 bg-black/30"></div>
         </button>
       </div>
     </div>
@@ -114,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch } from "vue";
 
 const props = defineProps({
   screenshots: {

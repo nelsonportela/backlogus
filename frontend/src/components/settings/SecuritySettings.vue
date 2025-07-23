@@ -19,8 +19,7 @@
         <div>
           <label
             for="current_password"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Current Password
           </label>
           <input
@@ -28,15 +27,13 @@
             v-model="passwordForm.current_password"
             type="password"
             required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
-          />
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
         </div>
 
         <div>
           <label
             for="new_password"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             New Password
           </label>
           <input
@@ -45,8 +42,7 @@
             type="password"
             required
             minlength="6"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
-          />
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Password must be at least 6 characters long
           </p>
@@ -55,8 +51,7 @@
         <div>
           <label
             for="confirm_password"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Confirm New Password
           </label>
           <input
@@ -70,16 +65,14 @@
                 passwordForm.new_password &&
                 passwordForm.confirm_password &&
                 passwordForm.new_password !== passwordForm.confirm_password,
-            }"
-          />
+            }" />
           <p
             v-if="
               passwordForm.new_password &&
               passwordForm.confirm_password &&
               passwordForm.new_password !== passwordForm.confirm_password
             "
-            class="mt-1 text-xs text-red-500 dark:text-red-400"
-          >
+            class="mt-1 text-xs text-red-500 dark:text-red-400">
             Passwords do not match
           </p>
         </div>
@@ -88,27 +81,23 @@
           <button
             type="submit"
             :disabled="loading || !isPasswordFormValid"
-            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
+            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
             <span v-if="loading" class="flex items-center">
               <svg
                 class="animate-spin -ml-1 mr-3 h-5 w-5"
                 fill="none"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <circle
                   class="opacity-25"
                   cx="12"
                   cy="12"
                   r="10"
                   stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
+                  stroke-width="4"></circle>
                 <path
                   class="opacity-75"
                   fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Changing Password...
             </span>
@@ -135,8 +124,7 @@
             </p>
           </div>
           <span
-            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded"
-          >
+            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
             Coming Soon
           </span>
         </div>
@@ -151,8 +139,7 @@
             </p>
           </div>
           <span
-            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded"
-          >
+            class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded">
             Coming Soon
           </span>
         </div>

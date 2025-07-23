@@ -1,36 +1,30 @@
 <template>
   <button
     @click="$emit('click')"
-    class="group flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-lg"
-  >
+    class="group flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-lg">
     <div
       class="w-12 h-12 mb-3 rounded-full bg-gradient-to-br flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200"
-      :class="iconGradient"
-    >
+      :class="iconGradient">
       <svg
         class="w-6 h-6"
         fill="none"
         stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
+        viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          :d="iconComponent"
-        />
+          :d="iconComponent" />
       </svg>
     </div>
 
     <div
-      class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1 text-center"
-    >
+      class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1 text-center">
       {{ label }}
     </div>
 
     <div
-      class="text-xs text-gray-500 dark:text-gray-400 text-center leading-tight"
-    >
+      class="text-xs text-gray-500 dark:text-gray-400 text-center leading-tight">
       {{ description }}
     </div>
   </button>

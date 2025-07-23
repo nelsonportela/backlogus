@@ -73,8 +73,7 @@
         <a
           :href="item.homepage"
           target="_blank"
-          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-        >
+          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
           Official Website
         </a>
       </div>
@@ -87,8 +86,7 @@
         <a
           :href="`https://www.imdb.com/title/${item.imdb_id}/`"
           target="_blank"
-          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
-        >
+          class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">
           View on IMDB
         </a>
       </div>

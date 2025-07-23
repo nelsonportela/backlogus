@@ -14,8 +14,7 @@
           currentPage === 1
             ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
-        ]"
-      >
+        ]">
         Previous
       </button>
 
@@ -30,8 +29,7 @@
             page === currentPage
               ? 'bg-primary-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
-          ]"
-        >
+          ]">
           {{ page }}
         </button>
       </div>
@@ -45,8 +43,7 @@
           currentPage === totalPages
             ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
             : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
-        ]"
-      >
+        ]">
         Next
       </button>
     </div>
@@ -78,10 +75,10 @@ const props = defineProps({
 defineEmits(["page-change"]);
 
 const startItem = computed(
-  () => (props.currentPage - 1) * props.itemsPerPage + 1,
+  () => (props.currentPage - 1) * props.itemsPerPage + 1
 );
 const endItem = computed(() =>
-  Math.min(props.currentPage * props.itemsPerPage, props.totalItems),
+  Math.min(props.currentPage * props.itemsPerPage, props.totalItems)
 );
 
 const visiblePages = computed(() => {

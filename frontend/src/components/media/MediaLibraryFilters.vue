@@ -3,20 +3,17 @@
     <!-- Library Search Bar -->
     <div class="relative">
       <div
-        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-      >
+        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
           class="w-5 h-5 text-gray-400 dark:text-gray-500"
           fill="none"
           stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+          viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
       <input
@@ -24,25 +21,21 @@
         @input="$emit('update:searchQuery', $event.target.value)"
         type="text"
         :placeholder="`Search ${mediaType}s in your library...`"
-        class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
-      />
+        class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
       <button
         v-if="searchQuery"
         @click="$emit('clear-search')"
-        class="absolute inset-y-0 right-0 pr-3 flex items-center"
-      >
+        class="absolute inset-y-0 right-0 pr-3 flex items-center">
         <svg
           class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           fill="none"
           stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+          viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
+            d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
@@ -54,13 +47,11 @@
         <select
           :value="sortBy"
           @change="$emit('update:sortBy', $event.target.value)"
-          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm"
-        >
+          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm">
           <option
             v-for="option in sortOptions"
             :key="option.value"
-            :value="option.value"
-          >
+            :value="option.value">
             {{ option.label }}
           </option>
         </select>
@@ -69,19 +60,16 @@
       <!-- Platform Filter (for games) -->
       <div
         v-if="mediaType === 'game' && availablePlatforms.length > 0"
-        class="flex-shrink-0"
-      >
+        class="flex-shrink-0">
         <select
           :value="platformFilter"
           @change="$emit('update:platformFilter', $event.target.value)"
-          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm"
-        >
+          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm">
           <option value="">All Platforms</option>
           <option
             v-for="platform in availablePlatforms"
             :key="platform"
-            :value="platform"
-          >
+            :value="platform">
             {{ platform }}
           </option>
         </select>
@@ -92,8 +80,7 @@
         <select
           :value="itemsPerPage"
           @change="$emit('update:itemsPerPage', parseInt($event.target.value))"
-          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm"
-        >
+          class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-sm">
           <option :value="20">20 per page</option>
           <option :value="40">40 per page</option>
           <option :value="60">60 per page</option>
@@ -157,19 +144,19 @@ const sortOptions = computed(() => {
       { value: "release_date_desc", label: "Release Date (Newest)" },
       { value: "release_date_asc", label: "Release Date (Oldest)" },
       { value: "rating_desc", label: "Highest Rated" },
-      { value: "rating_asc", label: "Lowest Rated" },
+      { value: "rating_asc", label: "Lowest Rated" }
     );
   } else if (props.mediaType === "movie") {
     baseOptions.push(
       { value: "release_date_desc", label: "Release Date (Newest)" },
       { value: "release_date_asc", label: "Release Date (Oldest)" },
-      { value: "rating_desc", label: "Highest Rated" },
+      { value: "rating_desc", label: "Highest Rated" }
     );
   } else if (props.mediaType === "book") {
     baseOptions.push(
       { value: "publication_date_desc", label: "Publication Date (Newest)" },
       { value: "publication_date_asc", label: "Publication Date (Oldest)" },
-      { value: "author_asc", label: "Author (A-Z)" },
+      { value: "author_asc", label: "Author (A-Z)" }
     );
   }
 

@@ -2,8 +2,7 @@
   <div class="space-y-6">
     <!-- Welcome Section -->
     <div
-      class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-6 text-white"
-    >
+      class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-6 text-white">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl md:text-3xl font-bold mb-2">Welcome back! 👋</h1>
@@ -13,12 +12,10 @@
         </div>
         <div class="hidden md:block">
           <div
-            class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center"
-          >
+            class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
             <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-              />
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
         </div>
@@ -35,8 +32,7 @@
         :value="stat.value"
         :change="stat.change"
         :color="stat.color"
-        :loading="statsLoading"
-      />
+        :loading="statsLoading" />
     </div>
 
     <!-- Charts Section -->
@@ -54,11 +50,9 @@
           <canvas ref="statusChart" class="w-full h-full"></canvas>
           <div
             v-if="statsLoading"
-            class="absolute inset-0 flex items-center justify-center"
-          >
+            class="absolute inset-0 flex items-center justify-center">
             <div
-              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"
-            ></div>
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
         </div>
       </div>
@@ -73,12 +67,10 @@
             v-for="activity in recentActivities"
             :key="activity.id"
             :activity="activity"
-            :loading="statsLoading"
-          />
+            :loading="statsLoading" />
           <div
             v-if="recentActivities.length === 0 && !statsLoading"
-            class="text-center text-gray-500 dark:text-gray-400 py-8"
-          >
+            class="text-center text-gray-500 dark:text-gray-400 py-8">
             No recent activity
           </div>
         </div>
@@ -89,8 +81,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Monthly Progress Chart -->
       <div
-        class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
-      >
+        class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {{
             activeMediaType
@@ -102,11 +93,9 @@
           <canvas ref="monthlyChart" class="w-full h-full"></canvas>
           <div
             v-if="statsLoading"
-            class="absolute inset-0 flex items-center justify-center"
-          >
+            class="absolute inset-0 flex items-center justify-center">
             <div
-              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"
-            ></div>
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
         </div>
       </div>
@@ -129,12 +118,10 @@
             :key="genre.name"
             :genre="genre"
             :rank="index + 1"
-            :loading="statsLoading"
-          />
+            :loading="statsLoading" />
           <div
             v-if="topGenres.length === 0 && !statsLoading"
-            class="text-center text-gray-500 dark:text-gray-400 py-8"
-          >
+            class="text-center text-gray-500 dark:text-gray-400 py-8">
             No data available
           </div>
         </div>
@@ -151,26 +138,22 @@
           icon="search"
           label="Discover"
           description="Find new media"
-          @click="navigateToDiscover"
-        />
+          @click="navigateToDiscover" />
         <ActionButton
           icon="library"
           label="My Collection"
           description="View all items"
-          @click="navigateToCollection"
-        />
+          @click="navigateToCollection" />
         <ActionButton
           icon="trending"
           label="Trending"
           description="Popular content"
-          @click="navigateToTrending"
-        />
+          @click="navigateToTrending" />
         <ActionButton
           icon="random"
           label="Surprise Me"
           description="Random picker"
-          @click="pickRandomItem"
-        />
+          @click="pickRandomItem" />
       </div>
     </div>
 
@@ -180,8 +163,7 @@
       :random-game="randomGame"
       @close="showRandomGameModal = false"
       @start-playing="handleStartPlaying"
-      @go-to-games="navigateToGames"
-    />
+      @go-to-games="navigateToGames" />
   </div>
 </template>
 
@@ -288,7 +270,7 @@ const loadStats = async () => {
               coverUrl: activity.coverUrl,
               status: activity.status,
               updatedAt: activity.updatedAt,
-            }),
+            })
           ),
         };
       }
@@ -508,7 +490,7 @@ const pickRandomGame = async () => {
   try {
     await gamesStore.getUserGames();
     const games = gamesStore.games.filter(
-      (game) => game.status === "want_to_play" || game.status === "playing",
+      (game) => game.status === "want_to_play" || game.status === "playing"
     );
 
     if (games.length === 0) {

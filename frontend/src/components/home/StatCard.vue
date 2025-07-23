@@ -1,7 +1,6 @@
 <template>
   <div
-    class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200"
-  >
+    class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
     <div v-if="loading" class="animate-pulse">
       <div class="flex items-center justify-between mb-4">
         <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
@@ -15,16 +14,14 @@
       <div class="flex items-center justify-between mb-4">
         <div
           class="w-12 h-12 rounded-lg flex items-center justify-center text-white"
-          :class="iconBgClass"
-        >
+          :class="iconBgClass">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path :d="iconComponent" />
           </svg>
         </div>
         <div
           class="px-2 py-1 rounded-full text-xs font-medium"
-          :class="changeBadgeClass"
-        >
+          :class="changeBadgeClass">
           {{ change }}
         </div>
       </div>

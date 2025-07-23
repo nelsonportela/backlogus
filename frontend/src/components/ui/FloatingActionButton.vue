@@ -4,20 +4,17 @@
     <button
       @click="openSearchModal"
       class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center group"
-      :title="`Add ${mediaTypeLabel}`"
-    >
+      :title="`Add ${mediaTypeLabel}`">
       <svg
         class="w-6 h-6 group-hover:rotate-90 transition-transform duration-200"
         fill="none"
         stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
+        viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
-          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-        />
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
     </button>
 
@@ -25,22 +22,18 @@
     <div
       v-if="isSearchModalOpen"
       class="fixed inset-0 z-50 overflow-y-auto"
-      @click.self="closeSearchModal"
-    >
+      @click.self="closeSearchModal">
       <!-- Backdrop -->
       <div
-        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-      ></div>
+        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
 
       <!-- Modal -->
       <div class="relative min-h-screen flex items-center justify-center p-4">
         <div
-          class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-        >
+          class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           <!-- Header -->
           <div
-            class="flex items-center justify-between p-3 border-b dark:border-gray-700"
-          >
+            class="flex items-center justify-between p-3 border-b dark:border-gray-700">
             <h2 class="text-base font-medium text-gray-900 dark:text-gray-100">
               Add {{ mediaTypeLabel }}
             </h2>
@@ -48,20 +41,17 @@
             <button
               @click="closeSearchModal"
               class="-top-2 -right-2 z-10 bg-red-500 text-white rounded-full min-w-[24px] min-h-[24px] flex items-center justify-center"
-              title="Close"
-            >
+              title="Close">
               <svg
                 class="w-3 h-3"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                stroke-width="3"
-              >
+                stroke-width="3">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                  d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
@@ -76,8 +66,7 @@
                   v-model="searchQuery"
                   @input="debouncedSearch"
                   class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
-                  :placeholder="`Search for ${mediaTypeLabel.toLowerCase()}...`"
-                />
+                  :placeholder="`Search for ${mediaTypeLabel.toLowerCase()}...`" />
               </div>
             </div>
 
@@ -86,27 +75,23 @@
               <!-- Loading -->
               <div
                 v-if="loading"
-                class="text-center py-6 text-gray-500 dark:text-gray-400"
-              >
+                class="text-center py-6 text-gray-500 dark:text-gray-400">
                 <div class="inline-flex items-center">
                   <svg
                     class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-500"
                     fill="none"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <circle
                       class="opacity-25"
                       cx="12"
                       cy="12"
                       r="10"
                       stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
+                      stroke-width="4"></circle>
                     <path
                       class="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Searching...
                 </div>
@@ -118,39 +103,33 @@
                   v-for="item in searchResults"
                   :key="item.id"
                   class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  @click="handleShowDetails(item)"
-                >
+                  @click="handleShowDetails(item)">
                   <div class="flex items-center space-x-4 min-w-0 flex-1">
                     <img
                       v-if="getImageUrl(item)"
                       :src="getImageUrl(item)"
                       :alt="getItemName(item)"
-                      class="w-16 h-24 object-cover rounded flex-shrink-0"
-                    />
+                      class="w-16 h-24 object-cover rounded flex-shrink-0" />
                     <div
                       v-else
-                      class="w-16 h-24 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center flex-shrink-0"
-                    >
+                      class="w-16 h-24 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
                       <span class="text-gray-400 dark:text-gray-500 text-xs"
                         >No Image</span
                       >
                     </div>
                     <div class="min-w-0 flex-1">
                       <h4
-                        class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate"
-                      >
+                        class="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
                         {{ getItemName(item) }}
                       </h4>
                       <p
                         v-if="getItemYear(item)"
-                        class="text-sm text-gray-500 dark:text-gray-400"
-                      >
+                        class="text-sm text-gray-500 dark:text-gray-400">
                         {{ getItemYear(item) }}
                       </p>
                       <p
                         v-if="item.genres && item.genres.length > 0"
-                        class="text-sm text-gray-500 dark:text-gray-400 truncate"
-                      >
+                        class="text-sm text-gray-500 dark:text-gray-400 truncate">
                         {{ item.genres.join(", ") }}
                       </p>
                     </div>
@@ -158,8 +137,7 @@
                   <button
                     @click.stop="handleAddToLibrary(item)"
                     class="px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 border border-primary-600 dark:border-primary-400 rounded hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                    :disabled="isItemInLibrary(item.id)"
-                  >
+                    :disabled="isItemInLibrary(item.id)">
                     {{ isItemInLibrary(item.id) ? "Added" : "Add" }}
                   </button>
                 </div>
@@ -168,8 +146,7 @@
               <!-- No results -->
               <div
                 v-else-if="searchQuery && !loading"
-                class="text-center py-6 text-gray-500 dark:text-gray-400"
-              >
+                class="text-center py-6 text-gray-500 dark:text-gray-400">
                 No {{ mediaTypeLabel.toLowerCase() }} found for "{{
                   searchQuery
                 }}"
@@ -178,8 +155,7 @@
               <!-- Initial state -->
               <div
                 v-else
-                class="text-center py-6 text-gray-500 dark:text-gray-400"
-              >
+                class="text-center py-6 text-gray-500 dark:text-gray-400">
                 Search for {{ mediaTypeLabel.toLowerCase() }} to add to your
                 library
               </div>
@@ -195,8 +171,7 @@
       :item="selectedItemForLibrary"
       :media-type="mediaType"
       @close="showAddToLibraryModal = false"
-      @add-to-library="handleAddToLibraryFromModal"
-    />
+      @add-to-library="handleAddToLibraryFromModal" />
   </div>
 </template>
 

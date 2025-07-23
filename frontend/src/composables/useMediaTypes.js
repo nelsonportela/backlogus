@@ -31,7 +31,7 @@ export function useMediaTypes() {
         value:
           Object.values(statusDistribution).reduce(
             (sum, val) => sum + (val || 0),
-            0,
+            0
           ) -
           (statusDistribution.completed || 0) -
           (statusDistribution.dropped || 0),

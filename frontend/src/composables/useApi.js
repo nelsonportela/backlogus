@@ -59,7 +59,7 @@ export function useGamesApi() {
     const { gamesApi } = await import("../services/api.js");
     return api.execute(
       () => gamesApi.updateGame(gameId, updateData),
-      onSuccess,
+      onSuccess
     );
   };
 
