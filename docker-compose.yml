@@ -17,15 +17,18 @@ services:
       timeout: 10s
       retries: 3
 
-  backend:
+  app:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
-    container_name: backlogus-backend
+    container_name: backlogus-app
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://backlogus_user:${DB_PASSWORD:-backlogus_password}@postgres:5432/backlogus_db
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key}
+      # IGDB_CLIENT_ID: ${IGDB_CLIENT_ID:-your-igdb-client-id}
+      # IGDB_ACCESS_TOKEN: ${IGDB_ACCESS_TOKEN:-your-igdb-access-token}
+      # TMDB_API_KEY: ${TMDB_API_KEY:-your-tmdb-api-key}
       NODE_ENV: production
     ports:
       - "3001:3001"
@@ -34,19 +37,7 @@ services:
         condition: service_healthy
     networks:
       - backlogus-network
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: backlogus-frontend
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    networks:
-      - backlogus-network
+    command: sh -c "npx prisma migrate deploy && node src/index.js"
 
 volumes:
   postgres_data:

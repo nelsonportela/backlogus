@@ -19,7 +19,6 @@ yarn-error.log*
 /backend/build
 
 # Database
-/backend/prisma/migrations/
 /backend/generated/
 
 # Docker volumes
