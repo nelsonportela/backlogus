@@ -194,20 +194,10 @@ const handleExportData = async () => {
 
 const handleBackupData = async () => {
   try {
+    showMessage("Creating backup...", "info");
     const result = await userStore.createBackup();
     if (result.success) {
-      // Create and download the backup file
-      const blob = new Blob([result.data], { type: 'application/zip' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `backlogus-backup-${new Date().toISOString().split('T')[0]}.backlogus`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      showMessage("Backup created and downloaded successfully!");
+      showMessage("Backup downloaded successfully!");
     } else {
       showMessage(result.error || "Failed to create backup", "error");
     }
@@ -218,6 +208,7 @@ const handleBackupData = async () => {
 
 const handleImportData = async (file) => {
   try {
+    showMessage("Importing backup...", "info");
     const result = await userStore.importBackup(file);
     if (result.success) {
       showMessage("Backup imported successfully! Please refresh the page to see your restored data.");

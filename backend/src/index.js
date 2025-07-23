@@ -24,7 +24,9 @@ const prisma = new PrismaClient()
 // Register plugins
 await fastify.register(cors, {
   origin: ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 })
 
 await fastify.register(jwt, {

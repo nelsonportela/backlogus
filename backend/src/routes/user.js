@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import imageCacheService from '../services/imageCache.js';
+import BackupService from '../services/backupService.js';
 
 async function userRoutes(fastify, options) {
   // Get user profile
@@ -318,6 +319,85 @@ async function userRoutes(fastify, options) {
     } catch (error) {
       fastify.log.error(error);
       return reply.status(500).send({ message: 'Failed to get cache statistics' });
+    }
+  });
+
+  // Handle OPTIONS preflight for backup endpoint
+  fastify.options('/backup', async (request, reply) => {
+    reply.header('Access-Control-Allow-Origin', request.headers.origin || '*');
+    reply.header('Access-Control-Allow-Credentials', 'true');
+    reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    reply.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    return reply.status(200).send();
+  });
+
+  // Create backup
+  fastify.get('/backup', async (request, reply) => {
+    try {
+      // Set CORS headers explicitly
+      reply.header('Access-Control-Allow-Origin', request.headers.origin || '*');
+      reply.header('Access-Control-Allow-Credentials', 'true');
+      
+      // Handle authentication - check both header and query parameter
+      let token = null;
+      if (request.headers.authorization) {
+        token = request.headers.authorization.replace('Bearer ', '');
+      } else if (request.query.token) {
+        token = request.query.token;
+      }
+      
+      if (!token) {
+        return reply.status(401).send({ message: 'Authentication required' });
+      }
+      
+      // Verify JWT token manually
+      try {
+        const decoded = fastify.jwt.verify(token);
+        const userId = decoded.userId;
+        
+        const backupService = new BackupService(fastify.prisma);
+        const buffer = await backupService.createBackup(userId);
+        
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `backlogus-backup-${timestamp}.zip`;
+        
+        reply.type('application/zip');
+        reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+        
+        return reply.send(buffer);
+      } catch (jwtError) {
+        return reply.status(401).send({ message: 'Invalid token' });
+      }
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ message: 'Failed to create backup' });
+    }
+  });
+
+  // Import backup
+  fastify.post('/backup/import', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    try {
+      const userId = request.user.userId;
+      
+      const data = await request.file();
+      if (!data) {
+        return reply.status(400).send({ message: 'No backup file provided' });
+      }
+
+      const buffer = await data.toBuffer();
+      
+      const backupService = new BackupService(fastify.prisma);
+      const result = await backupService.importBackup(userId, buffer);
+      
+      return reply.send(result);
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(500).send({ 
+        message: 'Failed to import backup', 
+        error: error.message 
+      });
     }
   });
 }
