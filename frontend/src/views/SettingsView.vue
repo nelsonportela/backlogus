@@ -18,8 +18,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
         <!-- Tab Navigation -->
-        <div class="border-b border-gray-200 dark:border-gray-700">
-          <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+        <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <nav class="-mb-px flex space-x-8 px-6 min-w-0 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style="max-width:100vw;" aria-label="Tabs">
             <button
               v-for="tab in tabs"
               :key="tab.id"

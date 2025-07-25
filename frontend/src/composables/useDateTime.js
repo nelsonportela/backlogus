@@ -116,6 +116,7 @@ export function useDateTime() {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        hourCycle: "h23", // Force 24-hour format
         ...options,
       };
 

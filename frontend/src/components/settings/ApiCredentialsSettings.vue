@@ -47,15 +47,19 @@
       <div class="mt-4">
         <button
           @click="toggleCredentialForm('igdb')"
-          class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium">
+          class="inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+            bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          :aria-pressed="openForms.igdb"
+        >
+          <svg v-if="!openForms.igdb" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           {{
             openForms.igdb
               ? "Hide"
               : isProviderConfigured("igdb")
                 ? "Update"
                 : "Configure"
-          }}
-          Credentials
+          }} Credentials
         </button>
       </div>
 
@@ -155,15 +159,19 @@
       <div class="mt-4">
         <button
           @click="toggleCredentialForm('tmdb')"
-          class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium">
+          class="inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+            bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          :aria-pressed="openForms.tmdb"
+        >
+          <svg v-if="!openForms.tmdb" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           {{
             openForms.tmdb
               ? "Hide"
               : isProviderConfigured("tmdb")
                 ? "Update"
                 : "Configure"
-          }}
-          Credentials
+          }} Credentials
         </button>
       </div>
 
