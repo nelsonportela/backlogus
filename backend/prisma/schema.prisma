@@ -18,7 +18,7 @@ model User {
   lastName        String?             @map("last_name") @db.VarChar(255)
   avatarUrl       String?             @map("avatar_url")
   timezone        String?             @default("UTC") @db.VarChar(50)
-  themePreference String?             @default("system") @map("theme_preference") @db.VarChar(20)
+  // themePreference removed
   apiCredentials  UserApiCredential[]
   userGames       UserGame[]
   userMovies      UserMovie[]

@@ -17,7 +17,7 @@ async function userRoutes(fastify, options) {
           lastName: true,
           avatarUrl: true,
           timezone: true,
-          themePreference: true,
+          // themePreference removed
           createdAt: true,
           updatedAt: true
         }
@@ -34,7 +34,7 @@ async function userRoutes(fastify, options) {
         last_name: user.lastName,
         avatar_url: user.avatarUrl,
         timezone: user.timezone,
-        theme_preference: user.themePreference,
+        // theme_preference removed
         created_at: user.createdAt.toISOString(),
         updated_at: user.updatedAt.toISOString()
       });
@@ -54,7 +54,7 @@ async function userRoutes(fastify, options) {
       last_name, 
       avatar_url, 
       timezone, 
-      theme_preference 
+      // theme_preference removed
     } = request.body;
 
     const updateData = {};
@@ -77,12 +77,7 @@ async function userRoutes(fastify, options) {
     if (last_name !== undefined) updateData.lastName = last_name;
     if (avatar_url !== undefined) updateData.avatarUrl = avatar_url;
     if (timezone !== undefined) updateData.timezone = timezone;
-    if (theme_preference !== undefined) {
-      if (!['light', 'dark', 'system'].includes(theme_preference)) {
-        return reply.status(400).send({ message: 'Invalid theme preference' });
-      }
-      updateData.themePreference = theme_preference;
-    }
+    // theme_preference removed
 
     if (Object.keys(updateData).length === 0) {
       return reply.status(400).send({ message: 'No valid fields to update' });
@@ -99,7 +94,7 @@ async function userRoutes(fastify, options) {
           lastName: true,
           avatarUrl: true,
           timezone: true,
-          themePreference: true,
+          // themePreference removed
           updatedAt: true
         }
       });
@@ -111,7 +106,7 @@ async function userRoutes(fastify, options) {
         last_name: updatedUser.lastName,
         avatar_url: updatedUser.avatarUrl,
         timezone: updatedUser.timezone,
-        theme_preference: updatedUser.themePreference,
+        // theme_preference removed
         updated_at: updatedUser.updatedAt.toISOString()
       });
     } catch (error) {
