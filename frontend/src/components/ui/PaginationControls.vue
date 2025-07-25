@@ -1,10 +1,10 @@
 <template>
-  <div v-if="totalPages > 1" class="flex items-center justify-between mt-6">
-    <div class="text-sm text-gray-500 dark:text-gray-400">
+  <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between mt-6 w-full gap-2">
+    <div class="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
       Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} items
     </div>
 
-    <div class="flex items-center space-x-2">
+    <div class="flex w-full sm:w-auto items-center justify-stretch sm:justify-end space-x-2">
       <!-- Previous Button -->
       <button
         @click="$emit('page-change', currentPage - 1)"
@@ -19,13 +19,13 @@
       </button>
 
       <!-- Page Numbers -->
-      <div class="flex space-x-1">
+      <div class="flex flex-1 sm:flex-none space-x-1">
         <button
           v-for="page in visiblePages"
           :key="page"
           @click="$emit('page-change', page)"
           :class="[
-            'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+            'w-full sm:w-auto min-w-[2.5rem] px-0 sm:px-3 py-2 rounded-md text-sm font-medium transition-colors text-center',
             page === currentPage
               ? 'bg-primary-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',

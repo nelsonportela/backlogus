@@ -33,6 +33,18 @@ await fastify.register(jwt, {
   secret: process.env.JWT_SECRET
 })
 
+fastify.setNotFoundHandler((request, reply) => {
+  // Only handle GET requests that are not for API or static files
+  if (
+    request.raw.method === 'GET' &&
+    !request.raw.url.startsWith('/api') &&
+    !request.raw.url.startsWith('/images') &&
+    !request.raw.url.match(/\.[a-zA-Z0-9]+$/) // skip static assets
+  ) {
+    return reply.type('text/html').sendFile('index.html');
+  }
+  reply.status(404).send({ error: 'Not Found' });
+});
 // Register multipart for file uploads
 await fastify.register(import('@fastify/multipart'), {
   limits: {

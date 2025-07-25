@@ -46,19 +46,17 @@
 
       <div class="mt-4">
         <button
+          v-if="!openForms.igdb"
           @click="toggleCredentialForm('igdb')"
           class="inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
             bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
           :aria-pressed="openForms.igdb"
         >
-          <svg v-if="!openForms.igdb" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
           {{
-            openForms.igdb
-              ? "Hide"
-              : isProviderConfigured("igdb")
-                ? "Update"
-                : "Configure"
+            isProviderConfigured("igdb")
+              ? "Update"
+              : "Configure"
           }} Credentials
         </button>
       </div>
@@ -94,25 +92,25 @@
             class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
         </div>
 
-        <div class="flex justify-between">
+        <div class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-0">
           <button
             v-if="isProviderConfigured('igdb')"
             type="button"
             @click="deleteCredentials('igdb')"
-            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            class="w-full sm:w-auto mb-2 sm:mb-0 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Remove Credentials
           </button>
-          <div class="flex space-x-3 ml-auto">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto ml-auto">
             <button
               type="button"
               @click="toggleCredentialForm('igdb')"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               Cancel
             </button>
             <button
               type="submit"
               :disabled="loading.igdb"
-              class="px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              class="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               <span v-if="loading.igdb">Saving...</span>
               <span v-else>Save Credentials</span>
             </button>
@@ -158,19 +156,17 @@
 
       <div class="mt-4">
         <button
+          v-if="!openForms.tmdb"
           @click="toggleCredentialForm('tmdb')"
           class="inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
             bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
           :aria-pressed="openForms.tmdb"
         >
-          <svg v-if="!openForms.tmdb" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
           {{
-            openForms.tmdb
-              ? "Hide"
-              : isProviderConfigured("tmdb")
-                ? "Update"
-                : "Configure"
+            isProviderConfigured("tmdb")
+              ? "Update"
+              : "Configure"
           }} Credentials
         </button>
       </div>
@@ -193,25 +189,25 @@
             class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
         </div>
 
-        <div class="flex justify-between">
+        <div class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-0">
           <button
             v-if="isProviderConfigured('tmdb')"
             type="button"
             @click="deleteCredentials('tmdb')"
-            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            class="w-full sm:w-auto mb-2 sm:mb-0 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Remove Credentials
           </button>
-          <div class="flex space-x-3 ml-auto">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto ml-auto">
             <button
               type="button"
               @click="toggleCredentialForm('tmdb')"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               Cancel
             </button>
             <button
               type="submit"
               :disabled="loading.tmdb"
-              class="px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              class="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               <span v-if="loading.tmdb">Saving...</span>
               <span v-else>Save Credentials</span>
             </button>
