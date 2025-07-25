@@ -97,9 +97,11 @@
 </template>
 
 <script setup>
+
 import { ref, onMounted } from "vue";
 import { useTheme } from "@/composables/useTheme.js";
 import { useUserStore } from "@/stores/user.js";
+import { useMediaStore } from "@/stores/media.js";
 import ProfileSettings from "@/components/settings/ProfileSettings.vue";
 import SecuritySettings from "@/components/settings/SecuritySettings.vue";
 import ApiCredentialsSettings from "@/components/settings/ApiCredentialsSettings.vue";
@@ -162,27 +164,35 @@ const handleChangePassword = async (passwordData) => {
 };
 
 const { isDark } = useTheme();
+const mediaStore = useMediaStore();
 const handleUpdatePreferences = async (preferences) => {
-  // Update backend
-  const result = await userStore.updateProfile(preferences);
-  // Update theme immediately
-  if (preferences.theme_preference === "dark") {
-    isDark.value = true;
-    localStorage.setItem("theme", "dark");
-  } else if (preferences.theme_preference === "light") {
-    isDark.value = false;
-    localStorage.setItem("theme", "light");
+  if (preferences.theme_preference !== undefined) {
+    // Only send to backend if theme_preference is present
+    const result = await userStore.updateProfile({ theme_preference: preferences.theme_preference });
+    if (result.success) {
+      showMessage("Preferences updated successfully");
+    } else {
+      showMessage(result.error, "error");
+    }
+    // Update theme immediately
+    if (preferences.theme_preference === "dark") {
+      isDark.value = true;
+      localStorage.setItem("theme", "dark");
+    } else if (preferences.theme_preference === "light") {
+      isDark.value = false;
+      localStorage.setItem("theme", "light");
+    } else {
+      // system: follow system preference
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      isDark.value = prefersDark;
+      localStorage.removeItem("theme");
+    }
   } else {
-    // system: follow system preference
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    isDark.value = prefersDark;
-    localStorage.removeItem("theme");
-  }
-  if (result.success) {
+    // Only localStorage preferences, no backend call
     showMessage("Preferences updated successfully");
-  } else {
-    showMessage(result.error, "error");
   }
+  // Always reload menu options after preferences update
+  mediaStore.reloadEnabledMenuOptions();
 };
 
 const handleSaveCredentials = async (provider, credentials) => {

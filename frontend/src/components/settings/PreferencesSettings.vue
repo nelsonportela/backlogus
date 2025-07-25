@@ -76,6 +76,29 @@
         </div>
       </div>
 
+      <!-- Menu Options -->
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+        <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
+          Menu Options
+        </h3>
+        <div class="space-y-2">
+          <div v-for="option in menuOptions" :key="option.value" class="flex items-center">
+            <input
+              :id="'menu-option-' + option.value"
+              type="checkbox"
+              v-model="formData.menu_options"
+              :value="option.value"
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
+            />
+            <label
+              :for="'menu-option-' + option.value"
+              class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              {{ option.label }}
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Notification Preferences -->
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
         <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
@@ -165,6 +188,13 @@ const emit = defineEmits(["update-preferences"]);
 
 const loading = ref(false);
 
+const menuOptions = [
+  { value: "games", label: "Games" },
+  { value: "movies", label: "Movies" },
+  { value: "tv", label: "TV Shows" },
+  { value: "books", label: "Books" },
+];
+
 const formData = ref({
   default_view: "grid",
   items_per_page: 20,
@@ -172,6 +202,7 @@ const formData = ref({
   auto_update_status: true,
   email_updates: false,
   release_notifications: false,
+  menu_options: ["games", "movies", "tv", "books"],
 });
 
 const originalData = ref({});
@@ -181,14 +212,25 @@ watch(
   () => props.profile,
   (newProfile) => {
     if (newProfile) {
+      // Load from localStorage if available
+      const stored = localStorage.getItem("media_tracker_preferences");
+      let menu_options = ["games", "movies", "tv", "books"];
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.menu_options)) {
+            menu_options = parsed.menu_options;
+          }
+        } catch {}
+      }
       formData.value = {
-        // These are placeholder preferences - not yet stored in backend
         default_view: "grid",
         items_per_page: 20,
         show_spoilers: false,
         auto_update_status: true,
         email_updates: false,
         release_notifications: false,
+        menu_options,
       };
       originalData.value = { ...formData.value };
     }
@@ -200,6 +242,9 @@ const hasChanges = computed(() => {
   return JSON.stringify(formData.value) !== JSON.stringify(originalData.value);
 });
 
+import { useMediaStore } from "@/stores/media.js";
+const mediaStore = useMediaStore();
+
 const submitForm = async () => {
   if (!hasChanges.value) return;
 
@@ -208,7 +253,7 @@ const submitForm = async () => {
   try {
     // For now, only save theme_preference to backend
     // Other preferences can be stored in localStorage or added to backend later
-    await emit("update-preferences", {});
+    emit("update-preferences", { theme_preference: props.profile?.theme_preference });
 
     // Store other preferences in localStorage for now
     localStorage.setItem(
@@ -220,8 +265,12 @@ const submitForm = async () => {
         auto_update_status: formData.value.auto_update_status,
         email_updates: formData.value.email_updates,
         release_notifications: formData.value.release_notifications,
+        menu_options: formData.value.menu_options,
       })
     );
+
+    // Immediately update sidebar menu options reactively
+    mediaStore.reloadEnabledMenuOptions();
 
     originalData.value = { ...formData.value };
   } finally {

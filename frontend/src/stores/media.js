@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { mediaApi } from "@/services/api";
+import { ref } from "vue";
 
 export const useMediaStore = defineStore("media", () => {
   // Get unified statistics across all media types
@@ -81,6 +82,29 @@ export const useMediaStore = defineStore("media", () => {
     return Object.keys(mediaTypes);
   };
 
+  // --- Sidebar menu options (reactive) ---
+  const enabledMenuOptions = ref([
+    "games", "movies", "tv", "books"
+  ]);
+
+  function reloadEnabledMenuOptions() {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem("media_tracker_preferences");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed.menu_options)) {
+          enabledMenuOptions.value = parsed.menu_options;
+          return;
+        }
+      } catch {}
+    }
+    enabledMenuOptions.value = ["games", "movies", "tv", "books"];
+  }
+
+  // Initialize on load
+  reloadEnabledMenuOptions();
+
   return {
     // Methods
     getStats,
@@ -93,5 +117,9 @@ export const useMediaStore = defineStore("media", () => {
 
     // Configuration
     mediaTypes,
+
+    // Sidebar menu options
+    enabledMenuOptions,
+    reloadEnabledMenuOptions,
   };
 });
