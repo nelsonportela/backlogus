@@ -146,7 +146,6 @@
                 @click="handleBackup"
                 :disabled="backupLoading"
                 class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ backupLoading }}
                 <span v-if="backupLoading" class="flex items-center">
                   <svg class="animate-spin -ml-1 mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -245,7 +244,7 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const emit = defineEmits(["change-password", "backup-data", "import-data", "delete-account"]);
+const emit = defineEmits(["change-password", "backup-data", "import-data", "delete-account", "backup-complete"]);
 
 const loading = ref(false);
 const backupLoading = ref(false);
@@ -293,35 +292,58 @@ const submitPasswordChange = async () => {
 
 const handleBackup = async () => {
   if (backupLoading.value) return;
-  
   backupLoading.value = true;
-  
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No authentication token found');
     }
-    
-    // Use a simple approach - create a temporary form to trigger download
-    // This avoids CORS issues with file downloads
     const backendUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
+    const downloadUrl = `${backendUrl}/api/user/backup`;
+
+    // Use fetch to get the backup file as a blob
+    const response = await fetch(downloadUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to download backup');
+    }
+    const blob = await response.blob();
+    // Try to get filename from Content-Disposition header
+    let filename = 'backlogus-backup.zip';
+    const disposition = response.headers.get('Content-Disposition');
+    if (disposition && disposition.includes('filename=')) {
+      filename = disposition.split('filename=')[1].replace(/"/g, '').trim();
+    }
+    // Add timestamp to filename in yyyyMMddHHmmss format
+    const now = new Date();
     
-    // Create a temporary iframe to handle the download
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    
-    // Create the download URL with token as query parameter (for file downloads)
-    const downloadUrl = `${backendUrl}/api/user/backup?token=${encodeURIComponent(token)}`;
-    
-    // Set the iframe source to trigger download
-    iframe.src = downloadUrl;
-    
-    // Clean up iframe after a delay
+    const pad = (n) => n.toString().padStart(2, '0');
+    const timestamp =
+      now.getFullYear().toString() +
+      pad(now.getMonth() + 1) +
+      pad(now.getDate()) +
+      pad(now.getHours()) +
+      pad(now.getMinutes()) +
+      pad(now.getSeconds());
+    // Insert timestamp before .zip
+    filename = filename.replace(/\.zip$/, `-${timestamp}.zip`);
+    // Create a link and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
     setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 5000);
-    
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 1000);
+    // Emit event for parent to show toaster notification
+    emit('backup-complete');
   } catch (error) {
     console.error('Backup failed:', error);
     alert('Backup failed: ' + error.message);

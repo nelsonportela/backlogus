@@ -31,10 +31,11 @@
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
               ]">
               <div class="flex items-center">
-                <component
-                  :is="tab.icon"
-                  class="mr-2 h-5 w-5"
-                  aria-hidden="true" />
+                <span
+                  class="mr-2 h-5 w-5 inline-block align-middle"
+                  aria-hidden="true"
+                  v-html="tab.icon"
+                />
                 {{ tab.name }}
               </div>
             </button>
@@ -55,9 +56,10 @@
           <div v-if="activeTab === 'security'" class="space-y-6">
             <SecuritySettings 
               @change-password="handleChangePassword"
-              @backup-data="handleBackupData"
+
               @import-data="handleImportData"
-              @delete-account="handleDeleteAccount" />
+              @delete-account="handleDeleteAccount"
+              @backup-complete="handleBackupComplete" />
           </div>
 
           <!-- API Credentials Tab -->
@@ -96,28 +98,31 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useTheme } from "@/composables/useTheme.js";
 import { useUserStore } from "@/stores/user.js";
 import ProfileSettings from "@/components/settings/ProfileSettings.vue";
 import SecuritySettings from "@/components/settings/SecuritySettings.vue";
 import ApiCredentialsSettings from "@/components/settings/ApiCredentialsSettings.vue";
 import PreferencesSettings from "@/components/settings/PreferencesSettings.vue";
 
-// Icons (you can replace these with actual icon components)
-const UserIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>`,
-};
 
-const ShieldIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`,
-};
+// Inline SVG strings for icons
+const UserIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+</svg>`
 
-const KeyIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>`,
-};
+const ShieldIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+</svg>`
 
-const CogIcon = {
-  template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`,
-};
+const KeyIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+</svg>`
+
+const CogIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>`
 
 const userStore = useUserStore();
 
@@ -156,8 +161,23 @@ const handleChangePassword = async (passwordData) => {
   }
 };
 
+const { isDark } = useTheme();
 const handleUpdatePreferences = async (preferences) => {
+  // Update backend
   const result = await userStore.updateProfile(preferences);
+  // Update theme immediately
+  if (preferences.theme_preference === "dark") {
+    isDark.value = true;
+    localStorage.setItem("theme", "dark");
+  } else if (preferences.theme_preference === "light") {
+    isDark.value = false;
+    localStorage.setItem("theme", "light");
+  } else {
+    // system: follow system preference
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    isDark.value = prefersDark;
+    localStorage.removeItem("theme");
+  }
   if (result.success) {
     showMessage("Preferences updated successfully");
   } else {
@@ -180,29 +200,6 @@ const handleDeleteCredentials = async (provider) => {
     showMessage(`${provider.toUpperCase()} credentials removed successfully`);
   } else {
     showMessage(result.error, "error");
-  }
-};
-
-const handleExportData = async () => {
-  try {
-    // TODO: Implement data export functionality
-    showMessage("Data export feature coming soon!", "info");
-  } catch (error) {
-    showMessage("Failed to export data", "error");
-  }
-};
-
-const handleBackupData = async () => {
-  try {
-    showMessage("Creating backup...", "info");
-    const result = await userStore.createBackup();
-    if (result.success) {
-      showMessage("Backup downloaded successfully!");
-    } else {
-      showMessage(result.error || "Failed to create backup", "error");
-    }
-  } catch (error) {
-    showMessage("Failed to create backup", "error");
   }
 };
 
@@ -231,6 +228,10 @@ const handleDeleteAccount = async () => {
   } catch (error) {
     showMessage("Failed to delete account", "error");
   }
+};
+
+const handleBackupComplete = () => {
+  showMessage(`Backup completed successfully!`);
 };
 
 onMounted(async () => {

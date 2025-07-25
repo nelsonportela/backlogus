@@ -1,29 +1,5 @@
 <template>
   <div class="flex h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Mobile Menu Button -->
-    <button
-      @click="toggleMobileMenu"
-      class="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg md:hidden">
-      <svg
-        class="w-6 h-6 text-gray-600 dark:text-gray-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24">
-        <path
-          v-if="!mobileMenuOpen"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16" />
-        <path
-          v-else
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-
     <!-- Mobile Overlay -->
     <div
       v-if="mobileMenuOpen"
@@ -286,13 +262,37 @@
     <div class="flex-1 flex flex-col overflow-hidden md:ml-0">
       <!-- Header -->
       <header
-        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 pl-16 md:pl-6">
+        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 md:pl-6">
         <div class="flex items-center justify-between">
-          <h2
-            class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 truncate">
-            {{ dynamicTitle }}
-          </h2>
-
+          <div class="flex items-center">
+            <!-- Mobile Menu Button (inline with title) -->
+            <button
+              @click="toggleMobileMenu"
+              class="mr-3 p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg md:hidden flex-shrink-0 flex items-center justify-center">
+              <svg
+                class="w-6 h-6 text-gray-600 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  v-if="!mobileMenuOpen"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  v-else
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2
+              class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200 truncate">
+              {{ dynamicTitle }}
+            </h2>
+          </div>
           <!-- Theme Toggle Switch -->
           <div class="flex items-center space-x-3 flex-shrink-0">
             <!-- Sun Icon (Light Mode) -->
