@@ -83,12 +83,10 @@ export const useMediaStore = defineStore("media", () => {
   };
 
   // --- Sidebar menu options (reactive) ---
-  const enabledMenuOptions = ref([
-    "games", "movies", "tv", "books"
-  ]);
+  const enabledMenuOptions = ref(["games", "movies", "tv", "books"]);
 
   function reloadEnabledMenuOptions() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const stored = localStorage.getItem("media_tracker_preferences");
     if (stored) {
       try {
@@ -97,7 +95,9 @@ export const useMediaStore = defineStore("media", () => {
           enabledMenuOptions.value = parsed.menu_options;
           return;
         }
-      } catch {}
+      } catch {
+        // Ignore JSON parse errors
+      }
     }
     enabledMenuOptions.value = ["games", "movies", "tv", "books"];
   }

@@ -177,11 +177,28 @@
               :to="{ name: 'tv' }"
               class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               :class="{
-                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100': route.name === 'tv',
+                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
+                  route.name === 'tv',
               }">
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="7" width="18" height="13" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M16 3l-4 4-4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <rect
+                  x="3"
+                  y="7"
+                  width="18"
+                  height="13"
+                  rx="2"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path
+                  d="M16 3l-4 4-4-4"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
               </svg>
               TV Shows
             </router-link>
@@ -193,16 +210,28 @@
               :to="{ name: 'books' }"
               class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               :class="{
-                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100': route.name === 'books',
+                'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
+                  route.name === 'books',
               }">
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M20 2H8a2 2 0 0 0-2 2v15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path
+                  d="M20 2H8a2 2 0 0 0-2 2v15"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
               </svg>
               Books
             </router-link>
           </div>
-
         </div>
       </nav>
 
@@ -380,7 +409,6 @@
 </template>
 
 <script setup>
-
 import { storeToRefs } from "pinia";
 import { useMediaStore } from "@/stores/media.js";
 import { useRoute, useRouter } from "vue-router";

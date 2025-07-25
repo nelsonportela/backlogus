@@ -1,12 +1,17 @@
+
 # BackLogus
 
-A modern, responsive web application for tracking your media backlog across games, movies, books, and more. Built with Vue 3 and Node.js with a focus on clean architecture and user experience.
+A modern, responsive web application for tracking your media backlog across games, movies, books, and more. Built with Vue 3 and Node.js (Fastify) with a focus on clean architecture, user experience, and extensibility. Now features a fully customizable sidebar menu and instant reactivity using Pinia.
+
 
 ## ✨ Features
 
 - 🎮 **Game Library Management**: Search and add games from the IGDB database
 - 🎬 **Movie Tracking**: Search and manage movies with TMDB integration
-- 🔐 **Secure Authentication**: JWT-based user authentication with password hashing
+- � **Books & TV (Planned)**: Expandable architecture for books and TV shows
+- 🧩 **Customizable Sidebar**: Instantly show/hide Games, Movies, TV, Books in the sidebar via Preferences
+- 🔄 **Reactive State**: Sidebar and navigation update instantly using Pinia store
+- �🔐 **Secure Authentication**: JWT-based user authentication with password hashing
 - 📱 **Fully Responsive**: Mobile-first design with dark/light theme support
 - 📊 **Status Tracking**: Track media as Want to Play/Watch, Playing/Watching, Completed, or Dropped  
 - ⭐ **Rating System**: Quick review system with thumbs up/down/neutral
@@ -15,23 +20,26 @@ A modern, responsive web application for tracking your media backlog across game
 
 ## 🏗️ Tech Stack
 
+
 ### Frontend
 - **Vue 3** with Composition API - Progressive JavaScript framework
-- **Pinia** - Intuitive state management
+- **Pinia** - Intuitive, reactive state management (sidebar/menu options, preferences)
 - **Vue Router** - Client-side routing with navigation guards  
 - **Tailwind CSS** - Utility-first CSS framework
 - **Heroicons** - Beautiful SVG icons
 - **Axios** - Promise-based HTTP client
 - **Vite** - Fast build tool and development server
 
+
 ### Backend
 - **Node.js** - JavaScript runtime environment
 - **Fastify** - Fast and low overhead web framework
-- **Prisma** - Next-generation ORM with type safety
-- **SQLite** - Lightweight database for development
+- **Prisma** - Next-generation ORM
+- **PostgreSQL** (default) or SQLite for development
 - **JWT** - Secure authentication tokens
 - **bcryptjs** - Password hashing and verification
 - **IGDB API** - Game database integration
+- **TMDB API** - Movie database integration
 
 ## 🚀 Quick Start
 
@@ -45,7 +53,7 @@ A modern, responsive web application for tracking your media backlog across game
 1. **Clone the repository**:
    ```bash
    git clone <your-repo-url>
-   cd tracky
+   cd backlogus
    ```
 
 2. **Install dependencies**:
@@ -64,7 +72,6 @@ A modern, responsive web application for tracking your media backlog across game
    cp .env.example .env
    
    # Edit .env with your configuration
-   # Add your IGDB_CLIENT_ID and IGDB_ACCESS_TOKEN
    ```
 
 4. **Initialize the database**:
@@ -101,10 +108,6 @@ JWT_SECRET="your-super-secure-jwt-secret-here"
 # Server Configuration  
 PORT=3001
 NODE_ENV="development"
-
-# IGDB API Configuration (required)
-IGDB_CLIENT_ID="your-igdb-client-id"
-IGDB_ACCESS_TOKEN="your-igdb-access-token"
 ```
 
 ## 📱 Features Overview
@@ -123,27 +126,32 @@ IGDB_ACCESS_TOKEN="your-igdb-access-token"
 - **Quick Reviews**: Thumbs up/down/neutral rating system
 - **Platform Tracking**: Record which platform you're playing on
 
+
 ### User Interface
+- **Customizable Sidebar**: Instantly show/hide Games, Movies, TV, Books in the sidebar via Preferences
+- **Reactive Navigation**: Sidebar and navigation update instantly using Pinia store
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
 - **Dark/Light Theme**: Toggle between themes with system preference detection  
 - **Modal System**: Clean, accessible modals for game details and actions
 - **Error Handling**: User-friendly error messages and loading states
 - **Keyboard Navigation**: Full keyboard accessibility support
 
+
 ## 🗂️ Project Structure
 
 ```
-tracky/
+backlogus/
 ├── frontend/                   # Vue 3 frontend application
 │   ├── src/
 │   │   ├── components/        # Reusable Vue components
 │   │   │   ├── media/         # Media-specific components
+│   │   │   ├── settings/      # User settings and preferences
 │   │   │   └── ui/            # General UI components
 │   │   ├── composables/       # Vue composition functions
-│   │   ├── layouts/           # Page layouts
+│   │   ├── layouts/           # Page layouts (Dashboard, etc)
 │   │   ├── router/            # Vue Router configuration
 │   │   ├── services/          # API service layer
-│   │   ├── stores/            # Pinia state management
+│   │   ├── stores/            # Pinia state management (sidebar, preferences, media)
 │   │   └── views/             # Page components
 │   └── ...
 ├── backend/                    # Node.js backend API

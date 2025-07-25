@@ -1,10 +1,13 @@
 <template>
-  <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between mt-6 w-full gap-2">
+  <div
+    v-if="totalPages > 1"
+    class="flex flex-col sm:flex-row items-center justify-between mt-6 w-full gap-2">
     <div class="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
       Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} items
     </div>
 
-    <div class="flex w-full sm:w-auto items-center justify-stretch sm:justify-end space-x-2">
+    <div
+      class="flex w-full sm:w-auto items-center justify-stretch sm:justify-end space-x-2">
       <!-- Previous Button -->
       <button
         @click="$emit('page-change', currentPage - 1)"

@@ -115,7 +115,8 @@
 
       <div class="space-y-6">
         <!-- Social Login Integration -->
-        <div class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
+        <div
+          class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
           <div>
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
               Social Login Integration
@@ -134,11 +135,13 @@
         <div class="py-3 border-b border-gray-200 dark:border-gray-600">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span
+                class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Backup My Data
               </span>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Download complete backup ZIP with user data, database, and images
+                Download complete backup ZIP with user data, database, and
+                images
               </p>
             </div>
             <div class="flex space-x-2">
@@ -147,9 +150,21 @@
                 :disabled="backupLoading"
                 class="px-3 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <span v-if="backupLoading" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    class="animate-spin -ml-1 mr-1 h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Creating...
                 </span>
@@ -160,7 +175,8 @@
         </div>
 
         <!-- Data Import -->
-        <div class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
+        <div
+          class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
           <div>
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
               Import My Backup
@@ -181,9 +197,21 @@
               :disabled="importLoading"
               class="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <span v-if="importLoading" class="flex items-center">
-                <svg class="animate-spin -ml-1 mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  class="animate-spin -ml-1 mr-1 h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Importing...
               </span>
@@ -242,9 +270,16 @@
 </template>
 
 <script setup>
+/* global fetch, alert */
 import { ref, computed } from "vue";
 
-const emit = defineEmits(["change-password", "backup-data", "import-data", "delete-account", "backup-complete"]);
+const emit = defineEmits([
+  "change-password",
+  "backup-data",
+  "import-data",
+  "delete-account",
+  "backup-complete",
+]);
 
 const loading = ref(false);
 const backupLoading = ref(false);
@@ -294,34 +329,34 @@ const handleBackup = async () => {
   if (backupLoading.value) return;
   backupLoading.value = true;
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error("No authentication token found");
     }
-    const backendUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
+    const backendUrl = import.meta.env.DEV ? "http://localhost:3001" : "";
     const downloadUrl = `${backendUrl}/api/user/backup`;
 
     // Use fetch to get the backup file as a blob
     const response = await fetch(downloadUrl, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     if (!response.ok) {
-      throw new Error('Failed to download backup');
+      throw new Error("Failed to download backup");
     }
     const blob = await response.blob();
     // Try to get filename from Content-Disposition header
-    let filename = 'backlogus-backup.zip';
-    const disposition = response.headers.get('Content-Disposition');
-    if (disposition && disposition.includes('filename=')) {
-      filename = disposition.split('filename=')[1].replace(/"/g, '').trim();
+    let filename = "backlogus-backup.zip";
+    const disposition = response.headers.get("Content-Disposition");
+    if (disposition && disposition.includes("filename=")) {
+      filename = disposition.split("filename=")[1].replace(/"/g, "").trim();
     }
     // Add timestamp to filename in yyyyMMddHHmmss format
     const now = new Date();
-    
-    const pad = (n) => n.toString().padStart(2, '0');
+
+    const pad = (n) => n.toString().padStart(2, "0");
     const timestamp =
       now.getFullYear().toString() +
       pad(now.getMonth() + 1) +
@@ -333,7 +368,7 @@ const handleBackup = async () => {
     filename = filename.replace(/\.zip$/, `-${timestamp}.zip`);
     // Create a link and trigger download
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -343,10 +378,10 @@ const handleBackup = async () => {
       document.body.removeChild(a);
     }, 1000);
     // Emit event for parent to show toaster notification
-    emit('backup-complete');
+    emit("backup-complete");
   } catch (error) {
-    console.error('Backup failed:', error);
-    alert('Backup failed: ' + error.message);
+    console.error("Backup failed:", error);
+    alert("Backup failed: " + error.message);
   } finally {
     backupLoading.value = false;
   }
@@ -360,12 +395,12 @@ const handleFileSelect = async (event) => {
   try {
     await emit("import-data", file);
   } catch (error) {
-    console.error('Import failed:', error);
-    alert('Import failed: ' + error.message);
+    console.error("Import failed:", error);
+    alert("Import failed: " + error.message);
   } finally {
     importLoading.value = false;
     if (fileInput.value) {
-      fileInput.value.value = '';
+      fileInput.value.value = "";
     }
   }
 };

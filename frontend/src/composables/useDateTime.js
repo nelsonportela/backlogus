@@ -21,7 +21,9 @@ export function useDateTime() {
         ...options,
       };
 
-      return new Intl.DateTimeFormat("en-US", defaultOptions).format(parsedDate);
+      return new Intl.DateTimeFormat("en-US", defaultOptions).format(
+        parsedDate
+      );
     } catch (error) {
       console.warn("Error formatting date:", error);
       // Fallback to regular date formatting
@@ -41,7 +43,9 @@ export function useDateTime() {
         ...options,
       };
 
-      return new Intl.DateTimeFormat("en-US", defaultOptions).format(parsedDate);
+      return new Intl.DateTimeFormat("en-US", defaultOptions).format(
+        parsedDate
+      );
     } catch (error) {
       console.warn("Error formatting time:", error);
       // Fallback to regular time formatting
@@ -57,14 +61,16 @@ export function useDateTime() {
       const defaultOptions = {
         timeZone: userTimezone.value,
         year: "numeric",
-        month: "short", 
+        month: "short",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
         ...options,
       };
 
-      return new Intl.DateTimeFormat("en-US", defaultOptions).format(parsedDate);
+      return new Intl.DateTimeFormat("en-US", defaultOptions).format(
+        parsedDate
+      );
     } catch (error) {
       console.warn("Error formatting datetime:", error);
       // Fallback to regular datetime formatting
@@ -78,11 +84,15 @@ export function useDateTime() {
     try {
       const parsedDate = new Date(date);
       const now = new Date();
-      
+
       // Convert both dates to the user's timezone for proper comparison
-      const userNow = new Date(now.toLocaleString("en-US", { timeZone: userTimezone.value }));
-      const userDate = new Date(parsedDate.toLocaleString("en-US", { timeZone: userTimezone.value }));
-      
+      const userNow = new Date(
+        now.toLocaleString("en-US", { timeZone: userTimezone.value })
+      );
+      const userDate = new Date(
+        parsedDate.toLocaleString("en-US", { timeZone: userTimezone.value })
+      );
+
       const diffInMs = userNow - userDate;
       const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
       const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
@@ -130,7 +140,9 @@ export function useDateTime() {
   const getTimeOfDayGreeting = () => {
     try {
       const now = new Date();
-      const userTime = new Date(now.toLocaleString("en-US", { timeZone: userTimezone.value }));
+      const userTime = new Date(
+        now.toLocaleString("en-US", { timeZone: userTimezone.value })
+      );
       const hour = userTime.getHours();
 
       if (hour < 6) {
@@ -138,7 +150,7 @@ export function useDateTime() {
       } else if (hour < 12) {
         return "Good morning";
       } else if (hour < 17) {
-        return "Good afternoon";  
+        return "Good afternoon";
       } else if (hour < 22) {
         return "Good evening";
       } else {

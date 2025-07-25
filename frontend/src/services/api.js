@@ -1,3 +1,4 @@
+/* global FormData */
 import axios from "axios";
 
 // Create axios instance with default config
@@ -83,13 +84,13 @@ export const userApi = {
     api.put(`/user/api-credentials/${provider}`, credentials),
   deleteApiCredentials: (provider) =>
     api.delete(`/user/api-credentials/${provider}`),
-  createBackup: () => api.get("/user/backup", { responseType: 'blob' }),
+  createBackup: () => api.get("/user/backup", { responseType: "blob" }),
   importBackup: (file) => {
     const formData = new FormData();
-    formData.append('backup', file);
+    formData.append("backup", file);
     return api.post("/user/backup/import", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
   },

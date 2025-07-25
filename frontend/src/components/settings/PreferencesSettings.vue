@@ -10,8 +10,6 @@
     </div>
 
     <form @submit.prevent="submitForm" class="space-y-6">
-
-
       <!-- Library Preferences -->
       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
         <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">
@@ -82,14 +80,16 @@
           Menu Options
         </h3>
         <div class="space-y-2">
-          <div v-for="option in menuOptions" :key="option.value" class="flex items-center">
+          <div
+            v-for="option in menuOptions"
+            :key="option.value"
+            class="flex items-center">
             <input
               :id="'menu-option-' + option.value"
               type="checkbox"
               v-model="formData.menu_options"
               :value="option.value"
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700"
-            />
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-700" />
             <label
               :for="'menu-option-' + option.value"
               class="ml-2 text-sm text-gray-700 dark:text-gray-300">
@@ -221,7 +221,9 @@ watch(
           if (Array.isArray(parsed.menu_options)) {
             menu_options = parsed.menu_options;
           }
-        } catch {}
+        } catch {
+          // Ignore JSON parse errors
+        }
       }
       formData.value = {
         default_view: "grid",
@@ -253,7 +255,9 @@ const submitForm = async () => {
   try {
     // For now, only save theme_preference to backend
     // Other preferences can be stored in localStorage or added to backend later
-    emit("update-preferences", { theme_preference: props.profile?.theme_preference });
+    emit("update-preferences", {
+      theme_preference: props.profile?.theme_preference,
+    });
 
     // Store other preferences in localStorage for now
     localStorage.setItem(
