@@ -128,7 +128,7 @@ async function moviesRoutes(fastify, options) {
           trailer_key: userMovie.movie.trailerKey,
           status: reverseStatusMap[userMovie.status],
           personal_rating: userMovie.personalRating,
-          quick_review: userMovie.movie.quickReview ? reverseQuickReviewMap[userMovie.movie.quickReview] : null,
+          quick_review: userMovie.quickReview ? reverseQuickReviewMap[userMovie.quickReview] : null,
           notes: userMovie.notes,
           watched_date: userMovie.watchedDate,
           added_at: userMovie.createdAt,
@@ -181,11 +181,13 @@ async function moviesRoutes(fastify, options) {
   fastify.post('/', {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
+    // Accept snake_case for all user fields (for consistency with games)
     const { 
       tmdbId, 
       status = 'want_to_watch',
-      personalRating,
-      quickReview,
+      personal_rating,
+      quick_review,
+      user_platform,
       notes 
     } = request.body
 
@@ -202,7 +204,7 @@ async function moviesRoutes(fastify, options) {
       })
     }
 
-    const dbQuickReview = quickReview ? quickReviewMap[quickReview] : null
+    const dbQuickReview = quick_review ? quickReviewMap[quick_review] : null
 
     try {
       // Get movie details from TMDB to store in our database
@@ -282,10 +284,11 @@ async function moviesRoutes(fastify, options) {
           userId: request.user.userId,
           movieId: movie.id,
           status: dbStatus,
-          personalRating,
+          personalRating: personal_rating,
           quickReview: dbQuickReview,
           notes,
-          watchedDate: dbStatus === 'WATCHED' ? new Date() : null
+          watchedDate: dbStatus === 'WATCHED' ? new Date() : null,
+          // user_platform is ignored for movies, but included for games for future extensibility
         },
         include: {
           movie: true
@@ -338,7 +341,8 @@ async function moviesRoutes(fastify, options) {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
     const { id } = request.params
-    const { status, personalRating, quickReview, notes } = request.body
+    // Accept snake_case for all user fields
+    const { status, personal_rating, quick_review, notes, user_platform } = request.body
 
     if (!id || isNaN(parseInt(id))) {
       return reply.status(400).send({ 
@@ -365,13 +369,14 @@ async function moviesRoutes(fastify, options) {
       }
     }
 
-    if (personalRating !== undefined) {
-      updateData.personalRating = personalRating
+    if (personal_rating !== undefined) {
+      updateData.personalRating = personal_rating
     }
 
-    if (quickReview !== undefined) {
-      updateData.quickReview = quickReview ? quickReviewMap[quickReview] : null
+    if (quick_review !== undefined) {
+      updateData.quickReview = quick_review ? quickReviewMap[quick_review] : null
     }
+    // user_platform is ignored for movies, but included for games for future extensibility
 
     if (notes !== undefined) {
       updateData.notes = notes

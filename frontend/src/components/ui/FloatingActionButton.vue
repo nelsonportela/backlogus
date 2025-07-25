@@ -135,10 +135,27 @@
                     </div>
                   </div>
                   <button
-                    @click.stop="handleAddToLibrary(item)"
-                    class="px-3 py-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 border border-primary-600 dark:border-primary-400 rounded hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                    :disabled="isItemInLibrary(item.id)">
-                    {{ isItemInLibrary(item.id) ? "Added" : "Add" }}
+                    @click.stop="!isItemInLibrary(getSearchResultId(item)) && handleAddToLibrary(item)"
+                    :disabled="isItemInLibrary(getSearchResultId(item))"
+                    :class="[
+                      'w-12 h-12 flex items-center justify-center rounded-full text-sm text-center focus:ring-4 focus:outline-none transition-all duration-200',
+                      isItemInLibrary(getSearchResultId(item))
+                        ? 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900'
+                        : 'bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800',
+                      'disabled:opacity-60 disabled:cursor-not-allowed'
+                    ]"
+                    :title="isItemInLibrary(getSearchResultId(item)) ? 'Added' : 'Add to Library'"
+                    type="button"
+                  >
+                    <svg v-if="!isItemInLibrary(getSearchResultId(item))" class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-width="2.5" d="M10 4v12M4 10h12" />
+                    </svg>
+                    <svg v-else class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 10.5l3 3 5-6" />
+                    </svg>
+                    <span class="sr-only">
+                      {{ isItemInLibrary(getSearchResultId(item)) ? 'Added' : 'Add' }}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -224,6 +241,13 @@ const mediaTypeLabel = computed(() => {
   return labels[props.mediaType] || "Items";
 });
 
+const getSearchResultId = (item) => {
+  if (props.mediaType === 'game') return item.id;
+  if (props.mediaType === 'movie' || props.mediaType === 'show') return item.tmdbId;
+  if (props.mediaType === 'book') return item.googleBooksId;
+  return item.id;
+};
+
 const openSearchModal = () => {
   isSearchModalOpen.value = true;
 };
@@ -266,9 +290,22 @@ const handleShowDetails = (item) => {
 };
 
 const isItemInLibrary = (itemId) => {
-  return props.libraryItems.some((item) => {
-    return item.igdb_id === itemId || item.id === itemId;
-  });
+  if (props.mediaType === 'game') {
+    // IGDB: search result id vs. library igdb_id
+    return props.libraryItems.some((item) => item.igdb_id === itemId);
+  } else if (props.mediaType === 'movie') {
+    // TMDB: search result id vs. library tmdb_id
+    return props.libraryItems.some((item) => item.tmdbId === itemId);
+  } else if (props.mediaType === 'book') {
+    // Books: search result id vs. library google_books_id (if used)
+    return props.libraryItems.some((item) => item.google_books_id === itemId);
+  } else if (props.mediaType === 'show') {
+    // Shows: search result id vs. library tmdb_id (if using TMDB for shows)
+    return props.libraryItems.some((item) => item.tmdb_id === itemId);
+  } else {
+    // Fallback: compare id fields directly
+    return props.libraryItems.some((item) => item.id === itemId);
+  }
 };
 
 const getImageUrl = (item) => {

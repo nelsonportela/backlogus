@@ -86,7 +86,7 @@ const showError = (message) => {
 };
 
 // Computed properties
-const allUserGames = computed(() => gamesStore.games);
+const allUserGames = computed(() => gamesStore.items);
 const searchResults = computed(() => gamesStore.searchResults);
 const loading = computed(() => gamesStore.loading);
 const searchError = computed(() => gamesStore.searchError);
@@ -110,7 +110,7 @@ const userGames = computed(() => {
 });
 
 const handleSearch = (query) => {
-  gamesStore.searchGames(query);
+  gamesStore.search(query);
 };
 
 // Watch route changes to handle status filtering
@@ -139,7 +139,7 @@ const showGameDetails = async (game) => {
 
     const igdbId = game.id;
     if (igdbId) {
-      const result = await gamesStore.getGameDetails(igdbId);
+      const result = await gamesStore.getItemDetails(igdbId);
       if (result.success) {
         // Merge the detailed data with the current game data
         selectedGame.value = {
@@ -176,7 +176,7 @@ const addGameToLibrary = async (libraryData) => {
     notes = null;
   }
 
-  const result = await gamesStore.addGame({
+  const result = await gamesStore.addItem({
     igdb_id: gameData.id,
     name: gameData.name,
     cover_url: gameData.cover_url,
@@ -220,7 +220,7 @@ const removeGameFromLibrary = async (game) => {
   );
 
   if (libraryGame) {
-    const result = await gamesStore.removeGame(libraryGame.id);
+    const result = await gamesStore.removeItem(libraryGame.id);
     if (!result.success) {
       showError(result.error);
     } else {
@@ -232,7 +232,7 @@ const removeGameFromLibrary = async (game) => {
 };
 
 const updateStatus = async (gameId, status) => {
-  const result = await gamesStore.updateGameStatus(gameId, status);
+  const result = await gamesStore.updateItem(gameId, { status });
   if (!result.success) {
     showError(result.error);
   }
@@ -249,18 +249,7 @@ const updateGameItem = async (gameId, updateData) => {
     return;
   }
 
-  let result;
-
-  // Handle status updates through the specific status endpoint
-  if (updateData.status) {
-    result = await gamesStore.updateGameStatus(
-      libraryGame.id,
-      updateData.status
-    );
-  } else {
-    // Handle other field updates through the general details endpoint
-    result = await gamesStore.updateGameDetails(libraryGame.id, updateData);
-  }
+  const result = await gamesStore.updateItem(libraryGame.id, updateData);
 
   if (result.success) {
     // Update local state
@@ -282,10 +271,10 @@ const isGameInLibrary = (gameId) => {
 };
 
 const refreshLibrary = () => {
-  gamesStore.getUserGames();
+  gamesStore.getUserItems();
 };
 
 onMounted(() => {
-  gamesStore.getUserGames();
+  gamesStore.getUserItems();
 });
 </script>

@@ -4,7 +4,7 @@
     <div class="space-y-1 text-xs">
       <!-- Rating/Score -->
       <div v-if="displayRating">
-        <span class="text-gray-600 dark:text-gray-400">Rating:</span>
+        <span class="text-gray-600 dark:text-gray-400">Score:</span>
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
           {{ displayRating }}
         </span>
@@ -16,7 +16,11 @@
           >{{ getDateLabel() }}:</span
         >
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
-          {{ new Date(getDateField(item)).getFullYear() }}
+          {{ new Date(getDateField(item)).toLocaleString("en-UK", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+          }) }}
         </span>
       </div>
 
@@ -115,13 +119,13 @@ const getDateField = (item) => {
 const getDateLabel = () => {
   switch (props.mediaType) {
     case "game":
-      return "Release Date";
+      return "Release";
     case "movie":
-      return "Release Date";
+      return "Release";
     case "show":
       return "Air Date";
     case "book":
-      return "Publication Date";
+      return "Publication";
     default:
       return "Date";
   }

@@ -80,7 +80,7 @@ const showError = (message) => {
 };
 
 // Computed properties
-const allUserMovies = computed(() => moviesStore.movies);
+const allUserMovies = computed(() => moviesStore.items);
 const searchResults = computed(() => moviesStore.searchResults);
 const loading = computed(() => moviesStore.loading);
 const searchError = computed(() => moviesStore.searchError);
@@ -104,7 +104,7 @@ const userMovies = computed(() => {
 });
 
 const handleSearch = (query) => {
-  moviesStore.searchMovies(query);
+  moviesStore.search(query);
 };
 
 // Watch route changes to handle status filtering
@@ -137,23 +137,23 @@ const closeModal = () => {
 // Library management methods
 const addMovieToLibrary = async (libraryData) => {
   // Handle both old format (just movie object) and new format (enhanced data from modal)
-  let movieData, status, quickReview, notes;
+  let movieData, status, quick_review, notes;
 
   if (libraryData.item) {
     // New format from AddToLibraryModal
     movieData = libraryData.item;
     status = libraryData.status;
-    quickReview = libraryData.quick_review;
+    quick_review = libraryData.quick_review;
     notes = libraryData.notes;
   } else {
     // Old format - direct movie object
     movieData = libraryData;
     status = "want_to_watch"; // default status
-    quickReview = null;
+    quick_review = null;
     notes = null;
   }
 
-  const result = await moviesStore.addMovie({
+  const result = await moviesStore.addItem({
     tmdbId: movieData.tmdbId,
     name: movieData.name,
     original_title: movieData.original_title,
@@ -168,7 +168,7 @@ const addMovieToLibrary = async (libraryData) => {
     original_language: movieData.original_language,
     popularity: movieData.popularity,
     status: status,
-    quick_review: quickReview,
+    quick_review: quick_review,
     notes: notes,
   });
 
@@ -183,28 +183,14 @@ const addMovieToLibraryFromModal = async (libraryData) => {
 };
 
 const updateStatus = async (movieId, newStatus) => {
-  const result = await moviesStore.updateMovieStatus(movieId, newStatus);
+  const result = await moviesStore.updateItem(movieId, { status: newStatus });
   if (!result.success) {
     showError(result.error);
   }
 };
 
 const updateMovieItem = async (movieId, updateData) => {
-  let result;
-
-  // Handle status updates through the specific status endpoint
-  if (updateData.status) {
-    result = await moviesStore.updateMovieStatus(movieId, updateData.status);
-  } else if (updateData.quick_review !== undefined) {
-    // Handle quick review updates through the specific quick review endpoint
-    result = await moviesStore.updateMovieQuickReview(
-      movieId,
-      updateData.quick_review
-    );
-  } else {
-    // Handle other field updates through the general details endpoint
-    result = await moviesStore.updateMovieDetails(movieId, updateData);
-  }
+  const result = await moviesStore.updateItem(movieId, updateData);
 
   if (result.success) {
     // Update local state
@@ -228,7 +214,7 @@ const removeMovieFromLibrary = async (movie) => {
   // Handle both cases: direct ID or movie object
   const movieId = typeof movie === "object" ? movie.id : movie;
 
-  const result = await moviesStore.removeMovie(movieId);
+  const result = await moviesStore.removeItem(movieId);
   if (result.success) {
     // Close modal if the removed movie was being displayed
     if (selectedMovie.value && selectedMovie.value.id === movieId) {
@@ -240,7 +226,7 @@ const removeMovieFromLibrary = async (movie) => {
 };
 
 const refreshLibrary = () => {
-  moviesStore.getUserMovies();
+  moviesStore.getUserItems();
 };
 
 // Load user movies on component mount

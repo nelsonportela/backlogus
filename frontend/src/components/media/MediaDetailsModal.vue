@@ -108,7 +108,7 @@
           <!-- Details Section -->
           <div class="px-6 py-6 space-y-6">
             <!-- Title and Subtitle -->
-            <div class="ml-32">
+            <div>
               <h2
                 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                 {{ displayItem.name || displayItem.title }}
@@ -373,7 +373,7 @@ watch(
       if (item.tmdbId && !enhancedItem.value) {
         isLoadingDetails.value = true;
         try {
-          const result = await moviesStore.getMovieDetails(item.tmdbId);
+          const result = await moviesStore.getItemDetails(item.tmdbId);
           if (result.success) {
             enhancedItem.value = result.data;
           }

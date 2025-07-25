@@ -508,8 +508,8 @@ const pickRandomItem = async () => {
 
 const pickRandomGame = async () => {
   try {
-    await gamesStore.getUserGames();
-    const games = gamesStore.games.filter(
+    await gamesStore.getUserItems();
+    const games = gamesStore.items.filter(
       (game) => game.status === "want_to_play" || game.status === "playing"
     );
 
