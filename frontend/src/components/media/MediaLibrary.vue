@@ -2,17 +2,27 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
     <!-- Header with Title and Refresh -->
     <div class="flex items-center justify-between mb-4 gap-2">
-      <div
-        class="bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30">
-        <h3
-          class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
-          {{ mediaTypeLabel }}
-          <span
-            v-if="totalItems > 0"
-            class="text-sm text-gray-500 dark:text-gray-400 ml-2">
-            ({{ totalItems }})
-          </span>
-        </h3>
+      <div>
+        <!-- Large screens: original div -->
+        <div class="hidden sm:block bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-200/50 dark:border-gray-600/30">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 truncate">
+            {{ mediaTypeLabel }}
+            <span v-if="totalItems > 0" class="text-sm text-gray-500 dark:text-gray-400 ml-2">
+              ({{ totalItems }})
+            </span>
+          </h3>
+        </div>
+        <!-- Small screens: select navigation -->
+        <select
+          v-if="statusMenuOptions.length > 0"
+          class="block sm:hidden w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-base"
+          :value="currentStatusOption.value"
+          @change="handleStatusSelect($event)"
+        >
+          <option v-for="option in statusMenuOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
       </div>
       <button
         @click="refreshLibrary"
@@ -90,7 +100,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ConfirmationModal from "../ui/ConfirmationModal.vue";
 import MediaLibraryFilters from "./MediaLibraryFilters.vue";
 import MediaLibraryItem from "./MediaLibraryItem.vue";
@@ -98,6 +108,55 @@ import MediaLibraryEmptyState from "./MediaLibraryEmptyState.vue";
 import PaginationControls from "../ui/PaginationControls.vue";
 
 const route = useRoute();
+const router = useRouter();
+
+// Sidebar submenu options for each media type
+const statusMenuMap = {
+  game: [
+    { value: "all", label: "All Games" },
+    { value: "playing", label: "Playing" },
+    { value: "completed", label: "Completed" },
+    { value: "want_to_play", label: "Want to Play" },
+    { value: "dropped", label: "Dropped" },
+  ],
+  movie: [
+    { value: "all", label: "All Movies" },
+    { value: "watching", label: "Watching" },
+    { value: "watched", label: "Watched" },
+    { value: "want_to_watch", label: "Want to Watch" },
+    { value: "dropped", label: "Dropped" },
+  ],
+  book: [
+    { value: "all", label: "All Books" },
+    { value: "reading", label: "Reading" },
+    { value: "read", label: "Read" },
+    { value: "want_to_read", label: "Want to Read" },
+    { value: "dropped", label: "Dropped" },
+  ],
+  show: [
+    { value: "all", label: "All Shows" },
+    { value: "watching", label: "Watching" },
+    { value: "watched", label: "Watched" },
+    { value: "want_to_watch", label: "Want to Watch" },
+    { value: "dropped", label: "Dropped" },
+  ],
+};
+
+const statusMenuOptions = computed(() => statusMenuMap[props.mediaType] || []);
+
+// Determine current status from route
+const currentStatusOption = computed(() => {
+  const status = route.query.status || "all";
+  return statusMenuOptions.value.find((opt) => opt.value === status) || statusMenuOptions.value[0];
+});
+
+function handleStatusSelect(event) {
+  const selected = event.target.value;
+  // Update the route query param for status
+  router.replace({
+    query: { ...route.query, status: selected },
+  });
+}
 
 const props = defineProps({
   mediaType: {
