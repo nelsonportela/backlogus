@@ -301,7 +301,7 @@ const isItemInLibrary = (itemId) => {
     return props.libraryItems.some((item) => item.google_books_id === itemId);
   } else if (props.mediaType === 'show') {
     // Shows: search result id vs. library tmdb_id (if using TMDB for shows)
-    return props.libraryItems.some((item) => item.tmdb_id === itemId);
+    return props.libraryItems.some((item) => item.tmdbId === itemId);
   } else {
     // Fallback: compare id fields directly
     return props.libraryItems.some((item) => item.id === itemId);

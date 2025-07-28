@@ -57,19 +57,22 @@
             class="relative h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 overflow-hidden">
             <!-- Banner Image -->
             <div class="absolute inset-0">
-              <img
-                v-if="displayItem.backdrop_url || displayItem.banner_url"
-                :src="displayItem.backdrop_url || displayItem.banner_url"
-                :alt="displayItem.name || displayItem.title"
-                class="w-full h-full object-cover" />
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center">
-                <span
-                  class="text-white text-sm sm:text-lg font-medium px-4 text-center">
+              <!-- Banner fallback always visible -->
+              <div class="w-full h-full absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700">
+                <span class="text-white text-sm sm:text-lg font-medium px-4 text-center">
                   {{ displayItem.name || displayItem.title }}
                 </span>
               </div>
+              <!-- Banner image overlays, fades in when loaded -->
+              <img
+                v-if="(displayItem.backdrop_url || displayItem.banner_url) && !bannerImgError"
+                :src="displayItem.backdrop_url || displayItem.banner_url"
+                :alt="displayItem.name || displayItem.title"
+                class="w-full h-full object-cover absolute inset-0 z-10 transition-opacity duration-300"
+                :style="bannerImgLoaded ? 'opacity:1;' : 'opacity:0;'"
+                @load="bannerImgLoaded = true"
+                @error="bannerImgError = true"
+              />
             </div>
 
             <!-- Gradient overlay -->
@@ -78,27 +81,20 @@
 
             <!-- Cover Image -->
             <div class="absolute left-3 sm:left-6 top-12 sm:top-16 z-10">
-              <img
-                v-if="
-                  displayItem.cover_url ||
-                  displayItem.poster_url ||
-                  displayItem.image_url
-                "
-                :src="
-                  displayItem.cover_url ||
-                  displayItem.poster_url ||
-                  displayItem.image_url
-                "
-                :alt="displayItem.name || displayItem.title"
-                class="w-16 h-24 sm:w-24 sm:h-36 object-cover rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10" />
-              <div
-                v-else
-                class="w-16 h-24 sm:w-24 sm:h-36 bg-gray-300 dark:bg-gray-600 rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10 flex items-center justify-center">
-                <span
-                  class="text-gray-500 dark:text-gray-400 text-xs text-center px-1"
-                  >No Image</span
-                >
+              <!-- Cover fallback always visible -->
+              <div class="w-16 h-24 sm:w-24 sm:h-36 absolute inset-0 z-0 flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10">
+                <span class="text-gray-500 dark:text-gray-400 text-xs text-center px-1">No Image</span>
               </div>
+              <!-- Cover image overlays, fades in when loaded -->
+              <img
+                v-if="(displayItem.cover_url || displayItem.poster_url || displayItem.image_url) && !coverImgError"
+                :src="displayItem.cover_url || displayItem.poster_url || displayItem.image_url"
+                :alt="displayItem.name || displayItem.title"
+                class="w-16 h-24 sm:w-24 sm:h-36 object-cover rounded-lg shadow-xl border-2 border-white dark:border-gray-800 ring-2 ring-black/10 dark:ring-white/10 absolute inset-0 z-10 transition-opacity duration-300"
+                :style="coverImgLoaded ? 'opacity:1;' : 'opacity:0;'"
+                @load="coverImgLoaded = true"
+                @error="coverImgError = true"
+              />
             </div>
 
             <!-- Quick Info Card -->
@@ -312,6 +308,11 @@
 
 <script setup>
 import { ref, watch, computed } from "vue";
+// Banner and cover image fade-in state
+const bannerImgLoaded = ref(false);
+const bannerImgError = ref(false);
+const coverImgLoaded = ref(false);
+const coverImgError = ref(false);
 import AddToLibraryModal from "./AddToLibraryModal.vue";
 import MediaQuickInfo from "./MediaQuickInfo.vue";
 import MediaScreenshots from "./MediaScreenshots.vue";

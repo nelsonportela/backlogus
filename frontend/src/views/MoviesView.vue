@@ -29,7 +29,7 @@
       @remove-from-library="removeMovieFromLibrary" />
 
     <!-- Floating Action Button for adding movies -->
-    <FloatingActionButton
+    <AddToLibraryButton
       :media-type="'movie'"
       :search-results="searchResults"
       :loading="loading"
@@ -59,7 +59,7 @@ import { useRoute } from "vue-router";
 import { useMoviesStore } from "@/stores/movies";
 import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
 import MediaLibrary from "@/components/media/MediaLibrary.vue";
-import FloatingActionButton from "@/components/ui/FloatingActionButton.vue";
+import AddToLibraryButton from "@/components/ui/AddToLibraryButton.vue";
 
 const route = useRoute();
 const moviesStore = useMoviesStore();
@@ -137,19 +137,19 @@ const closeModal = () => {
 // Library management methods
 const addMovieToLibrary = async (libraryData) => {
   // Handle both old format (just movie object) and new format (enhanced data from modal)
-  let movieData, status, quick_review, notes;
+  let movieData, status, quickReview, notes;
 
   if (libraryData.item) {
     // New format from AddToLibraryModal
     movieData = libraryData.item;
     status = libraryData.status;
-    quick_review = libraryData.quick_review;
+    quickReview = libraryData.quick_review;
     notes = libraryData.notes;
   } else {
     // Old format - direct movie object
     movieData = libraryData;
     status = "want_to_watch"; // default status
-    quick_review = null;
+    quickReview = null;
     notes = null;
   }
 
@@ -168,7 +168,7 @@ const addMovieToLibrary = async (libraryData) => {
     original_language: movieData.original_language,
     popularity: movieData.popularity,
     status: status,
-    quick_review: quick_review,
+    quick_review: quickReview,
     notes: notes,
   });
 

@@ -51,45 +51,20 @@ export function useMediaStoreFactory(api, mediaType) {
     }
   };
 
-  const updateItemStatus = async (id, status) => {
-    try {
-      const response = await api.updateItem(id, { status });
-      const index = items.value.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        items.value[index] = response.data;
-      }
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || `Failed to update ${mediaType} status`,
-      };
-    }
-  };
-
-  const updateItemQuickReview = async (id, quickReview) => {
-    try {
-      const response = await api.updateItem(id, { quick_review: quickReview });
-      const index = items.value.findIndex((item) => item.id === id);
-      if (index !== -1) {
-        items.value[index] = response.data;
-      }
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || `Failed to update ${mediaType} review`,
-      };
-    }
-  };
-
-  const updateItemDetails = async (id, updateData) => {
+  // Unified updateItem method
+  const updateItem = async (id, updateData) => {
     try {
       const data = { ...updateData };
+      // Normalize camelCase to snake_case for backend
       if (data.quickReview !== undefined) {
         data.quick_review = data.quickReview;
         delete data.quickReview;
       }
+      if (data.userPlatform !== undefined) {
+        data.user_platform = data.userPlatform;
+        delete data.userPlatform;
+      }
+      // Add more mappings as needed
       const response = await api.updateItem(id, data);
       const index = items.value.findIndex((item) => item.id === id);
       if (index !== -1) {
@@ -149,9 +124,7 @@ export function useMediaStoreFactory(api, mediaType) {
     search,
     getUserItems,
     addItem,
-    updateItemStatus,
-    updateItemQuickReview,
-    updateItemDetails,
+    updateItem,
     removeItem,
     getItemDetails,
     getStats,

@@ -29,7 +29,7 @@
       @remove-from-library="removeGameFromLibrary" />
 
     <!-- Floating Action Button for adding games -->
-    <FloatingActionButton
+    <AddToLibraryButton
       :media-type="'game'"
       :search-results="searchResults"
       :loading="loading"
@@ -65,7 +65,7 @@ import { useRoute } from "vue-router";
 import { useGamesStore } from "@/stores/games";
 import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
 import MediaLibrary from "@/components/media/MediaLibrary.vue";
-import FloatingActionButton from "@/components/ui/FloatingActionButton.vue";
+import AddToLibraryButton from "@/components/ui/AddToLibraryButton.vue";
 
 const route = useRoute();
 const gamesStore = useGamesStore();
@@ -239,26 +239,21 @@ const updateStatus = async (gameId, status) => {
 };
 
 const updateGameItem = async (gameId, updateData) => {
-  // Find the library game by igdb_id
-  const libraryGame = userGames.value.find(
-    (g) => g.igdb_id === gameId || g.id === gameId
-  );
-
-  if (!libraryGame) {
-    showError("Game not found in your library");
-    return;
-  }
-
-  const result = await gamesStore.updateItem(libraryGame.id, updateData);
+  const result = await gamesStore.updateItem(gameId, updateData);
 
   if (result.success) {
     // Update local state
-    Object.keys(updateData).forEach((key) => {
-      libraryGame[key] = updateData[key];
-      if (selectedGame.value) {
+    const game = userGames.value.find((g) => g.id === gameId);
+    if (game) {
+      Object.keys(updateData).forEach((key) => {
+        game[key] = updateData[key];
+      });
+    }
+    if (selectedGame.value && selectedGame.value.id === gameId) {
+      Object.keys(updateData).forEach((key) => {
         selectedGame.value[key] = updateData[key];
-      }
-    });
+      });
+    }
   } else {
     showError(result.error);
   }
