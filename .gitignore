@@ -57,5 +57,4 @@ temp/
 # Backend Image Cache
 
 /backend/cache/
-DEPLOYMENT.md
-PRISMA_CHEATSHEET.md
+PRISMA_NOTES.md
