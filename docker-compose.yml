@@ -27,6 +27,8 @@ services:
       NODE_ENV: production
     ports:
       - "3001:3001"
+    volumes:
+      - cache_images:/app/backend/cache/images
     depends_on:
       postgres:
         condition: service_healthy
@@ -36,6 +38,7 @@ services:
 
 volumes:
   postgres_data:
+  cache_images:
 
 networks:
   backlogus-network:

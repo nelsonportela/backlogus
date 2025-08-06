@@ -174,29 +174,41 @@ class ImageCacheService {
     return path.join(this.cacheDir, filename);
   }
 
-  // Convert external URL to local URL if cached
+  // Convert external URL to local URL, auto-caching if not present
   async getLocalUrl(externalUrl, baseUrl = 'http://localhost:3001') {
     if (!externalUrl) return null;
     const filename = this.getFilenameFromUrl(externalUrl);
     if (!filename) return externalUrl;
     const localPath = this.getLocalPath(filename);
+    
     try {
       await fs.access(localPath);
-      // File exists, return absolute URL in dev, relative in prod
+      // File exists, return local URL
       const isDev = process.env.NODE_ENV !== 'production';
       const base = isDev ? `http://localhost:3001` : '';
       return `${base}/images/${filename}`;
     } catch {
-      // File doesn't exist, return original URL
+      // File doesn't exist, cache it and return local URL if successful
+      try {
+        const cacheResult = await this.cacheImage(externalUrl, filename);
+        if (cacheResult) {
+          const isDev = process.env.NODE_ENV !== 'production';
+          const base = isDev ? `http://localhost:3001` : '';
+          return `${base}/images/${filename}`;
+        }
+      } catch (error) {
+        console.error(`Failed to auto-cache image ${externalUrl}:`, error);
+      }
+      // If caching fails, return original URL as fallback
       return externalUrl;
     }
   }
 
-  // Convert multiple URLs to local URLs where possible
+  // Convert multiple URLs to local URLs, auto-caching where needed
   async getLocalUrls(urls, baseUrl = 'http://localhost:3001') {
     if (!Array.isArray(urls)) return urls;
     const results = await Promise.allSettled(
-      urls.map(url => this.getLocalUrl(url))
+      urls.map(url => this.getLocalUrl(url, baseUrl))
     );
     return results.map((result, index) => 
       result.status === 'fulfilled' ? result.value : urls[index]
