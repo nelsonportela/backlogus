@@ -40,7 +40,7 @@
         v-if="imageUrl && !imgError"
         :src="imageUrl"
         :alt="item.name || item.title"
-        class="w-full h-full object-cover absolute inset-0 z-10 transition-opacity duration-300"
+        class="w-full h-full object-cover absolute inset-0 z-2 transition-opacity duration-300"
         :style="imgLoaded ? 'opacity:1;' : 'opacity:0;'"
         @load="imgLoaded = true"
         @error="imgError = true"
@@ -48,7 +48,7 @@
 
       <!-- Full Cover Gradient Overlay (appears on hover) -->
       <div
-        class="absolute inset-0 bg-gradient-to-t from-black/100 via-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        class="absolute z-3 inset-0 bg-gradient-to-t from-black/100 via-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
       <!-- Title Text (appears on hover) -->
       <div

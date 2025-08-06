@@ -171,7 +171,7 @@ class MovieService {
    * Creates a user-movie relationship
    */
   async createUserMovie(userId, movieId, movieData, statusMap, quickReviewMap) {
-    const { status = 'want_to_watch', personal_rating, quick_review, notes } = movieData
+    const { status = 'want_to_watch', quick_review, notes } = movieData
 
     const dbStatus = statusMap[status]
     const dbQuickReview = quick_review ? quickReviewMap[quick_review] : null
@@ -182,10 +182,8 @@ class MovieService {
           userId: userId,
           movieId: movieId,
           status: dbStatus,
-          personalRating: personal_rating,
           quickReview: dbQuickReview,
-          notes,
-          watchedDate: dbStatus === 'WATCHED' ? new Date() : null,
+          notes: notes || null,
         },
         include: {
           movie: true
@@ -228,10 +226,8 @@ class MovieService {
       certification: userMovie.movie.certification,
       trailer_key: userMovie.movie.trailerKey,
       status: this.reverseStatusMap[userMovie.status],
-      personal_rating: userMovie.personalRating,
       quick_review: userMovie.quickReview ? this.reverseQuickReviewMap[userMovie.quickReview] : null,
       notes: userMovie.notes,
-      watched_date: userMovie.watchedDate,
       added_at: userMovie.createdAt,
       updated_at: userMovie.updatedAt
     }
@@ -295,7 +291,7 @@ class MovieService {
    * Validates the request body for updating a user movie
    */
   validateUpdateMovieRequest(body) {
-    const { status, personal_rating, quick_review, notes } = body
+    const { status, quick_review, notes } = body
 
     const statusMap = {
       'want_to_watch': 'WANT_TO_WATCH',
@@ -318,17 +314,6 @@ class MovieService {
         throw new Error('Invalid status')
       }
       updateData.status = dbStatus
-      
-      // Set watchedDate when status changes to watched
-      if (dbStatus === 'WATCHED') {
-        updateData.watchedDate = new Date()
-      } else if (dbStatus !== 'WATCHED') {
-        updateData.watchedDate = null
-      }
-    }
-
-    if (personal_rating !== undefined) {
-      updateData.personalRating = personal_rating
     }
 
     if (quick_review !== undefined) {

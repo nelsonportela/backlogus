@@ -71,10 +71,10 @@ class GameService {
    * Validates the request body for adding a game to library
    */
   validateAddGameRequest(body) {
-    const { igdb_id, name, status, quick_review } = body
+    const { igdb_id, status, quick_review } = body
 
-    if (!igdb_id || !name) {
-      throw new Error('Game ID and name are required')
+    if (!igdb_id) {
+      throw new Error('IGDB ID is required')
     }
 
     const statusMap = {
@@ -104,61 +104,72 @@ class GameService {
   /**
    * Gets or creates a game record in the database
    */
-  async getOrCreateGame(gameData) {
-    const {
-      igdb_id,
-      name,
-      cover_url,
-      banner_url,
-      artworks,
-      release_date,
-      genres,
-      summary,
-      platforms,
-      developer,
-      publisher,
-      game_engine,
-      esrb_rating,
-      website,
-      screenshots,
-      franchise,
-      rating,
-      total_rating,
-      aggregated_rating
-    } = gameData
+  async getOrCreateGame(igdbId, igdbService) {
+    // Always fetch fresh detailed data from IGDB
+    const gameData = await igdbService.getGameById(parseInt(igdbId))
 
     let game = await this.prisma.game.findUnique({
-      where: { igdbId: parseInt(igdb_id) }
+      where: { igdbId: parseInt(igdbId) }
     })
 
     if (!game) {
       game = await this.prisma.game.create({
         data: {
-          igdbId: parseInt(igdb_id),
-          name,
-          coverUrl: cover_url || null,
-          bannerUrl: banner_url || null,
-          artworks: Array.isArray(artworks) ? artworks : [],
-          releaseDate: release_date ? new Date(release_date) : null,
-          genres: Array.isArray(genres) ? genres : [],
-          summary: summary || null,
-          platforms: Array.isArray(platforms) ? platforms : [],
-          developer: developer || null,
-          publisher: publisher || null,
-          gameEngine: game_engine || null,
-          esrbRating: esrb_rating || null,
-          website: website || null,
-          screenshots: Array.isArray(screenshots) ? screenshots : [],
-          franchise: franchise || null,
-          rating: rating ? parseFloat(rating) : null,
-          totalRating: total_rating ? parseFloat(total_rating) : null,
-          aggregatedRating: aggregated_rating ? parseFloat(aggregated_rating) : null
+          igdbId: parseInt(igdbId),
+          name: gameData.name,
+          coverUrl: gameData.cover_url || null,
+          bannerUrl: gameData.banner_url || null,
+          artworks: Array.isArray(gameData.artworks) ? gameData.artworks : [],
+          releaseDate: gameData.release_date ? new Date(gameData.release_date) : null,
+          genres: Array.isArray(gameData.genres) ? gameData.genres : [],
+          summary: gameData.summary || null,
+          platforms: Array.isArray(gameData.platforms) ? gameData.platforms : [],
+          developer: gameData.developer || null,
+          publisher: gameData.publisher || null,
+          gameEngine: gameData.game_engine || null,
+          esrbRating: gameData.esrb_rating || null,
+          website: gameData.website || null,
+          screenshots: Array.isArray(gameData.screenshots) ? gameData.screenshots : [],
+          franchise: gameData.franchise || null,
+          rating: gameData.rating ? parseFloat(gameData.rating) : null,
+          totalRating: gameData.total_rating ? parseFloat(gameData.total_rating) : null,
+          aggregatedRating: gameData.aggregated_rating ? parseFloat(gameData.aggregated_rating) : null
         }
       })
 
       // Cache all images for this game (fire and forget)
       cacheAllMediaImages('game', game).catch((err) => {
         this.logger.warn('Failed to cache some game images:', err)
+      })
+    } else {
+      // Update existing game with fresh data
+      game = await this.prisma.game.update({
+        where: { igdbId: parseInt(igdbId) },
+        data: {
+          name: gameData.name,
+          coverUrl: gameData.cover_url || null,
+          bannerUrl: gameData.banner_url || null,
+          artworks: Array.isArray(gameData.artworks) ? gameData.artworks : [],
+          releaseDate: gameData.release_date ? new Date(gameData.release_date) : null,
+          genres: Array.isArray(gameData.genres) ? gameData.genres : [],
+          summary: gameData.summary || null,
+          platforms: Array.isArray(gameData.platforms) ? gameData.platforms : [],
+          developer: gameData.developer || null,
+          publisher: gameData.publisher || null,
+          gameEngine: gameData.game_engine || null,
+          esrbRating: gameData.esrb_rating || null,
+          website: gameData.website || null,
+          screenshots: Array.isArray(gameData.screenshots) ? gameData.screenshots : [],
+          franchise: gameData.franchise || null,
+          rating: gameData.rating ? parseFloat(gameData.rating) : null,
+          totalRating: gameData.total_rating ? parseFloat(gameData.total_rating) : null,
+          aggregatedRating: gameData.aggregated_rating ? parseFloat(gameData.aggregated_rating) : null
+        }
+      })
+
+      // Cache updated images (fire and forget)
+      cacheAllMediaImages('game', game).catch((err) => {
+        this.logger.warn('Failed to cache some updated game images:', err)
       })
     }
 
@@ -258,8 +269,17 @@ class GameService {
       // Validate request
       const { statusMap, quickReviewMap } = this.validateAddGameRequest(gameData)
 
-      // Get or create game record
-      const game = await this.getOrCreateGame(gameData)
+      // Get user's IGDB credentials
+      const userCredentials = await this.getUserIGDBCredentials(userId)
+      if (!userCredentials) {
+        throw new Error('IGDB credentials not found or inactive')
+      }
+
+      // Create IGDB service instance
+      const igdbService = new IGDBService(userCredentials.clientId, userCredentials.accessToken)
+
+      // Get or create game record with fresh detailed data
+      const game = await this.getOrCreateGame(gameData.igdb_id, igdbService)
 
       // Check if user already has this game
       await this.checkExistingUserGame(userId, game.id)

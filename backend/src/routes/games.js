@@ -91,10 +91,16 @@ async function gamesRoutes(fastify, options) {
       return reply.status(201).send(responseGame)
     } catch (error) {
       // Handle validation errors
-      if (error.message === 'Game ID and name are required' ||
+      if (error.message === 'IGDB ID is required' ||
           error.message === 'Invalid status value' ||
           error.message === 'Invalid quick_review value') {
         return reply.status(400).send({ message: error.message })
+      }
+
+      if (error.message.includes('credentials not found') || error.message.includes('credentials not configured')) {
+        return reply.status(400).send({ 
+          message: 'IGDB API credentials not configured. Please add your IGDB credentials in Settings.' 
+        })
       }
 
       if (error.message === 'Game already in your library') {
