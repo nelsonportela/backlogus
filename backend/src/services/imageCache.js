@@ -11,6 +11,12 @@ class ImageCacheService {
     // Create cache directory in backend/cache/images
     this.cacheDir = path.join(__dirname, '../../cache/images');
     this.ensureCacheDir();
+    
+    // Rate limiting and retry configuration
+    this.downloadQueue = [];
+    this.activeDownloads = 0;
+    this.maxConcurrentDownloads = 3; // Limit concurrent downloads
+    this.downloadDelay = 200; // 200ms delay between downloads
   }
 
   async ensureCacheDir() {
@@ -41,8 +47,8 @@ class ImageCacheService {
     return safeName;
   }
 
-  // Download and cache an image
-  async cacheImage(url, customFilename = null) {
+  // Download and cache an image with retry logic
+  async cacheImage(url, customFilename = null, retries = 2) {
     if (!url) return null;
 
     try {
@@ -61,38 +67,68 @@ class ImageCacheService {
         // File doesn't exist, need to download
       }
 
-      // Download the image
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Download with timeout and retry logic
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          
+          const response = await fetch(url, {
+            signal: controller.signal,
+            headers: {
+              'User-Agent': 'BackLogus/1.0.0 (Image Cache Service)'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const buffer = await response.arrayBuffer();
+          await fs.writeFile(filePath, Buffer.from(buffer));
+
+          return {
+            filename,
+            path: filePath,
+            cached: false,
+            size: buffer.byteLength
+          };
+        } catch (error) {
+          if (attempt === retries) {
+            // Final attempt failed, but don't spam logs for every failure
+            if (attempt > 0) {
+              console.warn(`Failed to cache image after ${retries + 1} attempts: ${url} - ${error.message}`);
+            }
+            return null;
+          }
+          
+          // Wait before retry (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-
-      const buffer = await response.arrayBuffer();
-      await fs.writeFile(filePath, Buffer.from(buffer));
-
-      return {
-        filename,
-        path: filePath,
-        cached: false,
-        size: buffer.byteLength
-      };
     } catch (error) {
-      console.error(`Failed to cache image ${url}:`, error);
+      // Silently handle errors to prevent log spam
       return null;
     }
   }
 
-  // Cache multiple images
+  // Cache multiple images with rate limiting
   async cacheImages(urls) {
     if (!urls || urls.length === 0) return [];
     
-    const results = await Promise.allSettled(
-      urls.map(url => this.cacheImage(url))
-    );
-
-    return results
-      .filter(result => result.status === 'fulfilled' && result.value !== null)
-      .map(result => result.value);
+    // Use queued downloads instead of parallel Promise.allSettled
+    const results = [];
+    for (const url of urls) {
+      if (url) {
+        const result = await this.queueDownload(url);
+        if (result) results.push(result);
+      }
+    }
+    
+    return results;
   }
 
   // Get all cached image info for backup
@@ -174,7 +210,38 @@ class ImageCacheService {
     return path.join(this.cacheDir, filename);
   }
 
-  // Convert external URL to local URL, auto-caching if not present
+  // Rate-limited queue for downloading images
+  async queueDownload(url, filename) {
+    return new Promise((resolve) => {
+      this.downloadQueue.push({ url, filename, resolve });
+      this.processQueue();
+    });
+  }
+
+  async processQueue() {
+    if (this.activeDownloads >= this.maxConcurrentDownloads || this.downloadQueue.length === 0) {
+      return;
+    }
+
+    this.activeDownloads++;
+    const { url, filename, resolve } = this.downloadQueue.shift();
+
+    try {
+      const result = await this.cacheImage(url, filename);
+      resolve(result);
+    } catch (error) {
+      resolve(null);
+    } finally {
+      this.activeDownloads--;
+      
+      // Small delay between downloads to be respectful to servers
+      setTimeout(() => {
+        this.processQueue();
+      }, this.downloadDelay);
+    }
+  }
+
+  // Convert external URL to local URL, with smart caching
   async getLocalUrl(externalUrl, baseUrl = 'http://localhost:3001') {
     if (!externalUrl) return null;
     const filename = this.getFilenameFromUrl(externalUrl);
@@ -188,31 +255,35 @@ class ImageCacheService {
       const base = isDev ? `http://localhost:3001` : '';
       return `${base}/images/${filename}`;
     } catch {
-      // File doesn't exist, cache it and return local URL if successful
-      try {
-        const cacheResult = await this.cacheImage(externalUrl, filename);
-        if (cacheResult) {
-          const isDev = process.env.NODE_ENV !== 'production';
-          const base = isDev ? `http://localhost:3001` : '';
-          return `${base}/images/${filename}`;
-        }
-      } catch (error) {
-        console.error(`Failed to auto-cache image ${externalUrl}:`, error);
-      }
-      // If caching fails, return original URL as fallback
+      // File doesn't exist, try to cache it (but don't block the response)
+      // Use queued download to prevent overwhelming servers
+      this.queueDownload(externalUrl, filename).then(result => {
+        // Cache result is handled asynchronously, don't block the response
+      }).catch(() => {
+        // Silently handle cache failures
+      });
+      
+      // Return external URL immediately as fallback
       return externalUrl;
     }
   }
 
-  // Convert multiple URLs to local URLs, auto-caching where needed
+  // Convert multiple URLs to local URLs, with smart batching
   async getLocalUrls(urls, baseUrl = 'http://localhost:3001') {
     if (!Array.isArray(urls)) return urls;
-    const results = await Promise.allSettled(
-      urls.map(url => this.getLocalUrl(url, baseUrl))
-    );
-    return results.map((result, index) => 
-      result.status === 'fulfilled' ? result.value : urls[index]
-    );
+    
+    // Process URLs one by one to prevent overwhelming servers
+    const results = [];
+    for (const url of urls) {
+      try {
+        const localUrl = await this.getLocalUrl(url, baseUrl);
+        results.push(localUrl);
+      } catch (error) {
+        results.push(url); // Fallback to original URL
+      }
+    }
+    
+    return results;
   }
 
   // Get cache statistics
