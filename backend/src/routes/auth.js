@@ -1,120 +1,56 @@
-import bcrypt from 'bcryptjs'
+import AuthService from '../services/authService.js'
 
 async function authRoutes(fastify, options) {
   // Register endpoint
   fastify.post('/register', async (request, reply) => {
     const { email, password } = request.body
+    const authService = new AuthService(fastify.prisma, fastify.jwt, fastify.log)
     
-    if (!email || !password) {
-      return reply.status(400).send({ 
-        message: 'Email and password are required' 
-      })
-    }
-
-    if (password.length < 6) {
-      return reply.status(400).send({ 
-        message: 'Password must be at least 6 characters long' 
-      })
-    }
-
     try {
-      // Check if user exists
-      const existingUser = await fastify.prisma.user.findUnique({
-        where: { email }
-      })
-
-      if (existingUser) {
-        return reply.status(409).send({ 
-          message: 'User already exists' 
-        })
-      }
-
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 12)
-
-      // Create user
-      const user = await fastify.prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword
-        },
-        select: {
-          id: true,
-          email: true,
-          createdAt: true
-        }
-      })
-
-      // Generate JWT
-      const token = fastify.jwt.sign({ 
-        userId: user.id, 
-        email: user.email 
-      })
-
+      const result = await authService.registerUser(email, password)
       return reply.send({
         message: 'User created successfully',
-        user,
-        token
+        ...result
       })
     } catch (error) {
+      // Handle validation errors
+      if (error.message === 'Email and password are required' ||
+          error.message === 'Password must be at least 6 characters long') {
+        return reply.status(400).send({ message: error.message })
+      }
+
+      if (error.message === 'User already exists') {
+        return reply.status(409).send({ message: error.message })
+      }
+
       fastify.log.error(error)
-      return reply.status(500).send({ 
-        message: 'Internal server error' 
-      })
+      return reply.status(500).send({ message: 'Internal server error' })
     }
   })
 
   // Login endpoint
   fastify.post('/login', async (request, reply) => {
     const { email, password } = request.body
-
-    if (!email || !password) {
-      return reply.status(400).send({ 
-        message: 'Email and password are required' 
-      })
-    }
+    const authService = new AuthService(fastify.prisma, fastify.jwt, fastify.log)
 
     try {
-      // Find user
-      const user = await fastify.prisma.user.findUnique({
-        where: { email }
-      })
-
-      if (!user) {
-        return reply.status(401).send({ 
-          message: 'Invalid credentials' 
-        })
-      }
-
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.password)
-
-      if (!isValidPassword) {
-        return reply.status(401).send({ 
-          message: 'Invalid credentials' 
-        })
-      }
-
-      // Generate JWT
-      const token = fastify.jwt.sign({ 
-        userId: user.id, 
-        email: user.email 
-      })
-
+      const result = await authService.loginUser(email, password)
       return reply.send({
         message: 'Login successful',
-        user: {
-          id: user.id,
-          email: user.email,
-          createdAt: user.createdAt
-        },
-        token
+        ...result
       })
     } catch (error) {
+      // Handle validation errors
+      if (error.message === 'Email and password are required') {
+        return reply.status(400).send({ message: error.message })
+      }
+
+      if (error.message === 'Invalid email or password') {
+        return reply.status(401).send({ message: 'Invalid credentials' })
+      }
+
       fastify.log.error(error)
-      return reply.status(500).send({ 
-        message: 'Internal server error' 
-      })
+      return reply.status(500).send({ message: 'Internal server error' })
     }
   })
 
@@ -122,29 +58,18 @@ async function authRoutes(fastify, options) {
   fastify.get('/me', {
     preHandler: [fastify.authenticate]
   }, async (request, reply) => {
+    const authService = new AuthService(fastify.prisma, fastify.jwt, fastify.log)
+
     try {
-      const user = await fastify.prisma.user.findUnique({
-        where: { id: request.user.userId },
-        select: {
-          id: true,
-          email: true,
-          createdAt: true,
-          updatedAt: true
-        }
-      })
-
-      if (!user) {
-        return reply.status(404).send({ 
-          message: 'User not found' 
-        })
-      }
-
+      const user = await authService.getAuthenticatedUser(request.user.userId)
       return reply.send({ user })
     } catch (error) {
+      if (error.message === 'User not found') {
+        return reply.status(404).send({ message: error.message })
+      }
+
       fastify.log.error(error)
-      return reply.status(500).send({ 
-        message: 'Internal server error' 
-      })
+      return reply.status(500).send({ message: 'Internal server error' })
     }
   })
 }

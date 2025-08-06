@@ -91,6 +91,8 @@ await fastify.register(import('./routes/user.js'), { prefix: '/api/user' })
 await fastify.register(import('./routes/games.js'), { prefix: '/api/games' })
 await fastify.register(import('./routes/movies.js'), { prefix: '/api/movies' })
 await fastify.register(import('./routes/media.js'), { prefix: '/api/media' })
+await fastify.register(import('./routes/backup.js'), { prefix: '/api/user' })
+await fastify.register(import('./routes/cache.js'), { prefix: '/api/cache' })
 
 // Health check
 fastify.get('/api/health', async (request, reply) => {

@@ -132,6 +132,40 @@
                         class="text-sm text-gray-500 dark:text-gray-400 truncate">
                         {{ item.genres.join(", ") }}
                       </p>
+                      <p
+                        v-if="item.platforms && item.platforms.length > 0"
+                        class="text-sm text-gray-500 dark:text-gray-400 truncate cursor-pointer"
+                        @click.stop="showAllPlatforms = item.id"
+                      >
+                        {{ item.platforms.slice(0, 2).join(', ') }}
+                        <span v-if="item.platforms.length > 2" class="underline cursor-pointer">
+                          +{{ item.platforms.length - 2 }} more
+                        </span>
+                      </p>
+                      <!-- Full list modal -->
+                      <div
+                        v-if="showAllPlatforms === item.id"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                        @click.self="showAllPlatforms = null"
+                      >
+                        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-sm w-full p-6">
+                          <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Platforms</h3>
+                            <button
+                              @click="showAllPlatforms = null"
+                              class="ml-2 bg-red-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+                              title="Close"
+                            >
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                          <ul class="space-y-1 max-h-48 overflow-y-auto">
+                            <li v-for="platform in item.platforms" :key="platform" class="text-gray-800 dark:text-gray-200 text-sm">{{ platform }}</li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <button
@@ -194,6 +228,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+const showAllPlatforms = ref(null);
 import AddToLibraryModal from "../media/AddToLibraryModal.vue";
 
 const isSearchModalOpen = ref(false);
