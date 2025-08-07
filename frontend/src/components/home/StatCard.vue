@@ -11,7 +11,8 @@
     </div>
 
     <div v-else>
-      <div class="flex items-center justify-between mb-4">
+      <!-- Desktop layout (md and up) -->
+      <div class="hidden md:flex items-center justify-between mb-4">
         <div
           class="w-12 h-12 rounded-lg flex items-center justify-center text-white"
           :class="iconBgClass">
@@ -20,19 +21,50 @@
           </svg>
         </div>
         <div
-          class="px-2 py-1 rounded-full text-xs font-medium"
+          class="px-3 py-1 rounded-full text-xs font-medium"
           :class="changeBadgeClass">
           {{ change }}
         </div>
       </div>
 
-      <div class="mb-1">
+      <!-- Mobile layout (below md) -->
+      <div class="md:hidden">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div
+              class="w-6 h-6 rounded flex items-center justify-center text-white"
+              :class="iconBgClass">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path :d="iconComponent" />
+              </svg>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              {{ label }}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {{ formattedValue }}
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-center mt-2">
+          <div
+            class="px-1.5 py-0.5 rounded-full text-xs font-medium"
+            :class="changeBadgeClass">
+            {{ change }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop content -->
+      <div class="hidden md:block mb-1">
         <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ formattedValue }}
         </div>
       </div>
 
-      <div class="text-sm text-gray-500 dark:text-gray-400">
+      <div class="hidden md:block text-sm text-gray-500 dark:text-gray-400">
         {{ label }}
       </div>
     </div>

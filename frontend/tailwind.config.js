@@ -12,6 +12,12 @@ export default {
           700: "#1d4ed8",
         },
       },
+      height: {
+        'screen-dynamic': ['100vh', '100dvh', 'calc(var(--vh, 1vh) * 100)'],
+      },
+      minHeight: {
+        'screen-dynamic': ['100vh', '100dvh', 'calc(var(--vh, 1vh) * 100)'],
+      },
     },
   },
   plugins: [],

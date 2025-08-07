@@ -3,8 +3,26 @@
 @tailwind utilities;
 
 @layer base {
+  /* CSS Custom Property for dynamic viewport height */
+  :root {
+    --vh: 1vh;
+  }
+
   body {
     @apply bg-gray-50;
+  }
+
+  /* Mobile viewport height handling */
+  .min-h-screen {
+    min-height: 100vh; /* Fallback */
+    min-height: 100dvh; /* Dynamic viewport height for modern browsers */
+    min-height: calc(var(--vh, 1vh) * 100); /* JavaScript fallback */
+  }
+
+  .h-screen {
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Dynamic viewport height for modern browsers */
+    height: calc(var(--vh, 1vh) * 100); /* JavaScript fallback */
   }
 
   /* Ensure touch targets are at least 44px */

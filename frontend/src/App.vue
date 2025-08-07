@@ -4,8 +4,9 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "App",
-};
+<script setup>
+import { useViewportHeight } from '@/composables/useViewportHeight'
+
+// Initialize dynamic viewport height handling
+useViewportHeight()
 </script>
