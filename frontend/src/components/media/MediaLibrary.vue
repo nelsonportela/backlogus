@@ -306,10 +306,17 @@ const mediaTypeLabel = computed(() => {
     read: "Read",
   };
 
-  // Capitalize first letter of route name
-  const baseLabel = routeName
-    ? routeName.charAt(0).toUpperCase() + routeName.slice(1)
-    : "Media";
+  // Map route names to proper labels
+  const routeLabels = {
+    games: "Games",
+    movies: "Movies", 
+    tv: "TV Shows",
+    books: "Books"
+  };
+
+  // Get the proper base label
+  const baseLabel = routeLabels[routeName] || 
+    (routeName ? routeName.charAt(0).toUpperCase() + routeName.slice(1) : "Media");
 
   // If there's a status and it's not 'all', append it
   if (status && status !== "all" && statusLabels[status]) {

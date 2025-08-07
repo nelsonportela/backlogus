@@ -22,6 +22,7 @@ model User {
   apiCredentials  UserApiCredential[]
   userGames       UserGame[]
   userMovies      UserMovie[]
+  userShows       UserShow[]
 
   @@map("users")
 }
@@ -86,6 +87,59 @@ model Movie {
   @@map("movies")
 }
 
+model Show {
+  id               Int        @id @default(autoincrement())
+  tmdbId           Int        @unique @map("tmdb_id")
+  name             String
+  originalName     String?    @map("original_name")
+  coverUrl         String?    @map("cover_url")
+  backdropUrl      String?    @map("backdrop_url")
+  firstAirDate     DateTime?  @map("first_air_date")
+  lastAirDate      DateTime?  @map("last_air_date")
+  genres           String[]   @default([])
+  summary          String?
+  networks         String[]   @default([])
+  creators         Json?
+  cast             Json?
+  seasons          Int?
+  episodes         Int?
+  episodeRuntime   Int?       @map("episode_runtime")
+  rating           Float?
+  voteCount        Int?       @map("vote_count")
+  homepage         String?
+  imdbId           String?    @map("imdb_id")
+  tagline          String?
+  status           String?    // "Ended", "Continuing", "Cancelled"
+  type             String?    // "Scripted", "Documentary", etc.
+  originalLanguage String?    @map("original_language")
+  popularity       Float?
+  certification    String?
+  trailerKey       String?    @map("trailer_key")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  userShows        UserShow[]
+
+  @@map("shows")
+}
+
+model UserShow {
+  id             Int         @id @default(autoincrement())
+  status         ShowStatus  @default(WANT_TO_WATCH)
+  quickReview    QuickReview? @map("quick_review")
+  currentSeason  Int?        @map("current_season")
+  currentEpisode Int?        @map("current_episode")
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  userId         Int         @map("user_id")
+  showId         Int         @map("show_id")
+  show           Show        @relation(fields: [showId], references: [id], onDelete: Cascade)
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, showId])
+  @@map("user_shows")
+}
+
 model UserMovie {
   id             Int          @id @default(autoincrement())
   status         MovieStatus  @default(WANT_TO_WATCH)
@@ -146,6 +200,13 @@ enum GameStatus {
 }
 
 enum MovieStatus {
+  WANT_TO_WATCH
+  WATCHING
+  WATCHED
+  DROPPED
+}
+
+enum ShowStatus {
   WANT_TO_WATCH
   WATCHING
   WATCHED

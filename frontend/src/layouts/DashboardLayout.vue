@@ -173,35 +173,75 @@
 
           <!-- TV Shows Section -->
           <div v-if="enabledMenuOptions.includes('tv')">
-            <router-link
-              :to="{ name: 'tv' }"
-              class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            <div
+              @click="handleShowsMenuClick"
+              class="flex items-center justify-between px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
               :class="{
                 'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
-                  route.name === 'tv',
+                  isShowsRoute,
               }">
+              <div class="flex items-center">
+                <svg
+                  class="w-5 h-5 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <rect
+                    x="3"
+                    y="7"
+                    width="18"
+                    height="13"
+                    rx="2"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path
+                    d="M16 3l-4 4-4-4"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                TV Shows
+              </div>
               <svg
-                class="w-5 h-5 mr-3"
+                class="w-4 h-4 transition-transform duration-200"
+                :class="{ 'rotate-180': showsSubmenuOpen }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24">
-                <rect
-                  x="3"
-                  y="7"
-                  width="18"
-                  height="13"
-                  rx="2"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round" />
                 <path
-                  d="M16 3l-4 4-4-4"
-                  stroke-width="2"
                   stroke-linecap="round"
-                  stroke-linejoin="round" />
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7" />
               </svg>
-              TV Shows
-            </router-link>
+            </div>
+
+            <!-- TV Shows Submenu -->
+            <transition
+              enter-active-class="transition-all duration-300 ease-out"
+              enter-from-class="opacity-0 max-h-0 transform -translate-y-2"
+              enter-to-class="opacity-100 max-h-96 transform translate-y-0"
+              leave-active-class="transition-all duration-300 ease-in"
+              leave-from-class="opacity-100 max-h-96 transform translate-y-0"
+              leave-to-class="opacity-0 max-h-0 transform -translate-y-2">
+              <div
+                v-show="showsSubmenuOpen"
+                class="ml-6 mt-2 space-y-1 overflow-hidden">
+                <router-link
+                  v-for="status in showStatuses"
+                  :key="status.value"
+                  :to="{ name: 'tv', query: { status: status.value } }"
+                  class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  :class="{
+                    'bg-primary-100 dark:bg-gray-600 text-primary-700 dark:text-gray-100 font-medium':
+                      $route.query.status === status.value ||
+                      (!$route.query.status && status.value === 'all'),
+                  }">
+                  {{ status.label }}
+                </router-link>
+              </div>
+            </transition>
           </div>
 
           <!-- Books Section -->
@@ -426,6 +466,7 @@ const { isDark, toggleTheme } = useTheme();
 // Submenu state - keep games submenu open when on games page
 const gamesSubmenuOpen = ref(route.name === "games");
 const moviesSubmenuOpen = ref(route.name === "movies");
+const showsSubmenuOpen = ref(route.name === "tv");
 
 // Mobile menu state
 const mobileMenuOpen = ref(false);
@@ -448,12 +489,25 @@ const movieStatuses = [
   { value: "dropped", label: "Dropped" },
 ];
 
+// TV Show statuses configuration  
+const showStatuses = [
+  { value: "all", label: "All TV Shows" },
+  { value: "watching", label: "Watching" },
+  { value: "watched", label: "Watched" },  
+  { value: "want_to_watch", label: "Want to Watch" },
+  { value: "dropped", label: "Dropped" },
+];
+
 const isGamesRoute = computed(() => {
   return route.name === "games";
 });
 
 const isMoviesRoute = computed(() => {
   return route.name === "movies";
+});
+
+const isShowsRoute = computed(() => {
+  return route.name === "tv";
 });
 
 const dynamicTitle = computed(() => {
@@ -474,6 +528,7 @@ const toggleGamesSubmenu = () => {
   if (gamesSubmenuOpen.value) {
     setTimeout(() => {
       moviesSubmenuOpen.value = false;
+      showsSubmenuOpen.value = false;
     }, 150);
   }
 };
@@ -484,6 +539,18 @@ const toggleMoviesSubmenu = () => {
   if (moviesSubmenuOpen.value) {
     setTimeout(() => {
       gamesSubmenuOpen.value = false;
+      showsSubmenuOpen.value = false;
+    }, 150);
+  }
+};
+
+const toggleShowsSubmenu = () => {
+  showsSubmenuOpen.value = !showsSubmenuOpen.value;
+  // Close other submenus when opening shows submenu with a slight delay for smoother UX
+  if (showsSubmenuOpen.value) {
+    setTimeout(() => {
+      gamesSubmenuOpen.value = false;
+      moviesSubmenuOpen.value = false;
     }, 150);
   }
 };
@@ -520,6 +587,22 @@ const handleMoviesMenuClick = () => {
   }
 };
 
+const handleShowsMenuClick = () => {
+  // If submenu is already open and we're not on tv route, navigate to tv
+  if (showsSubmenuOpen.value && route.name !== "tv") {
+    router.push({ name: "tv", query: { status: "all" } });
+  }
+  // If we're already on tv route, just toggle submenu
+  else if (route.name === "tv") {
+    toggleShowsSubmenu();
+  }
+  // If submenu is closed, open it and navigate to tv
+  else {
+    toggleShowsSubmenu();
+    router.push({ name: "tv", query: { status: "all" } });
+  }
+};
+
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
@@ -536,6 +619,8 @@ watch(
       gamesSubmenuOpen.value = true;
     } else if (newRouteName === "movies") {
       moviesSubmenuOpen.value = true;
+    } else if (newRouteName === "tv") {
+      showsSubmenuOpen.value = true;
     }
     // Close mobile menu on route change
     mobileMenuOpen.value = false;

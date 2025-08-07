@@ -127,6 +127,18 @@
                         class="text-sm text-gray-500 dark:text-gray-400">
                         {{ getItemYear(item) }}
                       </p>
+                      <!-- TV Show specific info -->
+                      <div v-if="mediaType === 'show'" class="text-sm text-gray-500 dark:text-gray-400">
+                        <p v-if="item.seasons">
+                          {{ item.seasons }} {{ item.seasons === 1 ? 'season' : 'seasons' }}
+                          <span v-if="item.episodes">({{ item.episodes }} episodes)</span>
+                        </p>
+                        <p v-if="item.status" class="text-xs mt-1">
+                          <span :class="getStatusColor(item.status)" class="px-2 py-0.5 rounded-full text-xs font-medium">
+                            {{ item.status }}
+                          </span>
+                        </p>
+                      </div>
                       <p
                         v-if="item.genres && item.genres.length > 0"
                         class="text-sm text-gray-500 dark:text-gray-400 truncate">
@@ -352,10 +364,24 @@ const getItemName = (item) => {
 };
 
 const getItemYear = (item) => {
-  const date = item.release_date || item.publication_date || item.air_date;
+  const date = item.release_date || item.publication_date || item.air_date || item.first_air_date;
   if (date) {
     return new Date(date).getFullYear();
   }
   return null;
+};
+
+const getStatusColor = (status) => {
+  if (!status) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+  
+  const statusLower = status.toLowerCase();
+  
+  if (statusLower.includes('ended') || statusLower.includes('canceled') || statusLower.includes('cancelled')) {
+    return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+  } else if (statusLower.includes('returning') || statusLower.includes('continuing') || statusLower.includes('ongoing')) {
+    return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+  } else {
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+  }
 };
 </script>

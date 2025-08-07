@@ -90,7 +90,8 @@ const dateField = computed(() => {
   return (
     props.item.release_date ||
     props.item.publication_date ||
-    props.item.air_date
+    props.item.air_date ||
+    props.item.first_air_date
   );
 });
 </script>

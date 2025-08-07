@@ -5,7 +5,7 @@ import DashboardLayout from "@/layouts/DashboardLayout.vue";
 import HomeView from "@/views/HomeView.vue";
 import GamesView from "@/views/GamesView.vue";
 import MoviesView from "@/views/MoviesView.vue";
-import TvView from "@/views/MoviesView.vue";
+import ShowsView from "@/views/ShowsView.vue";
 import BooksView from "@/views/MoviesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 
@@ -45,7 +45,7 @@ const router = createRouter({
         {
           path: "tv",
           name: "tv",
-          component: TvView,
+          component: ShowsView,
         },
         {
           path: "books",

@@ -270,6 +270,38 @@
                     No platform information available
                   </div>
                 </div>
+
+                <!-- Current Season (for TV shows) -->
+                <div v-if="mediaType === 'show' && item.status !== 'watched'">
+                  <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Current Season
+                  </label>
+                  <input
+                    type="number"
+                    :value="item.current_season || ''"
+                    @change="updateCurrentSeason"
+                    min="1"
+                    max="999"
+                    placeholder="Season #"
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
+                </div>
+
+                <!-- Current Episode (for TV shows) -->
+                <div v-if="mediaType === 'show' && item.status !== 'watched'">
+                  <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Current Episode
+                  </label>
+                  <input
+                    type="number"
+                    :value="item.current_episode || ''"
+                    @change="updateCurrentEpisode"
+                    min="1"
+                    max="999"
+                    placeholder="Episode #"
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
+                </div>
               </div>
             </div>
           </div>
@@ -320,6 +352,7 @@ import MovieDetails from "./details/MovieDetails.vue";
 import BookDetails from "./details/BookDetails.vue";
 import ShowDetails from "./details/ShowDetails.vue";
 import { useMoviesStore } from "../../stores/movies.js";
+import { useShowsStore } from "../../stores/shows.js";
 import { getStatusOptions } from "@/composables/useStatusOptions";
 
 const props = defineProps({
@@ -356,8 +389,9 @@ const emit = defineEmits([
 // Add to Library Modal state
 const showAddToLibraryModal = ref(false);
 
-// Enhanced item data for movies
+// Enhanced item data for movies and shows
 const moviesStore = useMoviesStore();
+const showsStore = useShowsStore();
 const enhancedItem = ref(null);
 const isLoadingDetails = ref(false);
 
@@ -368,17 +402,24 @@ const displayItem = computed(() => enhancedItem.value || props.item);
 watch(
   [() => props.isOpen, () => props.item],
   async ([isOpen, item]) => {
-    if (isOpen && item && props.mediaType === "movie" && !props.isInLibrary) {
-      // For search results (not library items), fetch full movie details
+    if (isOpen && item && !props.isInLibrary) {
+      // For search results (not library items), fetch full details
       if (item.tmdbId && !enhancedItem.value) {
         isLoadingDetails.value = true;
         try {
-          const result = await moviesStore.getItemDetails(item.tmdbId);
-          if (result.success) {
+          let result;
+          if (props.mediaType === "movie") {
+            result = await moviesStore.getItemDetails(item.tmdbId);
+          } else if (props.mediaType === "show") {
+            result = await showsStore.getItemDetails(item.tmdbId);
+          }
+          
+          if (result && result.success) {
             enhancedItem.value = result.data;
           }
-        } catch {
-          // Failed to fetch movie details - handle gracefully
+        } catch (error) {
+          // Failed to fetch details - handle gracefully
+          console.warn(`Failed to fetch ${props.mediaType} details:`, error);
         } finally {
           isLoadingDetails.value = false;
         }
@@ -414,6 +455,16 @@ const updateItemStatus = (event) => {
 
 const updateUserPlatform = (event) => {
   emit("update-item", props.item.id, { user_platform: event.target.value });
+};
+
+const updateCurrentSeason = (event) => {
+  const value = event.target.value;
+  emit("update-item", props.item.id, { current_season: value ? parseInt(value) : null });
+};
+
+const updateCurrentEpisode = (event) => {
+  const value = event.target.value;
+  emit("update-item", props.item.id, { current_episode: value ? parseInt(value) : null });
 };
 
 const toggleQuickReview = (reviewValue) => {

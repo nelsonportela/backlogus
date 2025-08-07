@@ -25,12 +25,34 @@
       </div>
 
       <!-- Duration/Length -->
-      <div v-if="item.runtime || item.duration || item.playtime">
+      <div v-if="item.runtime || item.duration || item.playtime || item.episode_runtime">
         <span class="text-gray-600 dark:text-gray-400">
           {{ getDurationLabel() }}:
         </span>
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
-          {{ formatRuntime(item.runtime || item.duration || item.playtime) }}
+          {{ formatRuntime(item.runtime || item.duration || item.playtime || item.episode_runtime) }}
+        </span>
+      </div>
+
+      <!-- TV Show specific info -->
+      <div v-if="mediaType === 'show' && item.seasons">
+        <span class="text-gray-600 dark:text-gray-400">Seasons:</span>
+        <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
+          {{ item.seasons }}
+        </span>
+      </div>
+
+      <div v-if="mediaType === 'show' && item.episodes">
+        <span class="text-gray-600 dark:text-gray-400">Episodes:</span>
+        <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
+          {{ item.episodes }}
+        </span>
+      </div>
+
+      <div v-if="mediaType === 'show' && (item.show_status || item.status)">
+        <span class="text-gray-600 dark:text-gray-400">Status:</span>
+        <span :class="getStatusColor(item.show_status || item.status)" class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium">
+          {{ item.show_status || item.status }}
         </span>
       </div>
 
@@ -107,11 +129,26 @@ const formatRuntime = (minutes) => {
   return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 };
 
+const getStatusColor = (status) => {
+  const statusColors = {
+    'returning series': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    'ended': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'canceled': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'in production': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'planned': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'pilot': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+  };
+  
+  const lowerStatus = status ? status.toLowerCase() : '';
+  return statusColors[lowerStatus] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+};
+
 const getDateField = (item) => {
   return (
     item.release_date ||
     item.publication_date ||
     item.air_date ||
+    item.first_air_date ||
     item.premiere_date
   );
 };
