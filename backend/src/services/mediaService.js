@@ -148,6 +148,25 @@ class MediaService {
         statusCounts[status] = (statusCounts[status] || 0) + 1
       })
 
+      // Genre analysis for movies
+      const genreCounts = {}
+      userMovies.forEach(userMovie => {
+        if (userMovie.movie.genres && Array.isArray(userMovie.movie.genres)) {
+          userMovie.movie.genres.forEach(genre => {
+            genreCounts[genre] = (genreCounts[genre] || 0) + 1
+          })
+        }
+      })
+
+      const topGenres = Object.entries(genreCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 8)
+        .map(([name, count]) => ({
+          name,
+          count,
+          percentage: totalItems > 0 ? Math.round((count / totalItems) * 100) : 0
+        }))
+
       // Basic monthly data
       const currentYear = new Date().getFullYear()
       const monthlyData = new Array(12).fill(0)
@@ -172,7 +191,7 @@ class MediaService {
       return {
         totalItems,
         statusDistribution: statusCounts,
-        topGenres: [], // Will be populated with movie genres
+        topGenres: topGenres,
         monthlyData,
         platformDistribution: [], // Not applicable for movies
         reviewDistribution: { positive: 0, neutral: 0, negative: 0, none: 0 },
@@ -204,34 +223,149 @@ class MediaService {
   }
 
   /**
+   * Gets TV show statistics
+   */
+  async getShowStatistics(userId) {
+    try {
+      const statusMap = {
+        'WANT_TO_WATCH': 'want_to_watch',
+        'WATCHING': 'watching',
+        'WATCHED': 'watched',
+        'DROPPED': 'dropped'
+      }
+
+      // Get all user shows with details
+      const userShows = await this.prisma.userShow.findMany({
+        where: { userId },
+        include: { show: true },
+        orderBy: { updatedAt: 'desc' }
+      })
+
+      // Basic counts
+      const totalItems = userShows.length
+      const statusCounts = {}
+      userShows.forEach(userShow => {
+        const status = statusMap[userShow.status]
+        statusCounts[status] = (statusCounts[status] || 0) + 1
+      })
+
+      // Genre analysis
+      const genreCounts = {}
+      userShows.forEach(userShow => {
+        if (userShow.show.genres && Array.isArray(userShow.show.genres)) {
+          userShow.show.genres.forEach(genre => {
+            genreCounts[genre] = (genreCounts[genre] || 0) + 1
+          })
+        }
+      })
+
+      const topGenres = Object.entries(genreCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 10)
+        .map(([genre, count]) => ({ name: genre, count }))
+
+      // Monthly data (shows added over the past 12 months)
+      const currentYear = new Date().getFullYear()
+      const monthlyData = new Array(12).fill(0)
+      
+      userShows.forEach(userShow => {
+        const showDate = new Date(userShow.createdAt)
+        if (showDate.getFullYear() === currentYear) {
+          monthlyData[showDate.getMonth()]++
+        }
+      })
+
+      // Recent activity (last 20 shows)
+      const recentActivity = userShows.slice(0, 20).map(userShow => ({
+        id: userShow.id,
+        itemId: userShow.show.tmdbId,
+        title: userShow.show.name,
+        coverUrl: userShow.show.coverUrl,
+        status: statusMap[userShow.status],
+        updatedAt: userShow.updatedAt.toISOString(),
+        createdAt: userShow.createdAt.toISOString()
+      }))
+
+      return {
+        totalItems,
+        statusDistribution: statusCounts,
+        topGenres,
+        monthlyData,
+        recentActivity,
+        completionRate: totalItems > 0 ? Math.round((statusCounts.watched || 0) / totalItems * 100) : 0,
+        averageRating: 0 // Will be calculated from show ratings when implemented
+      }
+    } catch (error) {
+      this.logger.error('MediaService.getShowStatistics error:', error)
+      throw error
+    }
+  }
+
+  /**
    * Aggregates unified statistics across all media types
    */
-  aggregateUnifiedStats(gameStats, movieStats, bookStats) {
-    const totalItems = gameStats.totalItems + movieStats.totalItems + bookStats.totalItems
+  aggregateUnifiedStats(gameStats, movieStats, showStats, bookStats) {
+    const totalItems = gameStats.totalItems + movieStats.totalItems + showStats.totalItems + bookStats.totalItems
 
     // Combine recent activity from all media types
     const allRecentActivity = [
-      ...gameStats.recentActivity.map(item => ({ ...item, mediaType: 'game' })),
-      ...movieStats.recentActivity.map(item => ({ ...item, mediaType: 'movie' })),
-      ...bookStats.recentActivity.map(item => ({ ...item, mediaType: 'book' }))
+      ...gameStats.recentActivity.map(item => ({ ...item, mediaType: 'games' })),
+      ...movieStats.recentActivity.map(item => ({ ...item, mediaType: 'movies' })),
+      ...showStats.recentActivity.map(item => ({ ...item, mediaType: 'shows' })),
+      ...bookStats.recentActivity.map(item => ({ ...item, mediaType: 'books' }))
     ]
 
-    // Sort by updatedAt and take last 20
+    // Sort by updatedAt and take last 30, then limit to 20 for better representation
     const recentActivity = allRecentActivity
       .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
       .slice(0, 20)
 
     // Combine monthly data (sum across all media types)
     const monthlyData = gameStats.monthlyData.map((games, index) => 
-      games + movieStats.monthlyData[index] + bookStats.monthlyData[index]
+      games + movieStats.monthlyData[index] + showStats.monthlyData[index] + bookStats.monthlyData[index]
     )
+
+    // Combine top genres from all media types
+    const allGenreCounts = {}
+    
+    // Add genres from games
+    gameStats.topGenres.forEach(genre => {
+      allGenreCounts[genre.name] = (allGenreCounts[genre.name] || 0) + genre.count
+    })
+    
+    // Add genres from movies
+    movieStats.topGenres.forEach(genre => {
+      allGenreCounts[genre.name] = (allGenreCounts[genre.name] || 0) + genre.count
+    })
+    
+    // Add genres from shows
+    showStats.topGenres.forEach(genre => {
+      allGenreCounts[genre.name] = (allGenreCounts[genre.name] || 0) + genre.count
+    })
+    
+    // Add genres from books (when implemented)
+    bookStats.topGenres.forEach(genre => {
+      allGenreCounts[genre.name] = (allGenreCounts[genre.name] || 0) + genre.count
+    })
+
+    // Convert to sorted array and take top 10
+    const topGenres = Object.entries(allGenreCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percentage: totalItems > 0 ? Math.round((count / totalItems) * 100) : 0
+      }))
 
     // Determine primary media type
     let primaryMediaType = null
-    if (gameStats.totalItems > movieStats.totalItems && gameStats.totalItems > bookStats.totalItems) {
+    if (gameStats.totalItems > movieStats.totalItems && gameStats.totalItems > showStats.totalItems && gameStats.totalItems > bookStats.totalItems) {
       primaryMediaType = 'games'
-    } else if (movieStats.totalItems > bookStats.totalItems) {
+    } else if (movieStats.totalItems > showStats.totalItems && movieStats.totalItems > bookStats.totalItems) {
       primaryMediaType = 'movies'
+    } else if (showStats.totalItems > bookStats.totalItems) {
+      primaryMediaType = 'shows'
     } else if (bookStats.totalItems > 0) {
       primaryMediaType = 'books'
     }
@@ -241,10 +375,12 @@ class MediaService {
       mediaBreakdown: {
         games: gameStats.totalItems,
         movies: movieStats.totalItems,
+        shows: showStats.totalItems,
         books: bookStats.totalItems
       },
       recentActivity,
       monthlyData,
+      topGenres,
       primaryMediaType
     }
   }
@@ -256,13 +392,15 @@ class MediaService {
     try {
       const gameStats = await this.getGameStatistics(userId)
       const movieStats = await this.getMovieStatistics(userId)
+      const showStats = await this.getShowStatistics(userId)
       const bookStats = this.getBookStatistics()
 
       const stats = {
         games: gameStats,
         movies: movieStats,
+        shows: showStats,
         books: bookStats,
-        unified: this.aggregateUnifiedStats(gameStats, movieStats, bookStats)
+        unified: this.aggregateUnifiedStats(gameStats, movieStats, showStats, bookStats)
       }
 
       // Return specific media type if requested

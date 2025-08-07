@@ -27,7 +27,7 @@
 
       <div class="flex items-center space-x-3">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ genre.count }} games
+          {{ genre.count }} {{ mediaTypeLabel }}
         </div>
 
         <!-- Progress bar -->
@@ -54,10 +54,30 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  activeMediaType: {
+    type: String,
+    required: true,
+  },
   loading: {
     type: Boolean,
     default: false,
   },
+});
+
+const mediaTypeLabel = computed(() => {
+  const count = props.genre.count;
+  
+  if (props.activeMediaType === "all") {
+    return count === 1 ? "item" : "items";
+  } else if (props.activeMediaType === "games") {
+    return count === 1 ? "game" : "games";
+  } else if (props.activeMediaType === "movies") {
+    return count === 1 ? "movie" : "movies";
+  } else if (props.activeMediaType === "shows") {
+    return count === 1 ? "show" : "shows";
+  } else {
+    return count === 1 ? "item" : "items";
+  }
 });
 
 const rankColor = computed(() => {

@@ -15,27 +15,50 @@ export function useMediaTypes() {
 
     const statusDistribution = stats.statusDistribution || {};
     const totalItems = stats.totalItems || 0;
+    const recentActivity = stats.recentActivity || [];
+
+    // Helper function to calculate recent activity count
+    const getRecentActivityCount = (days = 7) => {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - days);
+      
+      return recentActivity.filter(activity => {
+        const activityDate = new Date(activity.updatedAt || activity.createdAt);
+        return activityDate >= cutoffDate;
+      }).length;
+    };
+
+    // Helper function to format change text
+    const formatChangeText = (count, period = "week") => {
+      if (count === 0) return "No recent activity";
+      if (count === 1) return `+1 this ${period}`;
+      return `+${count} this ${period}`;
+    };
+
+    // Calculate active items (everything except completed and dropped)
+    const activeCount = Object.values(statusDistribution).reduce(
+      (sum, val) => sum + (val || 0),
+      0
+    ) - (statusDistribution.completed || 0) - (statusDistribution.dropped || 0);
+
+    // Calculate completion percentage
+    const completedCount = statusDistribution.completed || statusDistribution.watched || statusDistribution.read || 0;
+    const completionPercentage = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
     return [
       {
         icon: "collection",
         label: `Total ${config.name}`,
         value: totalItems,
-        change: "+5 this week", // TODO: Implement change calculation
+        change: formatChangeText(getRecentActivityCount()),
         color: "blue",
       },
       {
         icon: "play",
         label:
           config.statuses.find((s) => s.color === "green")?.label || "Active",
-        value:
-          Object.values(statusDistribution).reduce(
-            (sum, val) => sum + (val || 0),
-            0
-          ) -
-          (statusDistribution.completed || 0) -
-          (statusDistribution.dropped || 0),
-        change: "2 active sessions", // TODO: Implement session tracking
+        value: activeCount,
+        change: activeCount === 1 ? "1 active" : `${activeCount} active`,
         color: "green",
       },
       {
@@ -43,12 +66,8 @@ export function useMediaTypes() {
         label:
           config.statuses.find((s) => s.color === "purple")?.label ||
           "Completed",
-        value:
-          statusDistribution.completed ||
-          statusDistribution.watched ||
-          statusDistribution.read ||
-          0,
-        change: `${Math.round(((statusDistribution.completed || statusDistribution.watched || statusDistribution.read || 0) / totalItems) * 100) || 0}% of library`,
+        value: completedCount,
+        change: totalItems > 0 ? `${completionPercentage}% of library` : "0% of library",
         color: "purple",
       },
       {
@@ -61,7 +80,7 @@ export function useMediaTypes() {
           statusDistribution.want_to_watch ||
           statusDistribution.want_to_read ||
           0,
-        change: "Your backlog",
+        change: "In backlog",
         color: "yellow",
       },
     ];

@@ -25,6 +25,10 @@ export const useMediaStore = defineStore("media", () => {
     return await getStats("movies");
   };
 
+  const getShowStats = async () => {
+    return await getStats("shows");
+  };
+
   const getBookStats = async () => {
     return await getStats("books");
   };
@@ -53,6 +57,17 @@ export const useMediaStore = defineStore("media", () => {
       ],
       route: "movies",
     },
+    shows: {
+      name: "TV Shows",
+      icon: "tv",
+      statuses: [
+        { value: "want_to_watch", label: "Want to Watch", color: "yellow" },
+        { value: "watching", label: "Watching", color: "green" },
+        { value: "watched", label: "Watched", color: "purple" },
+        { value: "dropped", label: "Dropped", color: "red" },
+      ],
+      route: "shows",
+    },
     books: {
       name: "Books",
       icon: "book",
@@ -73,8 +88,8 @@ export const useMediaStore = defineStore("media", () => {
 
   // Get all implemented media types
   const getImplementedMediaTypes = () => {
-    // Now both games and movies are implemented
-    return ["games", "movies"];
+    // Now games, movies, and shows are implemented
+    return ["games", "movies", "shows"];
   };
 
   // Get all planned media types
@@ -110,6 +125,7 @@ export const useMediaStore = defineStore("media", () => {
     getStats,
     getGameStats,
     getMovieStats,
+    getShowStats,
     getBookStats,
     getMediaTypeConfig,
     getImplementedMediaTypes,
