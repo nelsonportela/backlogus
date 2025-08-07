@@ -511,7 +511,7 @@ const initializeCharts = async () => {
   
   if (activeMediaType.value === "all") {
     // For "all" view, show media type breakdown instead of status
-    statusColors = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981"]; // Blue, Purple, Pink, Green
+    statusColors = ["#3b82f6", "#f97316", "#ec4899", "#10b981"]; // Blue, Orange, Pink, Green
     statusData = Object.entries(currentStats.mediaBreakdown || {})
       .filter(([, value]) => value > 0)
       .map(([key, value]) => ({

@@ -14,9 +14,13 @@ export default {
       },
       height: {
         'screen-dynamic': ['100vh', '100dvh', 'calc(var(--vh, 1vh) * 100)'],
+        'screen-real': 'calc(var(--real-vh, 1vh) * 100)',
+        'screen-ios': 'calc(var(--vh, 1vh) * 100)',
       },
       minHeight: {
         'screen-dynamic': ['100vh', '100dvh', 'calc(var(--vh, 1vh) * 100)'],
+        'screen-real': 'calc(var(--real-vh, 1vh) * 100)',
+        'screen-ios': 'calc(var(--vh, 1vh) * 100)',
       },
     },
   },

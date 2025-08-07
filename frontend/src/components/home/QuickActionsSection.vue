@@ -29,8 +29,8 @@
 </template>
 
 <script setup>
-import { useMediaTypes } from '@/composables/useMediaTypes';
-import ActionButton from '@/components/home/ActionButton.vue';
+import { useMediaTypes } from "@/composables/useMediaTypes";
+import ActionButton from "@/components/home/ActionButton.vue";
 
 const props = defineProps({
   activeMediaType: {
@@ -39,11 +39,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits([
-  'navigate-to-discover',
-  'navigate-to-collection', 
-  'navigate-to-trending',
-  'pick-random-item'
+defineEmits([
+  "navigate-to-discover",
+  "navigate-to-collection",
+  "navigate-to-trending",
+  "pick-random-item",
 ]);
 
 const { getMediaConfig } = useMediaTypes();

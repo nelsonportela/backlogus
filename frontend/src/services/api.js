@@ -97,13 +97,17 @@ export const userApi = {
   deleteApiCredentials: (provider) =>
     api.delete(`/user/api-credentials/${provider}`),
   createBackup: () => api.get("/user/backup", { responseType: "blob" }),
-  importBackup: (file) => {
+  importBackup: (file, onUploadProgress = null) => {
     const formData = new FormData();
     formData.append("backup", file);
     return api.post("/user/backup/import", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 600000, // 10 minutes timeout for large files
+      maxContentLength: 500 * 1024 * 1024, // 500MB max content length
+      maxBodyLength: 500 * 1024 * 1024, // 500MB max body length
+      onUploadProgress: onUploadProgress, // Progress callback for UI
     });
   },
 };

@@ -6,10 +6,22 @@
   /* CSS Custom Property for dynamic viewport height */
   :root {
     --vh: 1vh;
+    --real-vh: 1vh;
   }
 
   body {
     @apply bg-gray-50;
+    /* Prevent overscroll on iOS */
+    overscroll-behavior: none;
+    /* Ensure body takes full height */
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
+
+  /* iOS-specific fixes */
+  html {
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
   }
 
   /* Mobile viewport height handling */
@@ -23,6 +35,38 @@
     height: 100vh; /* Fallback */
     height: 100dvh; /* Dynamic viewport height for modern browsers */
     height: calc(var(--vh, 1vh) * 100); /* JavaScript fallback */
+  }
+
+  /* Alternative height classes for iOS-specific needs */
+  .min-h-screen-real {
+    min-height: calc(var(--real-vh, 1vh) * 100);
+  }
+
+  .h-screen-real {
+    height: calc(var(--real-vh, 1vh) * 100);
+  }
+
+  /* iOS-specific overrides */
+  .is-ios .h-screen {
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+
+  .is-ios .min-h-screen {
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+  }
+
+  /* Prevent elastic scrolling on iOS */
+  .is-ios body {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  .is-ios #app {
+    overflow-y: auto;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Ensure touch targets are at least 44px */

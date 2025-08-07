@@ -99,7 +99,8 @@ export function useMediaStoreFactory(api, mediaType) {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || `Failed to get ${mediaType} details`,
+        error:
+          error.response?.data?.message || `Failed to get ${mediaType} details`,
       };
     }
   };
@@ -111,7 +112,9 @@ export function useMediaStoreFactory(api, mediaType) {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || `Failed to get ${mediaType} statistics`,
+        error:
+          error.response?.data?.message ||
+          `Failed to get ${mediaType} statistics`,
       };
     }
   };

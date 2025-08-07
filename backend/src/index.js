@@ -15,7 +15,9 @@ const __dirname = path.dirname(__filename)
 const fastify = Fastify({
   logger: {
     level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
-  }
+  },
+  bodyLimit: 500 * 1024 * 1024, // 500MB body limit for large backup files
+  requestTimeout: 300000, // 5 minutes timeout for backup operations
 })
 
 // Initialize Prisma
@@ -48,7 +50,10 @@ fastify.setNotFoundHandler((request, reply) => {
 // Register multipart for file uploads
 await fastify.register(import('@fastify/multipart'), {
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit for backup files
+    fileSize: 500 * 1024 * 1024, // 500MB limit for backup files
+    fieldSize: 100 * 1024 * 1024, // 100MB for individual fields
+    fields: 10, // Maximum number of non-file fields
+    files: 1, // Maximum number of file fields
   }
 })
 
