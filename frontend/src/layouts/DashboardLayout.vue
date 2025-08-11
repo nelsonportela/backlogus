@@ -12,9 +12,11 @@
       :class="{
         '-translate-x-full': !mobileMenuOpen,
         'translate-x-0': mobileMenuOpen,
-      }">
+      }"
+      style="padding-left: env(safe-area-inset-left)">
       <div
-        class="flex items-center justify-center h-16 border-b dark:border-gray-700 pt-2 md:pt-0">
+        class="flex items-center justify-center h-16 border-b dark:border-gray-700 pt-2 md:pt-0"
+        style="padding-top: max(0.5rem, env(safe-area-inset-top))">
         <div class="flex items-center space-x-3">
           <svg
             class="w-8 h-8 text-primary-600 dark:text-primary-400"
@@ -26,10 +28,10 @@
             stroke-linejoin="round">
             <!-- Container box -->
             <rect x="1" y="1" width="22" height="22" rx="4" ry="4" />
-            
+
             <!-- Play button (left side) - equal spacing and size -->
             <path d="M11 12 L5 8 L5 16 Z" />
-            
+
             <!-- Bookmark (right side) - equal spacing and size -->
             <path d="M14 7 H19 V17 L16.5 14.5 L14 17 Z" />
           </svg>
@@ -383,7 +385,11 @@
     <div class="flex-1 flex flex-col overflow-hidden md:ml-0">
       <!-- Header -->
       <header
-        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 md:pl-6">
+        class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 md:px-6 py-4 md:pl-6"
+        style="
+          padding-top: max(1rem, env(safe-area-inset-top));
+          padding-right: max(1.5rem, env(safe-area-inset-right));
+        ">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <!-- Mobile Menu Button (inline with title) -->
@@ -460,7 +466,11 @@
 
       <!-- Page Content -->
       <main
-        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6"
+        style="
+          padding-right: max(1rem, env(safe-area-inset-right));
+          padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        ">
         <router-view />
       </main>
     </div>
@@ -494,18 +504,18 @@ const mobileMenuOpen = ref(false);
 // Status configurations using universal MediaStatus values
 const gameStatuses = [
   { value: "all", label: "All Games" },
-  ...getStatusOptions("game")
+  ...getStatusOptions("game"),
 ];
 
 const movieStatuses = [
   { value: "all", label: "All Movies" },
-  ...getStatusOptions("movie")
+  ...getStatusOptions("movie"),
 ];
 
-// TV Show statuses configuration  
+// TV Show statuses configuration
 const showStatuses = [
   { value: "all", label: "All TV Shows" },
-  ...getStatusOptions("show")
+  ...getStatusOptions("show"),
 ];
 
 const isGamesRoute = computed(() => {

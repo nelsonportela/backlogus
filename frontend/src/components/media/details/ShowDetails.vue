@@ -15,7 +15,8 @@
               :key="actor.name"
               class="flex items-center space-x-3">
               <!-- Actor Profile Image -->
-              <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+              <div
+                class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
                 <img
                   v-if="actor.profile_path"
                   :src="actor.profile_path"
@@ -30,7 +31,8 @@
               </div>
               <!-- Actor Info -->
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {{ actor.name }}
                 </p>
                 <p
@@ -57,17 +59,17 @@
             Creators
           </h4>
           <p class="text-gray-700 dark:text-gray-300">
-            {{ item.creators.join(', ') }}
+            {{ item.creators.join(", ") }}
           </p>
         </div>
 
         <!-- Networks -->
         <div v-if="item.networks && item.networks.length > 0">
           <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-            {{ item.networks.length > 1 ? 'Networks' : 'Network' }}
+            {{ item.networks.length > 1 ? "Networks" : "Network" }}
           </h4>
           <p class="text-gray-700 dark:text-gray-300">
-            {{ item.networks.join(', ') }}
+            {{ item.networks.join(", ") }}
           </p>
         </div>
 
@@ -78,7 +80,6 @@
           </h4>
           <p class="text-gray-700 dark:text-gray-300">
             {{ item.original_language.toUpperCase() }}
-            
           </p>
         </div>
 
@@ -98,8 +99,8 @@
     </div>
 
     <!-- Bottom Section: Single Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-      
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
       <!-- Seasons -->
       <div v-if="item.seasons">
         <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -119,7 +120,6 @@
           {{ item.episodes }}
         </p>
       </div>
-
     </div>
   </div>
 </template>

@@ -63,8 +63,7 @@ export const showsApi = {
   search: (query) => api.get(`/shows/search?q=${encodeURIComponent(query)}`),
   getUserShows: () => api.get("/shows/user"),
   addShow: (showData) => api.post("/shows", showData),
-  updateShow: (showId, updateData) =>
-    api.patch(`/shows/${showId}`, updateData),
+  updateShow: (showId, updateData) => api.patch(`/shows/${showId}`, updateData),
   removeShow: (showId) => api.delete(`/shows/${showId}`),
   getShowDetails: (tmdbId) => api.get(`/shows/details/${tmdbId}`),
   getStats: () => api.get("/shows/stats"),

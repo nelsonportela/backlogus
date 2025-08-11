@@ -55,7 +55,7 @@ export function getStatusOptions(mediaType) {
  */
 export function getStatusLabel(status, mediaType) {
   const options = getStatusOptions(mediaType);
-  const option = options.find(opt => opt.value === status);
+  const option = options.find((opt) => opt.value === status);
   return option ? option.label : status;
 }
 
@@ -64,5 +64,5 @@ export function getStatusLabel(status, mediaType) {
  * @returns {string[]} Array of valid MediaStatus enum values
  */
 export function getAllStatusValues() {
-  return ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG'];
+  return ["ACTIVE", "PAUSED", "COMPLETED", "DROPPED", "BACKLOG"];
 }

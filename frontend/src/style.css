@@ -16,6 +16,11 @@
     /* Ensure body takes full height */
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
+    /* Support for safe areas (notches, etc.) */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   /* iOS-specific fixes */
@@ -135,5 +140,34 @@
 
   .btn-secondary {
     @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors text-sm sm:text-base;
+  }
+  
+  /* Mobile fullscreen optimizations */
+  .mobile-fullscreen {
+    /* Ensure content doesn't go behind system UI */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* PWA standalone mode detection */
+  @media (display-mode: standalone) {
+    body {
+      /* Additional styling for PWA mode */
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    /* Hide scrollbars in standalone mode for cleaner look */
+    ::-webkit-scrollbar {
+      width: 0;
+      background: transparent;
+    }
+  }
+  
+  /* Mobile pull-to-refresh prevention where needed */
+  .no-pull-refresh {
+    overscroll-behavior-y: contain;
   }
 }

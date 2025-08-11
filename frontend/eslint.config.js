@@ -19,6 +19,8 @@ export default [
         console: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        navigator: "readonly",
+        getComputedStyle: "readonly",
       },
     },
     rules: {

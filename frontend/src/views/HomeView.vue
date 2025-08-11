@@ -4,11 +4,13 @@
     <WelcomeSection />
 
     <!-- Media Type Selector -->
-    <MediaTypeSelector v-model="activeMediaType" @update:model-value="setActiveMediaType" />
+    <MediaTypeSelector
+      v-model="activeMediaType"
+      @update:model-value="setActiveMediaType" />
 
     <!-- Quick Stats Cards -->
-    <QuickStatsSection 
-      :stats="stats" 
+    <QuickStatsSection
+      :stats="stats"
       :active-media-type="activeMediaType"
       :loading="statsLoading" />
 
@@ -44,7 +46,7 @@
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{ getActivityTimeframe() }}
             </span>
-            <button 
+            <button
               v-if="activeMediaType === 'all'"
               @click="showActivityFilter = !showActivityFilter"
               class="text-blue-600 dark:text-blue-400 text-sm hover:underline">
@@ -52,9 +54,9 @@
             </button>
           </div>
         </div>
-        
+
         <!-- Activity Filter (for "All" view) -->
-        <div 
+        <div
           v-if="showActivityFilter && activeMediaType === 'all'"
           class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex flex-wrap gap-2">
@@ -66,13 +68,13 @@
                 'px-3 py-1 rounded-full text-xs font-medium transition-colors',
                 activeActivityFilter === filter.type
                   ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500',
               ]">
               {{ filter.emoji }} {{ filter.label }}
             </button>
           </div>
         </div>
-        
+
         <div class="space-y-4 max-h-64 overflow-y-auto">
           <ActivityItem
             v-for="activity in filteredRecentActivities"
@@ -141,7 +143,7 @@
     </div>
 
     <!-- Smart Recommendations -->
-    <SmartRecommendations 
+    <SmartRecommendations
       :stats="stats"
       :active-media-type="activeMediaType"
       @continue-randomly="continueRandomly"
@@ -206,11 +208,8 @@ const router = useRouter();
 const mediaStore = useMediaStore();
 const gamesStore = useGamesStore();
 const userStore = useUserStore();
-const {
-  getMediaConfig,
-  getStatusChartColors,
-  formatRelativeTime,
-} = useMediaTypes();
+const { getMediaConfig, getStatusChartColors, formatRelativeTime } =
+  useMediaTypes();
 
 // Random picker functionality
 const {
@@ -283,7 +282,9 @@ const recentActivities = computed(() => {
   const currentStats = stats.value[activeMediaType.value] || stats.value.all;
   return (currentStats.recentActivity || []).map((activity) => ({
     id: activity.id,
-    type: activity.mediaType ? `${activity.mediaType}_added` : `${activeMediaType.value}_added`,
+    type: activity.mediaType
+      ? `${activity.mediaType}_added`
+      : `${activeMediaType.value}_added`,
     title: activity.title,
     subtitle: `${activity.status?.replace("_", " ") || ""} • ${formatRelativeTime(activity.updatedAt)}`,
     time: formatRelativeTime(activity.updatedAt),
@@ -296,9 +297,9 @@ const filteredRecentActivities = computed(() => {
   if (activeMediaType.value !== "all" || activeActivityFilter.value === "all") {
     return recentActivities.value;
   }
-  
-  return recentActivities.value.filter(activity => 
-    activity.mediaType === activeActivityFilter.value
+
+  return recentActivities.value.filter(
+    (activity) => activity.mediaType === activeActivityFilter.value
   );
 });
 
@@ -335,7 +336,9 @@ const getEmptyActivityMessage = () => {
   if (activeActivityFilter.value === "all") {
     return "No recent activity";
   }
-  const filter = activityFilters.value.find(f => f.type === activeActivityFilter.value);
+  const filter = activityFilters.value.find(
+    (f) => f.type === activeActivityFilter.value
+  );
   return `No recent ${filter?.label?.toLowerCase() || "activity"}`;
 };
 
@@ -387,16 +390,22 @@ const loadStats = async () => {
       if (serverStats.unified) {
         stats.value.all = {
           totalItems: serverStats.unified.totalItems || 0,
-          mediaBreakdown: serverStats.unified.mediaBreakdown || { games: 0, movies: 0, shows: 0 },
+          mediaBreakdown: serverStats.unified.mediaBreakdown || {
+            games: 0,
+            movies: 0,
+            shows: 0,
+          },
           statusDistribution: serverStats.unified.statusDistribution || {},
           topGenres: serverStats.unified.topGenres || [],
           monthlyData: serverStats.unified.monthlyData || new Array(12).fill(0),
-          recentActivity: (serverStats.unified.recentActivity || []).map((activity) => ({
-            ...activity,
-            title: activity.title,
-            subtitle: `${activity.status?.replace("_", " ") || ""} • ${formatRelativeTime(activity.updatedAt)}`,
-            time: formatRelativeTime(activity.updatedAt),
-          })),
+          recentActivity: (serverStats.unified.recentActivity || []).map(
+            (activity) => ({
+              ...activity,
+              title: activity.title,
+              subtitle: `${activity.status?.replace("_", " ") || ""} • ${formatRelativeTime(activity.updatedAt)}`,
+              time: formatRelativeTime(activity.updatedAt),
+            })
+          ),
         };
       }
 
@@ -407,10 +416,12 @@ const loadStats = async () => {
           statusDistribution: serverStats.games.statusDistribution || {},
           topGenres: serverStats.games.topGenres || [],
           monthlyData: serverStats.games.monthlyData || new Array(12).fill(0),
-          recentActivity: (serverStats.games.recentActivity || []).map((activity) => ({
-            ...activity,
-            mediaType: 'games',
-          })),
+          recentActivity: (serverStats.games.recentActivity || []).map(
+            (activity) => ({
+              ...activity,
+              mediaType: "games",
+            })
+          ),
         };
       }
 
@@ -420,10 +431,12 @@ const loadStats = async () => {
           statusDistribution: serverStats.movies.statusDistribution || {},
           topGenres: serverStats.movies.topGenres || [],
           monthlyData: serverStats.movies.monthlyData || new Array(12).fill(0),
-          recentActivity: (serverStats.movies.recentActivity || []).map((activity) => ({
-            ...activity,
-            mediaType: 'movies',
-          })),
+          recentActivity: (serverStats.movies.recentActivity || []).map(
+            (activity) => ({
+              ...activity,
+              mediaType: "movies",
+            })
+          ),
         };
       }
 
@@ -433,10 +446,12 @@ const loadStats = async () => {
           statusDistribution: serverStats.shows.statusDistribution || {},
           topGenres: serverStats.shows.topGenres || [],
           monthlyData: serverStats.shows.monthlyData || new Array(12).fill(0),
-          recentActivity: (serverStats.shows.recentActivity || []).map((activity) => ({
-            ...activity,
-            mediaType: 'shows',
-          })),
+          recentActivity: (serverStats.shows.recentActivity || []).map(
+            (activity) => ({
+              ...activity,
+              mediaType: "shows",
+            })
+          ),
         };
       }
     } else {
@@ -459,7 +474,7 @@ const loadStats = async () => {
             coverUrl: activity.coverUrl,
             status: activity.status,
             updatedAt: activity.updatedAt,
-            mediaType: 'games',
+            mediaType: "games",
           })),
         };
 
@@ -480,7 +495,7 @@ const loadStats = async () => {
     }
   } catch (error) {
     // Stats loading failed - handle gracefully
-    console.warn('Failed to load stats:', error);
+    console.warn("Failed to load stats:", error);
   } finally {
     statsLoading.value = false;
 
@@ -508,7 +523,7 @@ const initializeCharts = async () => {
 
   // Status Distribution Pie Chart
   let statusColors, statusData;
-  
+
   if (activeMediaType.value === "all") {
     // For "all" view, show media type breakdown instead of status
     statusColors = ["#3b82f6", "#f97316", "#ec4899", "#10b981"]; // Blue, Orange, Pink, Green
@@ -689,15 +704,15 @@ const navigateToTrending = () => {
 
 const continueRandomly = async () => {
   const currentStats = stats.value[activeMediaType.value] || stats.value.all;
-  const currentlyPlaying = (currentStats.recentActivity || []).filter(activity => 
-    activity.status === "ACTIVE"
+  const currentlyPlaying = (currentStats.recentActivity || []).filter(
+    (activity) => activity.status === "ACTIVE"
   );
-  
+
   if (currentlyPlaying.length === 0) return;
-  
+
   const randomIndex = Math.floor(Math.random() * currentlyPlaying.length);
   const selectedItem = currentlyPlaying[randomIndex];
-  
+
   // Navigate to the appropriate media type view
   if (selectedItem.mediaType === "games") {
     router.push({ name: "games", query: { status: "ACTIVE" } });
@@ -715,7 +730,7 @@ const tackleBacklog = async () => {
     const gameBacklog = stats.value.games.statusDistribution?.BACKLOG || 0;
     const movieBacklog = stats.value.movies.statusDistribution?.BACKLOG || 0;
     const showBacklog = stats.value.shows.statusDistribution?.BACKLOG || 0;
-    
+
     if (gameBacklog >= movieBacklog && gameBacklog >= showBacklog) {
       router.push({ name: "games", query: { status: "BACKLOG" } });
     } else if (movieBacklog >= showBacklog) {

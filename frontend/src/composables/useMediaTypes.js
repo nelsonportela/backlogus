@@ -21,8 +21,8 @@ export function useMediaTypes() {
     const getRecentActivityCount = (days = 7) => {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - days);
-      
-      return recentActivity.filter(activity => {
+
+      return recentActivity.filter((activity) => {
         const activityDate = new Date(activity.updatedAt || activity.createdAt);
         return activityDate >= cutoffDate;
       }).length;
@@ -36,14 +36,18 @@ export function useMediaTypes() {
     };
 
     // Calculate active items (everything except completed and dropped)
-    const activeCount = Object.values(statusDistribution).reduce(
-      (sum, val) => sum + (val || 0),
-      0
-    ) - (statusDistribution.completed || 0) - (statusDistribution.dropped || 0);
+    const activeCount =
+      Object.values(statusDistribution).reduce(
+        (sum, val) => sum + (val || 0),
+        0
+      ) -
+      (statusDistribution.completed || 0) -
+      (statusDistribution.dropped || 0);
 
     // Calculate completion percentage
     const completedCount = statusDistribution.COMPLETED || 0;
-    const completionPercentage = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+    const completionPercentage =
+      totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
     return [
       {
@@ -67,7 +71,10 @@ export function useMediaTypes() {
           config.statuses.find((s) => s.color === "purple")?.label ||
           "Completed",
         value: completedCount,
-        change: totalItems > 0 ? `${completionPercentage}% of library` : "0% of library",
+        change:
+          totalItems > 0
+            ? `${completionPercentage}% of library`
+            : "0% of library",
         color: "purple",
       },
       {

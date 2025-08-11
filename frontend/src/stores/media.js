@@ -39,25 +39,25 @@ export const useMediaStore = defineStore("media", () => {
     games: {
       name: "Games",
       icon: "gamepad",
-      statuses: getStatusOptions('game'),
+      statuses: getStatusOptions("game"),
       route: "games",
     },
     movies: {
       name: "Movies",
       icon: "film",
-      statuses: getStatusOptions('movie'),
+      statuses: getStatusOptions("movie"),
       route: "movies",
     },
     shows: {
       name: "TV Shows",
       icon: "tv",
-      statuses: getStatusOptions('show'),
+      statuses: getStatusOptions("show"),
       route: "shows",
     },
     books: {
       name: "Books",
       icon: "book",
-      statuses: getStatusOptions('book'),
+      statuses: getStatusOptions("book"),
       route: "books",
     },
   };

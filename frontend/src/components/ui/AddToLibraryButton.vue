@@ -128,13 +128,20 @@
                         {{ getItemYear(item) }}
                       </p>
                       <!-- TV Show specific info -->
-                      <div v-if="mediaType === 'show'" class="text-sm text-gray-500 dark:text-gray-400">
+                      <div
+                        v-if="mediaType === 'show'"
+                        class="text-sm text-gray-500 dark:text-gray-400">
                         <p v-if="item.seasons">
-                          {{ item.seasons }} {{ item.seasons === 1 ? 'season' : 'seasons' }}
-                          <span v-if="item.episodes">({{ item.episodes }} episodes)</span>
+                          {{ item.seasons }}
+                          {{ item.seasons === 1 ? "season" : "seasons" }}
+                          <span v-if="item.episodes"
+                            >({{ item.episodes }} episodes)</span
+                          >
                         </p>
                         <p v-if="item.status" class="text-xs mt-1">
-                          <span :class="getStatusColor(item.status)" class="px-2 py-0.5 rounded-full text-xs font-medium">
+                          <span
+                            :class="getStatusColor(item.status)"
+                            class="px-2 py-0.5 rounded-full text-xs font-medium">
                             {{ item.status }}
                           </span>
                         </p>
@@ -147,10 +154,11 @@
                       <p
                         v-if="item.platforms && item.platforms.length > 0"
                         class="text-sm text-gray-500 dark:text-gray-400 truncate cursor-pointer"
-                        @click.stop="showAllPlatforms = item.id"
-                      >
-                        {{ item.platforms.slice(0, 2).join(', ') }}
-                        <span v-if="item.platforms.length > 2" class="underline cursor-pointer">
+                        @click.stop="showAllPlatforms = item.id">
+                        {{ item.platforms.slice(0, 2).join(", ") }}
+                        <span
+                          v-if="item.platforms.length > 2"
+                          class="underline cursor-pointer">
                           +{{ item.platforms.length - 2 }} more
                         </span>
                       </p>
@@ -158,49 +166,95 @@
                       <div
                         v-if="showAllPlatforms === item.id"
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                        @click.self="showAllPlatforms = null"
-                      >
-                        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-sm w-full p-6">
+                        @click.self="showAllPlatforms = null">
+                        <div
+                          class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-w-sm w-full p-6">
                           <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Platforms</h3>
+                            <h3
+                              class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                              Platforms
+                            </h3>
                             <button
                               @click="showAllPlatforms = null"
                               class="ml-2 bg-red-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
-                              title="Close"
-                            >
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              title="Close">
+                              <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                stroke-width="3">
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
                           </div>
                           <ul class="space-y-1 max-h-48 overflow-y-auto">
-                            <li v-for="platform in item.platforms" :key="platform" class="text-gray-800 dark:text-gray-200 text-sm">{{ platform }}</li>
+                            <li
+                              v-for="platform in item.platforms"
+                              :key="platform"
+                              class="text-gray-800 dark:text-gray-200 text-sm">
+                              {{ platform }}
+                            </li>
                           </ul>
                         </div>
                       </div>
                     </div>
                   </div>
                   <button
-                    @click.stop="!isItemInLibrary(getSearchResultId(item)) && handleAddToLibrary(item)"
+                    @click.stop="
+                      !isItemInLibrary(getSearchResultId(item)) &&
+                      handleAddToLibrary(item)
+                    "
                     :disabled="isItemInLibrary(getSearchResultId(item))"
                     :class="[
                       'w-12 h-12 flex items-center justify-center rounded-full text-sm text-center focus:ring-4 focus:outline-none transition-all duration-200',
                       isItemInLibrary(getSearchResultId(item))
                         ? 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900'
                         : 'bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800',
-                      'disabled:opacity-60 disabled:cursor-not-allowed'
+                      'disabled:opacity-60 disabled:cursor-not-allowed',
                     ]"
-                    :title="isItemInLibrary(getSearchResultId(item)) ? 'Added' : 'Add to Library'"
-                    type="button"
-                  >
-                    <svg v-if="!isItemInLibrary(getSearchResultId(item))" class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-width="2.5" d="M10 4v12M4 10h12" />
+                    :title="
+                      isItemInLibrary(getSearchResultId(item))
+                        ? 'Added'
+                        : 'Add to Library'
+                    "
+                    type="button">
+                    <svg
+                      v-if="!isItemInLibrary(getSearchResultId(item))"
+                      class="w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                      stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-width="2.5"
+                        d="M10 4v12M4 10h12" />
                     </svg>
-                    <svg v-else class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 10.5l3 3 5-6" />
+                    <svg
+                      v-else
+                      class="w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                      stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M6 10.5l3 3 5-6" />
                     </svg>
                     <span class="sr-only">
-                      {{ isItemInLibrary(getSearchResultId(item)) ? 'Added' : 'Add' }}
+                      {{
+                        isItemInLibrary(getSearchResultId(item))
+                          ? "Added"
+                          : "Add"
+                      }}
                     </span>
                   </button>
                 </div>
@@ -289,9 +343,10 @@ const mediaTypeLabel = computed(() => {
 });
 
 const getSearchResultId = (item) => {
-  if (props.mediaType === 'game') return item.id;
-  if (props.mediaType === 'movie' || props.mediaType === 'show') return item.tmdbId;
-  if (props.mediaType === 'book') return item.googleBooksId;
+  if (props.mediaType === "game") return item.id;
+  if (props.mediaType === "movie" || props.mediaType === "show")
+    return item.tmdbId;
+  if (props.mediaType === "book") return item.googleBooksId;
   return item.id;
 };
 
@@ -337,16 +392,16 @@ const handleShowDetails = (item) => {
 };
 
 const isItemInLibrary = (itemId) => {
-  if (props.mediaType === 'game') {
+  if (props.mediaType === "game") {
     // IGDB: search result id vs. library igdb_id
     return props.libraryItems.some((item) => item.igdb_id === itemId);
-  } else if (props.mediaType === 'movie') {
+  } else if (props.mediaType === "movie") {
     // TMDB: search result id vs. library tmdb_id
     return props.libraryItems.some((item) => item.tmdbId === itemId);
-  } else if (props.mediaType === 'book') {
+  } else if (props.mediaType === "book") {
     // Books: search result id vs. library google_books_id (if used)
     return props.libraryItems.some((item) => item.google_books_id === itemId);
-  } else if (props.mediaType === 'show') {
+  } else if (props.mediaType === "show") {
     // Shows: search result id vs. library tmdb_id (if using TMDB for shows)
     return props.libraryItems.some((item) => item.tmdbId === itemId);
   } else {
@@ -364,7 +419,11 @@ const getItemName = (item) => {
 };
 
 const getItemYear = (item) => {
-  const date = item.release_date || item.publication_date || item.air_date || item.first_air_date;
+  const date =
+    item.release_date ||
+    item.publication_date ||
+    item.air_date ||
+    item.first_air_date;
   if (date) {
     return new Date(date).getFullYear();
   }
@@ -372,16 +431,25 @@ const getItemYear = (item) => {
 };
 
 const getStatusColor = (status) => {
-  if (!status) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-  
+  if (!status)
+    return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+
   const statusLower = status.toLowerCase();
-  
-  if (statusLower.includes('ended') || statusLower.includes('canceled') || statusLower.includes('cancelled')) {
-    return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-  } else if (statusLower.includes('returning') || statusLower.includes('continuing') || statusLower.includes('ongoing')) {
-    return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+
+  if (
+    statusLower.includes("ended") ||
+    statusLower.includes("canceled") ||
+    statusLower.includes("cancelled")
+  ) {
+    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+  } else if (
+    statusLower.includes("returning") ||
+    statusLower.includes("continuing") ||
+    statusLower.includes("ongoing")
+  ) {
+    return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
   } else {
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
   }
 };
 </script>

@@ -67,13 +67,20 @@
                 {{ new Date(getDateField(item)).getFullYear() }}
               </p>
               <!-- TV Show specific info -->
-              <div v-if="mediaType === 'show'" class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+              <div
+                v-if="mediaType === 'show'"
+                class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
                 <p v-if="item.seasons">
-                  {{ item.seasons }} {{ item.seasons === 1 ? 'season' : 'seasons' }}
-                  <span v-if="item.episodes">({{ item.episodes }} episodes)</span>
+                  {{ item.seasons }}
+                  {{ item.seasons === 1 ? "season" : "seasons" }}
+                  <span v-if="item.episodes"
+                    >({{ item.episodes }} episodes)</span
+                  >
                 </p>
                 <p v-if="item.status">
-                  <span :class="getStatusColor(item.status)" class="px-2 py-0.5 rounded-full text-xs font-medium">
+                  <span
+                    :class="getStatusColor(item.status)"
+                    class="px-2 py-0.5 rounded-full text-xs font-medium">
                     {{ item.status }}
                   </span>
                 </p>
@@ -275,8 +282,10 @@ const addToLibrary = () => {
     quick_review: selectedReview.value,
     user_platform: selectedPlatform.value || null,
     notes: selectedNotes.value || null,
-    current_season: props.mediaType === 'show' ? selectedCurrentSeason.value || null : null,
-    current_episode: props.mediaType === 'show' ? selectedCurrentEpisode.value || null : null,
+    current_season:
+      props.mediaType === "show" ? selectedCurrentSeason.value || null : null,
+    current_episode:
+      props.mediaType === "show" ? selectedCurrentEpisode.value || null : null,
   };
 
   emit("add-to-library", libraryData);
@@ -335,16 +344,25 @@ const getPlatformOptions = () => {
 };
 
 const getStatusColor = (status) => {
-  if (!status) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-  
+  if (!status)
+    return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+
   const statusLower = status.toLowerCase();
-  
-  if (statusLower.includes('ended') || statusLower.includes('canceled') || statusLower.includes('cancelled')) {
-    return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-  } else if (statusLower.includes('returning') || statusLower.includes('continuing') || statusLower.includes('ongoing')) {
-    return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+
+  if (
+    statusLower.includes("ended") ||
+    statusLower.includes("canceled") ||
+    statusLower.includes("cancelled")
+  ) {
+    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+  } else if (
+    statusLower.includes("returning") ||
+    statusLower.includes("continuing") ||
+    statusLower.includes("ongoing")
+  ) {
+    return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
   } else {
-    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
   }
 };
 

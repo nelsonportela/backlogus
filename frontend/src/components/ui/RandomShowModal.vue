@@ -53,7 +53,9 @@
                   {{ formatYear(randomShow.first_air_date) }}
                 </span>
                 <span v-if="randomShow.number_of_seasons">
-                  • {{ randomShow.number_of_seasons }} season{{ randomShow.number_of_seasons !== 1 ? 's' : '' }}
+                  • {{ randomShow.number_of_seasons }} season{{
+                    randomShow.number_of_seasons !== 1 ? "s" : ""
+                  }}
                 </span>
               </div>
             </div>

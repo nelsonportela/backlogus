@@ -66,7 +66,7 @@ const props = defineProps({
 
 const mediaTypeLabel = computed(() => {
   const count = props.genre.count;
-  
+
   if (props.activeMediaType === "all") {
     return count === 1 ? "item" : "items";
   } else if (props.activeMediaType === "games") {

@@ -5,8 +5,8 @@
 </template>
 
 <script setup>
-import { useViewportHeight } from '@/composables/useViewportHeight'
+import { useViewportHeight } from "@/composables/useViewportHeight";
 
 // Initialize dynamic viewport height handling
-useViewportHeight()
+useViewportHeight();
 </script>

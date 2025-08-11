@@ -16,21 +16,33 @@
           >{{ getDateLabel() }}:</span
         >
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
-          {{ new Date(getDateField(item)).toLocaleString("en-UK", {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-          }) }}
+          {{
+            new Date(getDateField(item)).toLocaleString("en-UK", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+            })
+          }}
         </span>
       </div>
 
       <!-- Duration/Length -->
-      <div v-if="item.runtime || item.duration || item.playtime || item.episode_runtime">
+      <div
+        v-if="
+          item.runtime || item.duration || item.playtime || item.episode_runtime
+        ">
         <span class="text-gray-600 dark:text-gray-400">
           {{ getDurationLabel() }}:
         </span>
         <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
-          {{ formatRuntime(item.runtime || item.duration || item.playtime || item.episode_runtime) }}
+          {{
+            formatRuntime(
+              item.runtime ||
+                item.duration ||
+                item.playtime ||
+                item.episode_runtime
+            )
+          }}
         </span>
       </div>
 
@@ -51,7 +63,9 @@
 
       <div v-if="mediaType === 'show' && (item.show_status || item.status)">
         <span class="text-gray-600 dark:text-gray-400">Status:</span>
-        <span :class="getStatusColor(item.show_status || item.status)" class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium">
+        <span
+          :class="getStatusColor(item.show_status || item.status)"
+          class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium">
           {{ item.show_status || item.status }}
         </span>
       </div>
@@ -131,16 +145,22 @@ const formatRuntime = (minutes) => {
 
 const getStatusColor = (status) => {
   const statusColors = {
-    'returning series': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    'ended': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    'canceled': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    'in production': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    'planned': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    'pilot': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+    "returning series":
+      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    ended: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    canceled: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+    "in production":
+      "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    planned: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    pilot:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   };
-  
-  const lowerStatus = status ? status.toLowerCase() : '';
-  return statusColors[lowerStatus] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+
+  const lowerStatus = status ? status.toLowerCase() : "";
+  return (
+    statusColors[lowerStatus] ||
+    "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+  );
 };
 
 const getDateField = (item) => {

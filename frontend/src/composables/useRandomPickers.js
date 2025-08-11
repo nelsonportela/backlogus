@@ -1,8 +1,8 @@
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useGamesStore } from '@/stores/games';
-import { useMoviesStore } from '@/stores/movies';
-import { useShowsStore } from '@/stores/shows';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useGamesStore } from "@/stores/games";
+import { useMoviesStore } from "@/stores/movies";
+import { useShowsStore } from "@/stores/shows";
 
 export function useRandomPickers() {
   const router = useRouter();
@@ -21,16 +21,21 @@ export function useRandomPickers() {
   const pickRandomItem = async (activeMediaType, stats) => {
     if (activeMediaType === "all") {
       // Pick from any media type based on what's available
-      const breakdown = stats.all.mediaBreakdown || { games: 0, movies: 0, shows: 0 };
+      const breakdown = stats.all.mediaBreakdown || {
+        games: 0,
+        movies: 0,
+        shows: 0,
+      };
       const availableTypes = Object.entries(breakdown)
         .filter(([, count]) => count > 0)
         .map(([type]) => type);
-      
+
       if (availableTypes.length === 0) return;
-      
+
       // Randomly select a media type weighted by collection size
-      const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-      
+      const randomType =
+        availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
       if (randomType === "games") {
         await pickRandomGame();
       } else if (randomType === "movies") {
@@ -157,18 +162,18 @@ export function useRandomPickers() {
     randomMovie,
     showRandomShowModal,
     randomShow,
-    
+
     // Picker functions
     pickRandomItem,
     pickRandomGame,
     pickRandomMovie,
     pickRandomShow,
-    
+
     // Handler functions
     handleStartPlaying,
     handleStartWatchingMovie,
     handleStartWatchingShow,
-    
+
     // Navigation functions
     navigateToGames,
     navigateToMovies,
