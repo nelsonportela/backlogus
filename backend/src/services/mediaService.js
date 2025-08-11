@@ -9,19 +9,6 @@ class MediaService {
    */
   async getGameStatistics(userId) {
     try {
-      const statusMap = {
-        'WANT_TO_PLAY': 'want_to_play',
-        'PLAYING': 'playing',
-        'COMPLETED': 'completed',
-        'DROPPED': 'dropped'
-      }
-
-      const reviewMap = {
-        'POSITIVE': 'positive',
-        'NEUTRAL': 'neutral',
-        'NEGATIVE': 'negative'
-      }
-
       // Get all user games with details
       const userGames = await this.prisma.userGame.findMany({
         where: { userId },
@@ -33,7 +20,7 @@ class MediaService {
       const totalItems = userGames.length
       const statusCounts = {}
       userGames.forEach(userGame => {
-        const status = statusMap[userGame.status]
+        const status = userGame.status  // Use raw enum value
         statusCounts[status] = (statusCounts[status] || 0) + 1
       })
 
@@ -81,7 +68,7 @@ class MediaService {
       
       userGames.forEach(userGame => {
         if (userGame.quickReview) {
-          const review = reviewMap[userGame.quickReview]
+          const review = userGame.quickReview.toLowerCase() // Convert enum to lowercase for counting
           reviewCounts[review]++
         } else {
           reviewCounts.none++
@@ -94,7 +81,7 @@ class MediaService {
         itemId: userGame.game.igdbId,
         title: userGame.game.name,
         coverUrl: userGame.game.coverUrl,
-        status: statusMap[userGame.status],
+        status: userGame.status,  // Use raw enum value
         updatedAt: userGame.updatedAt.toISOString(),
         createdAt: userGame.createdAt.toISOString()
       }))
@@ -127,12 +114,6 @@ class MediaService {
     try {
       // For now, return empty statistics
       // This will be populated with actual movie data when movies are fully integrated
-      const statusMap = {
-        'WANT_TO_WATCH': 'want_to_watch',
-        'WATCHING': 'watching',
-        'WATCHED': 'watched',
-        'DROPPED': 'dropped'
-      }
 
       // Get basic movie count
       const userMovies = await this.prisma.userMovie.findMany({
@@ -144,7 +125,7 @@ class MediaService {
       const totalItems = userMovies.length
       const statusCounts = {}
       userMovies.forEach(userMovie => {
-        const status = statusMap[userMovie.status]
+        const status = userMovie.status  // Use raw enum value
         statusCounts[status] = (statusCounts[status] || 0) + 1
       })
 
@@ -183,7 +164,7 @@ class MediaService {
         itemId: userMovie.movie.tmdbId,
         title: userMovie.movie.name,
         coverUrl: userMovie.movie.coverUrl,
-        status: statusMap[userMovie.status],
+        status: userMovie.status,  // Use raw enum value
         updatedAt: userMovie.updatedAt.toISOString(),
         createdAt: userMovie.createdAt.toISOString()
       }))
@@ -196,7 +177,7 @@ class MediaService {
         platformDistribution: [], // Not applicable for movies
         reviewDistribution: { positive: 0, neutral: 0, negative: 0, none: 0 },
         recentActivity,
-        completionRate: totalItems > 0 ? Math.round((statusCounts.watched || 0) / totalItems * 100) : 0,
+        completionRate: totalItems > 0 ? Math.round((statusCounts.COMPLETED || 0) / totalItems * 100) : 0,
         averageRating: 0 // Will be calculated from movie ratings
       }
     } catch (error) {
@@ -227,13 +208,6 @@ class MediaService {
    */
   async getShowStatistics(userId) {
     try {
-      const statusMap = {
-        'WANT_TO_WATCH': 'want_to_watch',
-        'WATCHING': 'watching',
-        'WATCHED': 'watched',
-        'DROPPED': 'dropped'
-      }
-
       // Get all user shows with details
       const userShows = await this.prisma.userShow.findMany({
         where: { userId },
@@ -245,7 +219,7 @@ class MediaService {
       const totalItems = userShows.length
       const statusCounts = {}
       userShows.forEach(userShow => {
-        const status = statusMap[userShow.status]
+        const status = userShow.status  // Use raw enum value
         statusCounts[status] = (statusCounts[status] || 0) + 1
       })
 
@@ -281,7 +255,7 @@ class MediaService {
         itemId: userShow.show.tmdbId,
         title: userShow.show.name,
         coverUrl: userShow.show.coverUrl,
-        status: statusMap[userShow.status],
+        status: userShow.status,  // Use raw enum value
         updatedAt: userShow.updatedAt.toISOString(),
         createdAt: userShow.createdAt.toISOString()
       }))
@@ -292,7 +266,7 @@ class MediaService {
         topGenres,
         monthlyData,
         recentActivity,
-        completionRate: totalItems > 0 ? Math.round((statusCounts.watched || 0) / totalItems * 100) : 0,
+        completionRate: totalItems > 0 ? Math.round((statusCounts.COMPLETED || 0) / totalItems * 100) : 0,
         averageRating: 0 // Will be calculated from show ratings when implemented
       }
     } catch (error) {

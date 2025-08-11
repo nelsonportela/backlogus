@@ -150,7 +150,7 @@ const addShowToLibrary = async (libraryData) => {
   } else {
     // Old format - direct show object
     showData = libraryData;
-    status = "want_to_watch"; // default status
+    status = "BACKLOG"; // default status
     quickReview = null;
     notes = null;
     currentSeason = null;

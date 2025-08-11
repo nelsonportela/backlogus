@@ -76,28 +76,21 @@ class MovieService {
       throw new Error('TMDB ID is required')
     }
 
-    const statusMap = {
-      'want_to_watch': 'WANT_TO_WATCH',
-      'watching': 'WATCHING', 
-      'watched': 'WATCHED',
-      'dropped': 'DROPPED'
-    }
+    // Valid MediaStatus enum values
+    const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
 
-    if (!statusMap[status]) {
+    if (status && !validStatuses.includes(status)) {
       throw new Error('Invalid status')
     }
 
-    const quickReviewMap = {
-      'positive': 'POSITIVE',
-      'neutral': 'NEUTRAL',
-      'negative': 'NEGATIVE'
-    }
+    // Valid QuickReview enum values
+    const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
 
-    if (quick_review && !quickReviewMap[quick_review]) {
+    if (quick_review && !validQuickReviews.includes(quick_review)) {
       throw new Error('Invalid quick_review value')
     }
 
-    return { statusMap, quickReviewMap }
+    return true
   }
 
   /**
@@ -170,19 +163,16 @@ class MovieService {
   /**
    * Creates a user-movie relationship
    */
-  async createUserMovie(userId, movieId, movieData, statusMap, quickReviewMap) {
-    const { status = 'want_to_watch', quick_review, notes } = movieData
-
-    const dbStatus = statusMap[status]
-    const dbQuickReview = quick_review ? quickReviewMap[quick_review] : null
+  async createUserMovie(userId, movieId, movieData) {
+    const { status = 'BACKLOG', quick_review, notes } = movieData
 
     try {
       const userMovie = await this.prisma.userMovie.create({
         data: {
           userId: userId,
           movieId: movieId,
-          status: dbStatus,
-          quickReview: dbQuickReview,
+          status: status,
+          quickReview: quick_review || null,
           notes: notes || null,
         },
         include: {
@@ -225,8 +215,8 @@ class MovieService {
       vote_count: userMovie.movie.voteCount,
       certification: userMovie.movie.certification,
       trailer_key: userMovie.movie.trailerKey,
-      status: this.reverseStatusMap[userMovie.status],
-      quick_review: userMovie.quickReview ? this.reverseQuickReviewMap[userMovie.quickReview] : null,
+      status: userMovie.status,
+      quick_review: userMovie.quickReview,
       notes: userMovie.notes,
       added_at: userMovie.createdAt,
       updated_at: userMovie.updatedAt
@@ -239,7 +229,7 @@ class MovieService {
   async addMovieToLibrary(userId, movieData) {
     try {
       // Validate request
-      const { statusMap, quickReviewMap } = this.validateAddMovieRequest(movieData)
+      this.validateAddMovieRequest(movieData)
 
       // Get user's TMDB credentials
       const userCredentials = await this.getUserTMDBCredentials(userId)
@@ -254,7 +244,7 @@ class MovieService {
       const { movie } = await this.getOrCreateMovie(movieData.tmdbId, tmdbService)
 
       // Create user-movie relationship
-      const userMovie = await this.createUserMovie(userId, movie.id, movieData, statusMap, quickReviewMap)
+      const userMovie = await this.createUserMovie(userId, movie.id, movieData)
 
       return userMovie
     } catch (error) {
@@ -293,31 +283,29 @@ class MovieService {
   validateUpdateMovieRequest(body) {
     const { status, quick_review, notes } = body
 
-    const statusMap = {
-      'want_to_watch': 'WANT_TO_WATCH',
-      'watching': 'WATCHING', 
-      'watched': 'WATCHED',
-      'dropped': 'DROPPED'
-    }
-
-    const quickReviewMap = {
-      'positive': 'POSITIVE',
-      'neutral': 'NEUTRAL',
-      'negative': 'NEGATIVE'
-    }
+    // Valid MediaStatus enum values
+    const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
+    
+    // Valid QuickReview enum values
+    const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
 
     const updateData = {}
 
     if (status !== undefined) {
-      const dbStatus = statusMap[status]
-      if (!dbStatus) {
+      if (!validStatuses.includes(status)) {
         throw new Error('Invalid status')
       }
-      updateData.status = dbStatus
+      updateData.status = status
     }
 
     if (quick_review !== undefined) {
-      updateData.quickReview = quick_review ? quickReviewMap[quick_review] : null
+      if (quick_review === null) {
+        updateData.quickReview = null
+      } else if (!validQuickReviews.includes(quick_review)) {
+        throw new Error('Invalid quick review value')
+      } else {
+        updateData.quickReview = quick_review
+      }
     }
 
     if (notes !== undefined) {
@@ -397,31 +385,18 @@ class MovieService {
 
       const formattedStats = {
         total: 0,
-        wantToWatch: 0,
-        watching: 0,
-        watched: 0,
-        dropped: 0
+        BACKLOG: 0,
+        ACTIVE: 0,
+        PAUSED: 0,
+        COMPLETED: 0,
+        DROPPED: 0
       }
 
       stats.forEach(stat => {
-        const status = this.reverseStatusMap[stat.status]
+        const status = stat.status
         const count = stat._count.status
         formattedStats.total += count
-        
-        switch (status) {
-          case 'want_to_watch':
-            formattedStats.wantToWatch = count
-            break
-          case 'watching':
-            formattedStats.watching = count
-            break
-          case 'watched':
-            formattedStats.watched = count
-            break
-          case 'dropped':
-            formattedStats.dropped = count
-            break
-        }
+        formattedStats[status] = count
       })
 
       return formattedStats
@@ -431,23 +406,6 @@ class MovieService {
     }
   }
 
-  // Getter methods for constants
-  get reverseStatusMap() {
-    return {
-      'WANT_TO_WATCH': 'want_to_watch',
-      'WATCHING': 'watching',
-      'WATCHED': 'watched', 
-      'DROPPED': 'dropped'
-    }
-  }
-
-  get reverseQuickReviewMap() {
-    return {
-      'POSITIVE': 'positive',
-      'NEUTRAL': 'neutral',
-      'NEGATIVE': 'negative'
-    }
-  }
 }
 
 export default MovieService

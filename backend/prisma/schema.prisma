@@ -124,7 +124,7 @@ model Show {
 
 model UserShow {
   id             Int         @id @default(autoincrement())
-  status         ShowStatus  @default(WANT_TO_WATCH)
+  status         MediaStatus @default(BACKLOG)
   quickReview    QuickReview? @map("quick_review")
   currentSeason  Int?        @map("current_season")
   currentEpisode Int?        @map("current_episode")
@@ -142,7 +142,7 @@ model UserShow {
 
 model UserMovie {
   id             Int          @id @default(autoincrement())
-  status         MovieStatus  @default(WANT_TO_WATCH)
+  status         MediaStatus  @default(BACKLOG)
   quickReview    QuickReview? @map("quick_review")
   notes          String?
   createdAt      DateTime     @default(now())
@@ -158,7 +158,7 @@ model UserMovie {
 
 model UserGame {
   id             Int          @id @default(autoincrement())
-  status         GameStatus   @default(WANT_TO_PLAY)
+  status         MediaStatus  @default(BACKLOG)
   quickReview    QuickReview? @map("quick_review")
   userPlatform   String?      @map("user_platform")
   notes          String?
@@ -192,25 +192,12 @@ model UserApiCredential {
   @@map("user_api_credentials")
 }
 
-enum GameStatus {
-  WANT_TO_PLAY
-  PLAYING
+enum MediaStatus {
+  ACTIVE
+  PAUSED
   COMPLETED
   DROPPED
-}
-
-enum MovieStatus {
-  WANT_TO_WATCH
-  WATCHING
-  WATCHED
-  DROPPED
-}
-
-enum ShowStatus {
-  WANT_TO_WATCH
-  WATCHING
-  WATCHED
-  DROPPED
+  BACKLOG
 }
 
 enum QuickReview {

@@ -124,33 +124,27 @@ const currentlyPlaying = computed(() => {
   const currentStats = props.stats[props.activeMediaType] || props.stats.all;
 
   if (props.activeMediaType === "games") {
-    // For games specifically, filter for "playing" status
+    // For games specifically, filter for "ACTIVE" status
     return (currentStats.recentActivity || []).filter(
-      (activity) => activity.status === "playing"
+      (activity) => activity.status === "ACTIVE"
     );
   } else if (
     props.activeMediaType === "movies" ||
     props.activeMediaType === "shows"
   ) {
-    // For movies/shows specifically, filter for "watching" status
+    // For movies/shows specifically, filter for "ACTIVE" status
     return (currentStats.recentActivity || []).filter(
-      (activity) => activity.status === "watching"
+      (activity) => activity.status === "ACTIVE"
     );
   } else if (props.activeMediaType === "all") {
-    // For all media types, filter for playing/watching/reading statuses
+    // For all media types, filter for ACTIVE statuses
     return (currentStats.recentActivity || []).filter(
-      (activity) =>
-        activity.status === "playing" ||
-        activity.status === "watching" ||
-        activity.status === "reading"
+      (activity) => activity.status === "ACTIVE"
     );
   } else {
     // Default fallback
     return (currentStats.recentActivity || []).filter(
-      (activity) =>
-        activity.status === "playing" ||
-        activity.status === "watching" ||
-        activity.status === "reading"
+      (activity) => activity.status === "ACTIVE"
     );
   }
 });
@@ -212,24 +206,19 @@ const getEmptyStateMessage = () => {
 const backlogCount = computed(() => {
   const currentStats = props.stats[props.activeMediaType] || props.stats.all;
   if (props.activeMediaType === "all") {
-    // Sum all "want to" statuses across media types
+    // Sum all "backlog" statuses across media types
     const gameStats = props.stats.games.statusDistribution || {};
     const movieStats = props.stats.movies.statusDistribution || {};
     const showStats = props.stats.shows.statusDistribution || {};
 
     return (
-      (gameStats.want_to_play || 0) +
-      (movieStats.want_to_watch || 0) +
-      (showStats.want_to_watch || 0)
+      (gameStats.BACKLOG || 0) +
+      (movieStats.BACKLOG || 0) +
+      (showStats.BACKLOG || 0)
     );
   } else {
     const statusDist = currentStats.statusDistribution || {};
-    return (
-      statusDist.want_to_play ||
-      statusDist.want_to_watch ||
-      statusDist.want_to_read ||
-      0
-    );
+    return statusDist.BACKLOG || 0;
   }
 });
 

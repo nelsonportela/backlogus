@@ -51,7 +51,7 @@ export function useRandomPickers() {
     try {
       await gamesStore.getUserItems();
       const games = gamesStore.items.filter(
-        (game) => game.status === "want_to_play" || game.status === "playing"
+        (game) => game.status === "BACKLOG" || game.status === "ACTIVE"
       );
 
       if (games.length === 0) {
@@ -70,7 +70,7 @@ export function useRandomPickers() {
     try {
       await moviesStore.getUserItems();
       const movies = moviesStore.items.filter(
-        (movie) => movie.status === "want_to_watch" || movie.status === "watching"
+        (movie) => movie.status === "BACKLOG" || movie.status === "ACTIVE"
       );
 
       if (movies.length === 0) {
@@ -89,7 +89,7 @@ export function useRandomPickers() {
     try {
       await showsStore.getUserItems();
       const shows = showsStore.items.filter(
-        (show) => show.status === "want_to_watch" || show.status === "watching"
+        (show) => show.status === "BACKLOG" || show.status === "ACTIVE"
       );
 
       if (shows.length === 0) {
@@ -106,7 +106,7 @@ export function useRandomPickers() {
 
   const handleStartPlaying = async (game, onStatsRefresh) => {
     try {
-      await gamesStore.updateUserGame(game.id, { status: "playing" });
+      await gamesStore.updateUserGame(game.id, { status: "ACTIVE" });
       showRandomGameModal.value = false;
       // Refresh stats
       if (onStatsRefresh) await onStatsRefresh();
@@ -117,7 +117,7 @@ export function useRandomPickers() {
 
   const handleStartWatchingMovie = async (movie, onStatsRefresh) => {
     try {
-      await moviesStore.updateUserMovie(movie.id, { status: "watching" });
+      await moviesStore.updateUserMovie(movie.id, { status: "ACTIVE" });
       showRandomMovieModal.value = false;
       // Refresh stats
       if (onStatsRefresh) await onStatsRefresh();
@@ -128,7 +128,7 @@ export function useRandomPickers() {
 
   const handleStartWatchingShow = async (show, onStatsRefresh) => {
     try {
-      await showsStore.updateUserShow(show.id, { status: "watching" });
+      await showsStore.updateUserShow(show.id, { status: "ACTIVE" });
       showRandomShowModal.value = false;
       // Refresh stats
       if (onStatsRefresh) await onStatsRefresh();

@@ -77,28 +77,21 @@ class GameService {
       throw new Error('IGDB ID is required')
     }
 
-    const statusMap = {
-      'want_to_play': 'WANT_TO_PLAY',
-      'playing': 'PLAYING',
-      'completed': 'COMPLETED',
-      'dropped': 'DROPPED'
-    }
+    // Valid MediaStatus enum values
+    const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
 
-    if (!statusMap[status]) {
+    if (status && !validStatuses.includes(status)) {
       throw new Error('Invalid status value')
     }
 
-    const quickReviewMap = {
-      'positive': 'POSITIVE',
-      'neutral': 'NEUTRAL',
-      'negative': 'NEGATIVE'
-    }
+    // Valid QuickReview enum values
+    const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
 
-    if (quick_review && !quickReviewMap[quick_review]) {
+    if (quick_review && !validQuickReviews.includes(quick_review)) {
       throw new Error('Invalid quick_review value')
     }
 
-    return { statusMap, quickReviewMap }
+    return true
   }
 
   /**
@@ -197,15 +190,15 @@ class GameService {
   /**
    * Creates a user-game relationship
    */
-  async createUserGame(userId, gameId, gameData, statusMap, quickReviewMap) {
-    const { status = 'want_to_play', quick_review, user_platform, notes } = gameData
+  async createUserGame(userId, gameId, gameData) {
+    const { status = 'BACKLOG', quick_review, user_platform, notes } = gameData
 
     const userGame = await this.prisma.userGame.create({
       data: {
         userId: userId,
         gameId: gameId,
-        status: statusMap[status],
-        quickReview: quick_review ? quickReviewMap[quick_review] : null,
+        status: status,
+        quickReview: quick_review || null,
         userPlatform: user_platform || null,
         notes: notes || null
       },
@@ -219,23 +212,10 @@ class GameService {
    * Transforms a user game for API response
    */
   transformUserGameResponse(userGame) {
-    const reverseStatusMap = {
-      'WANT_TO_PLAY': 'want_to_play',
-      'PLAYING': 'playing',
-      'COMPLETED': 'completed',
-      'DROPPED': 'dropped'
-    }
-
-    const reverseQuickReviewMap = {
-      'POSITIVE': 'positive',
-      'NEUTRAL': 'neutral',
-      'NEGATIVE': 'negative'
-    }
-
     return {
       id: userGame.id,
-      status: reverseStatusMap[userGame.status],
-      quick_review: userGame.quickReview ? reverseQuickReviewMap[userGame.quickReview] : null,
+      status: userGame.status,
+      quick_review: userGame.quickReview,
       personal_rating: userGame.personalRating,
       user_platform: userGame.userPlatform,
       notes: userGame.notes,
@@ -267,7 +247,7 @@ class GameService {
   async addGameToLibrary(userId, gameData) {
     try {
       // Validate request
-      const { statusMap, quickReviewMap } = this.validateAddGameRequest(gameData)
+      this.validateAddGameRequest(gameData)
 
       // Get user's IGDB credentials
       const userCredentials = await this.getUserIGDBCredentials(userId)
@@ -285,7 +265,7 @@ class GameService {
       await this.checkExistingUserGame(userId, game.id)
 
       // Create user-game relationship
-      const userGame = await this.createUserGame(userId, game.id, gameData, statusMap, quickReviewMap)
+      const userGame = await this.createUserGame(userId, game.id, gameData)
 
       // Transform for response
       return this.transformUserGameResponse(userGame)
@@ -301,26 +281,19 @@ class GameService {
   validateUpdateGameRequest(body) {
     const { status, personal_rating, notes, quick_review, user_platform } = body
 
-    const statusMap = {
-      'want_to_play': 'WANT_TO_PLAY',
-      'playing': 'PLAYING',
-      'completed': 'COMPLETED',
-      'dropped': 'DROPPED'
-    }
-
-    const quickReviewMap = {
-      'positive': 'POSITIVE',
-      'neutral': 'NEUTRAL',
-      'negative': 'NEGATIVE'
-    }
+    // Valid MediaStatus enum values
+    const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
+    
+    // Valid QuickReview enum values
+    const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
 
     const updateData = {}
     
     if (status) {
-      if (!statusMap[status]) {
+      if (!validStatuses.includes(status)) {
         throw new Error('Invalid status value')
       }
-      updateData.status = statusMap[status]
+      updateData.status = status
     }
 
     if (personal_rating !== undefined) {
@@ -334,10 +307,10 @@ class GameService {
     if (quick_review !== undefined) {
       if (quick_review === null) {
         updateData.quickReview = null
-      } else if (!quickReviewMap[quick_review]) {
+      } else if (!validQuickReviews.includes(quick_review)) {
         throw new Error('Invalid quick review value')
       } else {
-        updateData.quickReview = quickReviewMap[quick_review]
+        updateData.quickReview = quick_review
       }
     }
 
@@ -414,8 +387,8 @@ class GameService {
         return {
           // UserGame fields
           id: userGame.id, // This is now the userGame ID for updates
-          status: this.reverseStatusMap[userGame.status],
-          quick_review: userGame.quickReview ? this.reverseQuickReviewMap[userGame.quickReview] : null,
+          status: userGame.status,  // Use raw enum value
+          quick_review: userGame.quickReview, // Use raw enum value
           personal_rating: userGame.personalRating,
           user_platform: userGame.userPlatform,
           notes: userGame.notes,
@@ -489,7 +462,7 @@ class GameService {
       const totalGames = userGames.length
       const statusCounts = {}
       userGames.forEach(userGame => {
-        const status = this.reverseStatusMap[userGame.status]
+        const status = userGame.status  // Use raw enum value
         statusCounts[status] = (statusCounts[status] || 0) + 1
       })
 
@@ -537,7 +510,7 @@ class GameService {
       
       userGames.forEach(userGame => {
         if (userGame.quickReview) {
-          const review = this.reverseQuickReviewMap[userGame.quickReview]
+          const review = userGame.quickReview.toLowerCase() // Convert enum to lowercase for counting
           reviewCounts[review]++
         } else {
           reviewCounts.none++
@@ -550,7 +523,7 @@ class GameService {
         gameId: userGame.game.igdbId,
         gameName: userGame.game.name,
         coverUrl: userGame.game.coverUrl,
-        status: this.reverseStatusMap[userGame.status],
+        status: userGame.status,  // Use raw enum value
         updatedAt: userGame.updatedAt.toISOString(),
         createdAt: userGame.createdAt.toISOString()
       }))
@@ -575,24 +548,6 @@ class GameService {
     } catch (error) {
       this.logger.error('GameService.getUserStatistics error:', error)
       throw error
-    }
-  }
-
-  // Getter methods for constants (used by service methods)
-  get reverseStatusMap() {
-    return {
-      'WANT_TO_PLAY': 'want_to_play',
-      'PLAYING': 'playing',
-      'COMPLETED': 'completed',
-      'DROPPED': 'dropped'
-    }
-  }
-
-  get reverseQuickReviewMap() {
-    return {
-      'POSITIVE': 'positive',
-      'NEUTRAL': 'neutral',
-      'NEGATIVE': 'negative'
     }
   }
 }

@@ -15,9 +15,28 @@
       }">
       <div
         class="flex items-center justify-center h-16 border-b dark:border-gray-700 pt-2 md:pt-0">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">
-          BackLogus
-        </h1>
+        <div class="flex items-center space-x-3">
+          <svg
+            class="w-8 h-8 text-primary-600 dark:text-primary-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+            <!-- Container box -->
+            <rect x="1" y="1" width="22" height="22" rx="4" ry="4" />
+            
+            <!-- Play button (left side) - equal spacing and size -->
+            <path d="M11 12 L5 8 L5 16 Z" />
+            
+            <!-- Bookmark (right side) - equal spacing and size -->
+            <path d="M14 7 H19 V17 L16.5 14.5 L14 17 Z" />
+          </svg>
+          <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">
+            BackLogus
+          </h1>
+        </div>
       </div>
       <nav class="mt-8">
         <div class="px-4 space-y-2">
@@ -455,6 +474,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.js";
 import { useUserStore } from "@/stores/user.js";
 import { useTheme } from "@/composables/useTheme.js";
+import { getStatusOptions } from "@/composables/useStatusOptions.js";
 import { ref, computed, watch, onMounted } from "vue";
 
 const route = useRoute();
@@ -471,31 +491,21 @@ const showsSubmenuOpen = ref(route.name === "tv");
 // Mobile menu state
 const mobileMenuOpen = ref(false);
 
-// Game statuses configuration
+// Status configurations using universal MediaStatus values
 const gameStatuses = [
   { value: "all", label: "All Games" },
-  { value: "playing", label: "Playing" },
-  { value: "completed", label: "Completed" },
-  { value: "want_to_play", label: "Want to Play" },
-  { value: "dropped", label: "Dropped" },
+  ...getStatusOptions("game")
 ];
 
-// Movie statuses configuration
 const movieStatuses = [
   { value: "all", label: "All Movies" },
-  { value: "watching", label: "Watching" },
-  { value: "watched", label: "Watched" },
-  { value: "want_to_watch", label: "Want to Watch" },
-  { value: "dropped", label: "Dropped" },
+  ...getStatusOptions("movie")
 ];
 
 // TV Show statuses configuration  
 const showStatuses = [
   { value: "all", label: "All TV Shows" },
-  { value: "watching", label: "Watching" },
-  { value: "watched", label: "Watched" },  
-  { value: "want_to_watch", label: "Want to Watch" },
-  { value: "dropped", label: "Dropped" },
+  ...getStatusOptions("show")
 ];
 
 const isGamesRoute = computed(() => {

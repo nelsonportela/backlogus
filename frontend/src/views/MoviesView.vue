@@ -148,7 +148,7 @@ const addMovieToLibrary = async (libraryData) => {
   } else {
     // Old format - direct movie object
     movieData = libraryData;
-    status = "want_to_watch"; // default status
+    status = "BACKLOG"; // default status using universal MediaStatus
     quickReview = null;
     notes = null;
   }

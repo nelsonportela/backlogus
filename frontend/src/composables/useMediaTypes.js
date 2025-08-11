@@ -42,7 +42,7 @@ export function useMediaTypes() {
     ) - (statusDistribution.completed || 0) - (statusDistribution.dropped || 0);
 
     // Calculate completion percentage
-    const completedCount = statusDistribution.completed || statusDistribution.watched || statusDistribution.read || 0;
+    const completedCount = statusDistribution.COMPLETED || 0;
     const completionPercentage = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
     return [
@@ -75,11 +75,7 @@ export function useMediaTypes() {
         label:
           config.statuses.find((s) => s.color === "yellow")?.label ||
           "Want to Try",
-        value:
-          statusDistribution.want_to_play ||
-          statusDistribution.want_to_watch ||
-          statusDistribution.want_to_read ||
-          0,
+        value: statusDistribution.BACKLOG || 0,
         change: "In backlog",
         color: "yellow",
       },

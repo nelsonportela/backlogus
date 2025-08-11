@@ -5,20 +5,6 @@ class ShowService {
   constructor(prisma, logger) {
     this.prisma = prisma
     this.logger = logger
-
-    // Reverse mapping for response transformation
-    this.reverseStatusMap = {
-      'WANT_TO_WATCH': 'want_to_watch',
-      'WATCHING': 'watching',
-      'WATCHED': 'watched',
-      'DROPPED': 'dropped'
-    }
-
-    this.reverseQuickReviewMap = {
-      'POSITIVE': 'positive',
-      'NEUTRAL': 'neutral',
-      'NEGATIVE': 'negative'
-    }
   }
 
   /**
@@ -110,34 +96,27 @@ class ShowService {
    * Validates the request body for adding a show
    */
   validateAddShowRequest(body) {
-    const { tmdb_id, status = 'want_to_watch', quick_review, current_season, current_episode, notes } = body
+    const { tmdb_id, status = 'BACKLOG', quick_review, current_season, current_episode, notes } = body
 
     if (!tmdb_id) {
       throw new Error('tmdb_id is required')
     }
 
-    const statusMap = {
-      'want_to_watch': 'WANT_TO_WATCH',
-      'watching': 'WATCHING', 
-      'watched': 'WATCHED',
-      'dropped': 'DROPPED'
-    }
+    // Valid MediaStatus enum values
+    const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
 
-    if (!statusMap[status]) {
+    if (status && !validStatuses.includes(status)) {
       throw new Error('Invalid status')
     }
 
-    const quickReviewMap = {
-      'positive': 'POSITIVE',
-      'neutral': 'NEUTRAL',
-      'negative': 'NEGATIVE'
-    }
+    // Valid QuickReview enum values
+    const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
 
-    if (quick_review && !quickReviewMap[quick_review]) {
+    if (quick_review && !validQuickReviews.includes(quick_review)) {
       throw new Error('Invalid quick_review value')
     }
 
-    return { statusMap, quickReviewMap }
+    return true
   }
 
   /**
@@ -174,15 +153,15 @@ class ShowService {
   /**
    * Creates a user-show relationship
    */
-  async createUserShow(userId, showId, showData, statusMap, quickReviewMap) {
-    const { status = 'want_to_watch', quick_review, current_season, current_episode, notes } = showData
+  async createUserShow(userId, showId, showData) {
+    const { status = 'BACKLOG', quick_review, current_season, current_episode, notes } = showData
 
     const userShow = await this.prisma.userShow.create({
       data: {
         userId: userId,
         showId: showId,
-        status: statusMap[status],
-        quickReview: quick_review ? quickReviewMap[quick_review] : null,
+        status: status,
+        quickReview: quick_review || null,
         currentSeason: current_season ? parseInt(current_season) : null,
         currentEpisode: current_episode ? parseInt(current_episode) : null,
         notes: notes || null
@@ -205,8 +184,8 @@ class ShowService {
 
     return {
       id: userShow.id,
-      status: this.reverseStatusMap[userShow.status],
-      quick_review: userShow.quickReview ? this.reverseQuickReviewMap[userShow.quickReview] : null,
+      status: userShow.status,
+      quick_review: userShow.quickReview,
       current_season: userShow.currentSeason,
       current_episode: userShow.currentEpisode,
       notes: userShow.notes,
@@ -246,7 +225,7 @@ class ShowService {
   async addShowToLibrary(userId, showData) {
     try {
       // Validate request
-      const { statusMap, quickReviewMap } = this.validateAddShowRequest(showData)
+      this.validateAddShowRequest(showData)
 
       // Get user's TMDB credentials
       const userCredentials = await this.getUserTMDBCredentials(userId)
@@ -264,7 +243,7 @@ class ShowService {
       await this.checkExistingUserShow(userId, show.id)
 
       // Create user-show relationship
-      const userShow = await this.createUserShow(userId, show.id, showData, statusMap, quickReviewMap)
+      const userShow = await this.createUserShow(userId, show.id, showData)
 
       // Transform for response
       return await this.transformUserShowResponse(userShow)
@@ -344,24 +323,23 @@ class ShowService {
 
       // Update status if provided
       if (updateData.status) {
-        const statusMap = {
-          'want_to_watch': 'WANT_TO_WATCH',
-          'watching': 'WATCHING', 
-          'watched': 'WATCHED',
-          'dropped': 'DROPPED'
+        // Valid MediaStatus enum values
+        const validStatuses = ['ACTIVE', 'PAUSED', 'COMPLETED', 'DROPPED', 'BACKLOG']
+        if (!validStatuses.includes(updateData.status)) {
+          throw new Error('Invalid status value')
         }
-        updateFields.status = statusMap[updateData.status] || updateData.status
+        updateFields.status = updateData.status
       }
 
       // Update quick review if provided
       if (updateData.quick_review !== undefined) {
         if (updateData.quick_review) {
-          const quickReviewMap = {
-            'positive': 'POSITIVE',
-            'neutral': 'NEUTRAL',
-            'negative': 'NEGATIVE'
+          // Valid QuickReview enum values
+          const validQuickReviews = ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
+          if (!validQuickReviews.includes(updateData.quick_review)) {
+            throw new Error('Invalid quick review value')
           }
-          updateFields.quickReview = quickReviewMap[updateData.quick_review] || updateData.quick_review
+          updateFields.quickReview = updateData.quick_review
         } else {
           updateFields.quickReview = null
         }

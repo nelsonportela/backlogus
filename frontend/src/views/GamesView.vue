@@ -170,7 +170,7 @@ const addGameToLibrary = async (libraryData) => {
   } else {
     // Old format - direct game object
     gameData = libraryData;
-    status = "want_to_play"; // default status
+    status = "BACKLOG"; // default status
     quickReview = null;
     userPlatform = null;
     notes = null;

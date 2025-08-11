@@ -4,7 +4,19 @@
 
 A modern media backlog tracking application with Vue 3 frontend and Fastify backend. Supports games via IGDB API and movies via TMDB API, designed for expansion to TV shows, books, and other media types.
 
+## Core Development Principles
+
+**🎯 Consistency**: All patterns, naming conventions, and architectural decisions must be uniform across the entire codebase. Use the same approaches for similar problems.
+
+**🔧 Extensibility**: Every component, service, and data structure should be designed to accommodate new media types, features, and requirements without breaking changes.
+
+**💡 Clarity**: Code should be self-documenting with clear naming, logical organization, and minimal complexity. Prioritize readability over cleverness.
+
+**🚀 Future-Proof**: Build clean foundations that can evolve. Avoid tightly-coupled solutions and prefer flexible, maintainable architectures.
+
 ## Architecture Overview
+
+**Universal Design Philosophy**: All systems use shared patterns that work consistently across different media types (games, movies, TV shows, books, etc.)
 
 **Monorepo Structure**: Two independent applications with shared patterns
 - `frontend/` - Vue 3 SPA with Pinia, Vue Router, and Tailwind CSS
@@ -12,7 +24,7 @@ A modern media backlog tracking application with Vue 3 frontend and Fastify back
 - `dev-setup.sh` - Development helper script for database and Docker management
 
 **Data Flow**: External APIs → Backend transformation → Prisma models → Frontend stores → Components
-**Media Support**: Currently games (IGDB API), extensible for movies, TV shows, books, etc.
+**Media Support**: Universal status system and extensible architecture for any media type
 
 ## Key Technical Constraints
 
@@ -22,8 +34,8 @@ A modern media backlog tracking application with Vue 3 frontend and Fastify back
 - **Tailwind CSS** - Utility-first CSS framework for all styling
 - **Dark/Light Mode** - Support both themes with proper CSS variables and Tailwind dark: classes
 - **Snake_case ↔ camelCase mapping** - Database uses snake_case, JavaScript uses camelCase
-- **Clean & Simple** - Prioritize readable, maintainable code over complex abstractions
-- **Media Agnostic** - Design components and patterns to work across different media types
+- **Universal Patterns** - All components, services, and data structures must work across media types
+- **Clean Foundations** - Prioritize maintainable, extensible code over quick fixes
 
 ## Critical Development Workflows
 
@@ -45,12 +57,11 @@ cd frontend && npm run dev
 
 ## Data Architecture Patterns
 
-### Media Status System (Currently Games, Expandable)
-- **Database enum**: `WANT_TO_PLAY`, `PLAYING`, `COMPLETED`, `DROPPED`
-- **Frontend values**: `want_to_play`, `playing`, `completed`, `dropped`
-- **Future media**: Similar status patterns for books, movies, TV shows
-- **Mapping handled in**: `backend/src/routes/games.js` (statusMap/reverseStatusMap)
-
+### Universal Media Status System
+- **Database enum**: `MediaStatus` with values: `ACTIVE`, `PAUSED`, `COMPLETED`, `DROPPED`, `BACKLOG`
+- **Frontend mapping**: Consistent camelCase values across all media types
+- **Display labels**: Media-specific labels (e.g., ACTIVE → "Playing" for games, "Watching" for movies)
+- **Extensible design**: Same status system works for any future media type
 ### External API Integration (Expandable Architecture)
 - **Current**: IGDB service in `backend/src/services/igdb.js`
 - **Pattern**: Single API class with formatData() method for each media type

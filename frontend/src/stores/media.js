@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { mediaApi } from "@/services/api";
 import { ref } from "vue";
+import { getStatusOptions } from "@/composables/useStatusOptions";
 
 export const useMediaStore = defineStore("media", () => {
   // Get unified statistics across all media types
@@ -38,45 +39,25 @@ export const useMediaStore = defineStore("media", () => {
     games: {
       name: "Games",
       icon: "gamepad",
-      statuses: [
-        { value: "want_to_play", label: "Want to Play", color: "yellow" },
-        { value: "playing", label: "Playing", color: "green" },
-        { value: "completed", label: "Completed", color: "purple" },
-        { value: "dropped", label: "Dropped", color: "red" },
-      ],
+      statuses: getStatusOptions('game'),
       route: "games",
     },
     movies: {
       name: "Movies",
       icon: "film",
-      statuses: [
-        { value: "want_to_watch", label: "Want to Watch", color: "yellow" },
-        { value: "watching", label: "Watching", color: "green" },
-        { value: "watched", label: "Watched", color: "purple" },
-        { value: "dropped", label: "Dropped", color: "red" },
-      ],
+      statuses: getStatusOptions('movie'),
       route: "movies",
     },
     shows: {
       name: "TV Shows",
       icon: "tv",
-      statuses: [
-        { value: "want_to_watch", label: "Want to Watch", color: "yellow" },
-        { value: "watching", label: "Watching", color: "green" },
-        { value: "watched", label: "Watched", color: "purple" },
-        { value: "dropped", label: "Dropped", color: "red" },
-      ],
+      statuses: getStatusOptions('show'),
       route: "shows",
     },
     books: {
       name: "Books",
       icon: "book",
-      statuses: [
-        { value: "want_to_read", label: "Want to Read", color: "yellow" },
-        { value: "reading", label: "Reading", color: "green" },
-        { value: "read", label: "Read", color: "purple" },
-        { value: "dropped", label: "Dropped", color: "red" },
-      ],
+      statuses: getStatusOptions('book'),
       route: "books",
     },
   };

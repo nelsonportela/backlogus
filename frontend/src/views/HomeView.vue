@@ -690,7 +690,7 @@ const navigateToTrending = () => {
 const continueRandomly = async () => {
   const currentStats = stats.value[activeMediaType.value] || stats.value.all;
   const currentlyPlaying = (currentStats.recentActivity || []).filter(activity => 
-    activity.status === "playing" || activity.status === "watching" || activity.status === "reading"
+    activity.status === "ACTIVE"
   );
   
   if (currentlyPlaying.length === 0) return;
@@ -700,11 +700,11 @@ const continueRandomly = async () => {
   
   // Navigate to the appropriate media type view
   if (selectedItem.mediaType === "games") {
-    router.push({ name: "games", query: { status: "playing" } });
+    router.push({ name: "games", query: { status: "ACTIVE" } });
   } else if (selectedItem.mediaType === "movies") {
-    router.push({ name: "movies", query: { status: "watching" } });
+    router.push({ name: "movies", query: { status: "ACTIVE" } });
   } else if (selectedItem.mediaType === "shows") {
-    router.push({ name: "tv", query: { status: "watching" } });
+    router.push({ name: "tv", query: { status: "ACTIVE" } });
   }
 };
 
@@ -712,23 +712,23 @@ const tackleBacklog = async () => {
   // Navigate to the appropriate view based on active media type
   if (activeMediaType.value === "all") {
     // Find which media type has the most backlog items
-    const gameBacklog = stats.value.games.statusDistribution?.want_to_play || 0;
-    const movieBacklog = stats.value.movies.statusDistribution?.want_to_watch || 0;
-    const showBacklog = stats.value.shows.statusDistribution?.want_to_watch || 0;
+    const gameBacklog = stats.value.games.statusDistribution?.BACKLOG || 0;
+    const movieBacklog = stats.value.movies.statusDistribution?.BACKLOG || 0;
+    const showBacklog = stats.value.shows.statusDistribution?.BACKLOG || 0;
     
     if (gameBacklog >= movieBacklog && gameBacklog >= showBacklog) {
-      router.push({ name: "games", query: { status: "want_to_play" } });
+      router.push({ name: "games", query: { status: "BACKLOG" } });
     } else if (movieBacklog >= showBacklog) {
-      router.push({ name: "movies", query: { status: "want_to_watch" } });
+      router.push({ name: "movies", query: { status: "BACKLOG" } });
     } else {
-      router.push({ name: "tv", query: { status: "want_to_watch" } });
+      router.push({ name: "tv", query: { status: "BACKLOG" } });
     }
   } else if (activeMediaType.value === "games") {
-    router.push({ name: "games", query: { status: "want_to_play" } });
+    router.push({ name: "games", query: { status: "BACKLOG" } });
   } else if (activeMediaType.value === "movies") {
-    router.push({ name: "movies", query: { status: "want_to_watch" } });
+    router.push({ name: "movies", query: { status: "BACKLOG" } });
   } else if (activeMediaType.value === "shows") {
-    router.push({ name: "tv", query: { status: "want_to_watch" } });
+    router.push({ name: "tv", query: { status: "BACKLOG" } });
   }
 };
 

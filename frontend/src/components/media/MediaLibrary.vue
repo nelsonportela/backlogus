@@ -101,6 +101,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { getStatusOptions, getStatusLabel } from "@/composables/useStatusOptions";
 import ConfirmationModal from "../ui/ConfirmationModal.vue";
 import MediaLibraryFilters from "./MediaLibraryFilters.vue";
 import MediaLibraryItem from "./MediaLibraryItem.vue";
@@ -114,31 +115,19 @@ const router = useRouter();
 const statusMenuMap = {
   game: [
     { value: "all", label: "All Games" },
-    { value: "playing", label: "Playing" },
-    { value: "completed", label: "Completed" },
-    { value: "want_to_play", label: "Want to Play" },
-    { value: "dropped", label: "Dropped" },
+    ...getStatusOptions('game')
   ],
   movie: [
     { value: "all", label: "All Movies" },
-    { value: "watching", label: "Watching" },
-    { value: "watched", label: "Watched" },
-    { value: "want_to_watch", label: "Want to Watch" },
-    { value: "dropped", label: "Dropped" },
+    ...getStatusOptions('movie')
   ],
   book: [
     { value: "all", label: "All Books" },
-    { value: "reading", label: "Reading" },
-    { value: "read", label: "Read" },
-    { value: "want_to_read", label: "Want to Read" },
-    { value: "dropped", label: "Dropped" },
+    ...getStatusOptions('book')
   ],
   show: [
     { value: "all", label: "All Shows" },
-    { value: "watching", label: "Watching" },
-    { value: "watched", label: "Watched" },
-    { value: "want_to_watch", label: "Want to Watch" },
-    { value: "dropped", label: "Dropped" },
+    ...getStatusOptions('show')
   ],
 };
 
@@ -292,20 +281,6 @@ const mediaTypeLabel = computed(() => {
   // Get the status from query parameters
   const status = route.query.status;
 
-  // Map status values to display names
-  const statusLabels = {
-    playing: "Playing",
-    completed: "Completed",
-    want_to_play: "Want to Play",
-    dropped: "Dropped",
-    watching: "Watching",
-    want_to_watch: "Want to Watch",
-    watched: "Watched",
-    reading: "Reading",
-    want_to_read: "Want to Read",
-    read: "Read",
-  };
-
   // Map route names to proper labels
   const routeLabels = {
     games: "Games",
@@ -318,9 +293,12 @@ const mediaTypeLabel = computed(() => {
   const baseLabel = routeLabels[routeName] || 
     (routeName ? routeName.charAt(0).toUpperCase() + routeName.slice(1) : "Media");
 
-  // If there's a status and it's not 'all', append it
-  if (status && status !== "all" && statusLabels[status]) {
-    return `${statusLabels[status]}`;
+  // If there's a status and it's not 'all', get the label from composable
+  if (status && status !== "all") {
+    const statusLabel = getStatusLabel(status, props.mediaType);
+    if (statusLabel) {
+      return statusLabel;
+    }
   } else if (status === "all") {
     // If status is 'all', just return the base label
     return `All ${baseLabel}`;
