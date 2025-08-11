@@ -22,18 +22,6 @@ export default {
         "screen-real": "calc(var(--real-vh, 1vh) * 100)",
         "screen-ios": "calc(var(--vh, 1vh) * 100)",
       },
-      padding: {
-        "safe-top": "env(safe-area-inset-top)",
-        "safe-bottom": "env(safe-area-inset-bottom)",
-        "safe-left": "env(safe-area-inset-left)",
-        "safe-right": "env(safe-area-inset-right)",
-      },
-      margin: {
-        "safe-top": "env(safe-area-inset-top)",
-        "safe-bottom": "env(safe-area-inset-bottom)",
-        "safe-left": "env(safe-area-inset-left)",
-        "safe-right": "env(safe-area-inset-right)",
-      },
     },
   },
   plugins: [],

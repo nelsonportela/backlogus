@@ -76,17 +76,6 @@ export function useViewportHeight() {
       document.documentElement.classList.add("is-ios");
     }
 
-    // Detect PWA standalone mode
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone ||
-      document.referrer.includes("android-app://");
-
-    if (isStandalone) {
-      document.documentElement.classList.add("is-pwa");
-      document.body.classList.add("mobile-fullscreen");
-    }
-
     // Detect mobile device for additional optimizations
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
