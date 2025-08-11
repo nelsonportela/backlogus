@@ -8,7 +8,7 @@
 
     <!-- Sidebar -->
     <div
-      class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
+      class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col"
       :class="{
         '-translate-x-full': !mobileMenuOpen,
         'translate-x-0': mobileMenuOpen,
@@ -38,7 +38,7 @@
           </h1>
         </div>
       </div>
-      <nav class="mt-8">
+      <nav class="mt-8 flex-1 overflow-y-auto pb-44 max-h-[calc(100vh-250px)]">
         <div class="px-4 space-y-2">
           <!-- Home Section -->
           <router-link
@@ -109,7 +109,7 @@
               leave-to-class="opacity-0 max-h-0 transform -translate-y-2">
               <div
                 v-show="gamesSubmenuOpen"
-                class="ml-6 mt-2 space-y-1 overflow-hidden">
+                class="ml-6 mt-2 space-y-1 overflow-hidden max-h-64 overflow-y-auto">
                 <router-link
                   v-for="status in gameStatuses"
                   :key="status.value"
@@ -173,7 +173,7 @@
               leave-to-class="opacity-0 max-h-0 transform -translate-y-2">
               <div
                 v-show="moviesSubmenuOpen"
-                class="ml-6 mt-2 space-y-1 overflow-hidden">
+                class="ml-6 mt-2 space-y-1 overflow-hidden max-h-64 overflow-y-auto">
                 <router-link
                   v-for="status in movieStatuses"
                   :key="status.value"
@@ -246,7 +246,7 @@
               leave-to-class="opacity-0 max-h-0 transform -translate-y-2">
               <div
                 v-show="showsSubmenuOpen"
-                class="ml-6 mt-2 space-y-1 overflow-hidden">
+                class="ml-6 mt-2 space-y-1 overflow-hidden max-h-64 overflow-y-auto">
                 <router-link
                   v-for="status in showStatuses"
                   :key="status.value"
@@ -533,35 +533,38 @@ const dynamicTitle = computed(() => {
 });
 
 const toggleGamesSubmenu = () => {
-  gamesSubmenuOpen.value = !gamesSubmenuOpen.value;
-  // Close other submenus when opening games submenu with a slight delay for smoother UX
-  if (gamesSubmenuOpen.value) {
-    setTimeout(() => {
-      moviesSubmenuOpen.value = false;
-      showsSubmenuOpen.value = false;
-    }, 150);
+  const wasOpen = gamesSubmenuOpen.value;
+  // Close all submenus first
+  gamesSubmenuOpen.value = false;
+  moviesSubmenuOpen.value = false;
+  showsSubmenuOpen.value = false;
+  // Then open games submenu if it wasn't open before
+  if (!wasOpen) {
+    gamesSubmenuOpen.value = true;
   }
 };
 
 const toggleMoviesSubmenu = () => {
-  moviesSubmenuOpen.value = !moviesSubmenuOpen.value;
-  // Close other submenus when opening movies submenu with a slight delay for smoother UX
-  if (moviesSubmenuOpen.value) {
-    setTimeout(() => {
-      gamesSubmenuOpen.value = false;
-      showsSubmenuOpen.value = false;
-    }, 150);
+  const wasOpen = moviesSubmenuOpen.value;
+  // Close all submenus first
+  gamesSubmenuOpen.value = false;
+  moviesSubmenuOpen.value = false;
+  showsSubmenuOpen.value = false;
+  // Then open movies submenu if it wasn't open before
+  if (!wasOpen) {
+    moviesSubmenuOpen.value = true;
   }
 };
 
 const toggleShowsSubmenu = () => {
-  showsSubmenuOpen.value = !showsSubmenuOpen.value;
-  // Close other submenus when opening shows submenu with a slight delay for smoother UX
-  if (showsSubmenuOpen.value) {
-    setTimeout(() => {
-      gamesSubmenuOpen.value = false;
-      moviesSubmenuOpen.value = false;
-    }, 150);
+  const wasOpen = showsSubmenuOpen.value;
+  // Close all submenus first
+  gamesSubmenuOpen.value = false;
+  moviesSubmenuOpen.value = false;
+  showsSubmenuOpen.value = false;
+  // Then open shows submenu if it wasn't open before
+  if (!wasOpen) {
+    showsSubmenuOpen.value = true;
   }
 };
 
