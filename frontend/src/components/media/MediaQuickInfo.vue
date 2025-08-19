@@ -149,18 +149,16 @@ const displayRating = computed(() => {
     case "movie":
     case "show":
       // TMDB ratings are already 0-10 scale (e.g., 6.5)
-      return `${rating.toFixed(1)}/10`;
+      return `${rating.toFixed(1)} / 10`;
     case "game":
       // IGDB ratings are 0-100 scale, need to convert to 0-10
-      return `${Math.round(rating / 10)}/10`;
+      return `${Math.round(rating / 10)} / 10`;
     case "book":
       // Books might use different scales, handle accordingly
-      return rating > 10
-        ? `${Math.round(rating / 10)}/10`
-        : `${rating.toFixed(1)}/10`;
+      return `${rating.toFixed(1)} / 5`;
     default:
       // Default: assume 0-10 scale
-      return `${rating.toFixed(1)}/10`;
+      return `${rating.toFixed(1)} / 10`;
   }
 });
 

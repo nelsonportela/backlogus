@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -9,21 +9,21 @@ datasource db {
 }
 
 model User {
-  id              Int                 @id @default(autoincrement())
-  email           String              @unique
-  password        String
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  firstName       String?             @map("first_name") @db.VarChar(255)
-  lastName        String?             @map("last_name") @db.VarChar(255)
-  avatarUrl       String?             @map("avatar_url")
-  timezone        String?             @default("UTC") @db.VarChar(50)
-  apiCredentials  UserApiCredential[]
-  userGames       UserGame[]
-  userMovies      UserMovie[]
-  userShows       UserShow[]
-  userBooks       UserBook[]
-  preferences     UserPreferences?
+  id             Int                 @id @default(autoincrement())
+  email          String              @unique
+  password       String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  firstName      String?             @map("first_name") @db.VarChar(255)
+  lastName       String?             @map("last_name") @db.VarChar(255)
+  avatarUrl      String?             @map("avatar_url")
+  timezone       String?             @default("UTC") @db.VarChar(50)
+  apiCredentials UserApiCredential[]
+  userBooks      UserBook[]
+  userGames      UserGame[]
+  userMovies     UserMovie[]
+  preferences    UserPreferences?
+  userShows      UserShow[]
 
   @@map("users")
 }
@@ -110,8 +110,8 @@ model Show {
   homepage         String?
   imdbId           String?    @map("imdb_id")
   tagline          String?
-  status           String?    // "Ended", "Continuing", "Cancelled"
-  type             String?    // "Scripted", "Documentary", etc.
+  status           String?
+  type             String?
   originalLanguage String?    @map("original_language")
   popularity       Float?
   certification    String?
@@ -124,98 +124,98 @@ model Show {
 }
 
 model Book {
-  id                 Int        @id @default(autoincrement())
-  hardcoverId        Int        @unique @map("hardcover_id")
-  title              String
-  subtitle           String?
-  alternativeTitles  String[]   @default([]) @map("alternative_titles")
-  coverUrl           String?    @map("cover_url")
-  releaseDate        DateTime?  @map("release_date")
-  description        String?
-  pages              Int?
-  authors            Json?      // Array of author objects with name and role
-  series             String?    // Primary series name
-  seriesNames        String[]   @default([]) @map("series_names") // All series names
-  seriesPosition     Float?     @map("series_position")
-  genres             String[]   @default([])
-  tags               String[]   @default([])
-  moods              String[]   @default([])
-  averageRating      Float?     @map("average_rating")
-  hasAudiobook       Boolean?   @default(false) @map("has_audiobook")
-  hasEbook           Boolean?   @default(false) @map("has_ebook")
-  createdAt          DateTime   @default(now()) @map("created_at")
-  updatedAt          DateTime   @updatedAt @map("updated_at")
-  userBooks          UserBook[]
+  id                Int        @id @default(autoincrement())
+  hardcoverId       Int        @unique @map("hardcover_id")
+  title             String
+  subtitle          String?
+  coverUrl          String?    @map("cover_url")
+  releaseDate       DateTime?  @map("release_date")
+  description       String?
+  pages             Int?
+  authors           Json?
+  series            String?
+  seriesPosition    Float?     @map("series_position")
+  genres            String[]   @default([])
+  tags              String[]   @default([])
+  rating            Float?
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  alternativeTitles String[]   @default([]) @map("alternative_titles")
+  hasAudiobook      Boolean?   @default(false) @map("has_audiobook")
+  hasEbook          Boolean?   @default(false) @map("has_ebook")
+  moods             String[]   @default([])
+  seriesNames       String[]   @default([]) @map("series_names")
+  userBooks         UserBook[]
 
   @@map("books")
 }
 
 model UserBook {
-  id              Int          @id @default(autoincrement())
-  status          MediaStatus  @default(BACKLOG)
-  quickReview     QuickReview? @map("quick_review")
-  currentPage     Int?         @map("current_page")
-  format          String?      // "Physical", "Digital", "Audio"
-  notes           String?
-  startedDate     DateTime?    @map("started_date")
-  finishedDate    DateTime?    @map("finished_date")
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @updatedAt @map("updated_at")
-  userId          Int          @map("user_id")
-  bookId          Int          @map("book_id")
-  book            Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int          @id @default(autoincrement())
+  status       MediaStatus  @default(BACKLOG)
+  quickReview  QuickReview? @map("quick_review")
+  currentPage  Int?         @map("current_page")
+  format       String?
+  notes        String?
+  startedDate  DateTime?    @map("started_date")
+  finishedDate DateTime?    @map("finished_date")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  userId       Int          @map("user_id")
+  bookId       Int          @map("book_id")
+  book         Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId])
   @@map("user_books")
 }
 
 model UserShow {
-  id             Int         @id @default(autoincrement())
-  status         MediaStatus @default(BACKLOG)
+  id             Int          @id @default(autoincrement())
   quickReview    QuickReview? @map("quick_review")
-  currentSeason  Int?        @map("current_season")
-  currentEpisode Int?        @map("current_episode")
+  currentSeason  Int?         @map("current_season")
+  currentEpisode Int?         @map("current_episode")
   notes          String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  userId         Int         @map("user_id")
-  showId         Int         @map("show_id")
-  show           Show        @relation(fields: [showId], references: [id], onDelete: Cascade)
-  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  userId         Int          @map("user_id")
+  showId         Int          @map("show_id")
+  status         MediaStatus  @default(BACKLOG)
+  show           Show         @relation(fields: [showId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, showId])
   @@map("user_shows")
 }
 
 model UserMovie {
-  id             Int          @id @default(autoincrement())
-  status         MediaStatus  @default(BACKLOG)
-  quickReview    QuickReview? @map("quick_review")
-  notes          String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userId         Int          @map("user_id")
-  movieId        Int          @map("movie_id")
-  movie          Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int          @id @default(autoincrement())
+  quickReview QuickReview? @map("quick_review")
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      Int          @map("user_id")
+  movieId     Int          @map("movie_id")
+  status      MediaStatus  @default(BACKLOG)
+  movie       Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, movieId])
   @@map("user_movies")
 }
 
 model UserGame {
-  id             Int          @id @default(autoincrement())
-  status         MediaStatus  @default(BACKLOG)
-  quickReview    QuickReview? @map("quick_review")
-  userPlatform   String?      @map("user_platform")
-  notes          String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userId         Int          @map("user_id")
-  gameId         Int          @map("game_id")
-  game           Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int          @id @default(autoincrement())
+  quickReview  QuickReview? @map("quick_review")
+  userPlatform String?      @map("user_platform")
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  userId       Int          @map("user_id")
+  gameId       Int          @map("game_id")
+  status       MediaStatus  @default(BACKLOG)
+  game         Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, gameId])
   @@map("user_games")
@@ -240,6 +240,17 @@ model UserApiCredential {
   @@map("user_api_credentials")
 }
 
+model UserPreferences {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique @map("user_id")
+  preferences Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
 enum MediaStatus {
   ACTIVE
   PAUSED
@@ -252,15 +263,4 @@ enum QuickReview {
   POSITIVE
   NEUTRAL
   NEGATIVE
-}
-
-model UserPreferences {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @unique @map("user_id")
-  preferences Json     @default("{}")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_preferences")
 }

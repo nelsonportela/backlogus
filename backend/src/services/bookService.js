@@ -34,8 +34,6 @@ class BookService {
    * Search books using Hardcover API
    */
   async searchBooks(userId, query, limit = 20) {
-    console.log('here');
-    
     try {
       const hardcoverService = new HardcoverService()
       return await hardcoverService.searchBooks(query.trim())
@@ -140,7 +138,7 @@ class BookService {
       genres: bookData.genres || [],
       tags: bookData.tags || [],
       moods: bookData.moods || [],
-      averageRating: bookData.rating || null,
+      rating: bookData.rating || null,
       hasAudiobook: bookData.has_audiobook || false,
       hasEbook: bookData.has_ebook || false
     }
@@ -394,7 +392,7 @@ class BookService {
       genres: book.genres,
       tags: book.tags,
       moods: book.moods,
-      average_rating: book.averageRating,
+      rating: book.rating,
       has_audiobook: book.hasAudiobook,
       has_ebook: book.hasEbook
     }
@@ -421,7 +419,7 @@ class BookService {
       genres: book.genres,
       tags: book.tags,
       moods: book.moods,
-      averageRating: book.averageRating,
+      rating: book.rating,
       hasAudiobook: book.hasAudiobook,
       hasEbook: book.hasEbook,
       userBook: userBook ? {

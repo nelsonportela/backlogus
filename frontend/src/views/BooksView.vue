@@ -152,8 +152,6 @@ const closeModal = () => {
 
 const addBookToLibrary = async (libraryData) => {
 
-  console.log(libraryData);
-  
   const bookData = libraryData.item;
   const status = libraryData.status;
   const quickReview = libraryData.quick_review;
@@ -167,7 +165,11 @@ const addBookToLibrary = async (libraryData) => {
     release_date: bookData.release_date,
     genres: bookData.genres,
     description: bookData.description,
-    page_count: bookData.pages,
+    pages: bookData.pages,
+    subtitle: bookData.subtitle,
+    series_position: bookData.series_position,
+    rating: bookData.rating,
+    tags: bookData.tags,
     alternative_titles: bookData.alternative_titles,
     series_names: bookData.series_names,
     moods: bookData.moods,
