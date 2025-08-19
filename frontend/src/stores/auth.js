@@ -22,6 +22,15 @@ export const useAuthStore = defineStore("auth", () => {
       // Set default axios header
       axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
 
+      // Load user profile and preferences after successful login
+      try {
+        const { useUserStore } = await import("./user.js");
+        const userStore = useUserStore();
+        await userStore.getProfile();
+      } catch (profileError) {
+        console.warn("Failed to load user profile after login:", profileError);
+      }
+
       return { success: true };
     } catch (error) {
       return {
@@ -45,6 +54,15 @@ export const useAuthStore = defineStore("auth", () => {
       // Set default axios header
       axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
 
+      // Load user profile and preferences after successful registration
+      try {
+        const { useUserStore } = await import("./user.js");
+        const userStore = useUserStore();
+        await userStore.getProfile();
+      } catch (profileError) {
+        console.warn("Failed to load user profile after registration:", profileError);
+      }
+
       return { success: true };
     } catch (error) {
       return {
@@ -58,6 +76,7 @@ export const useAuthStore = defineStore("auth", () => {
     token.value = null;
     user.value = null;
     localStorage.removeItem("token");
+    localStorage.removeItem("media_tracker_preferences"); // Clear preferences on logout
     delete axios.defaults.headers.common["Authorization"];
   };
 

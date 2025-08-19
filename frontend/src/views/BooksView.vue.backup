@@ -1,0 +1,233 @@
+<template>
+  <div class="space-y-6">
+    <!-- Error Message -->
+    <div
+      v-if="errorMessage"
+      class="fixed top-4 right-4 z-[100] max-w-md p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg shadow-lg">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium">{{ errorMessage }}</p>
+        <button
+          @click="errorMessage = null"
+          class="ml-3 text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- User Library -->
+    <MediaLibrary
+      :media-type="'book'"
+      :library-items="transformedUserBooks"
+      @refresh-library="refreshLibrary"
+      @show-details="showBookDetails"
+      @update-status="updateStatus"
+      @remove-from-library="removeBookFromLibrary" />
+
+    <!-- Floating Action Button for adding books -->
+    <AddToLibraryButton
+      :media-type="'book'"
+      :search-results="searchResults"
+      :loading="loading"
+      :library-items="transformedUserBooks"
+      @search="handleSearch"
+      @add-to-library="addBookToLibrary"
+      @show-details="showBookDetails"
+      @refresh-library="refreshLibrary" />
+
+    <!-- Media Details Modal -->
+    <MediaDetailsModal
+      :is-open="showModal"
+      :item="selectedBook"
+      :media-type="'book'"
+      :is-in-library="
+        selectedBook
+          ? isBookInLibrary(
+              selectedBook.hardcover_id ||
+                selectedBook.hardcoverId ||
+                selectedBook.id
+            )
+          : false
+      "
+      @close="closeModal"
+      @add-to-library="addBookToLibrary"
+      @update-item="updateStatus"
+      @remove-from-library="removeBookFromLibrary" />
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from "vue";
+import MediaLibrary from "@/components/media/MediaLibrary.vue";
+import AddToLibraryButton from "@/components/ui/AddToLibraryButton.vue";
+import MediaDetailsModal from "@/components/media/MediaDetailsModal.vue";
+import { useBooksApi } from "@/composables/useApi";
+
+// Reactive data
+const userBooks = ref([]);
+const searchResults = ref([]);
+const loading = ref(false);
+const errorMessage = ref(null);
+const showModal = ref(false);
+const selectedBook = ref(null);
+
+// API composable
+const booksApi = useBooksApi();
+
+// Transform books for MediaLibrary compatibility
+const transformedUserBooks = computed(() => {
+  return userBooks.value.map(userBook => ({
+    // Keep all original userBook fields
+    ...userBook,
+    // Flatten book data to top level for MediaLibraryItem compatibility
+    name: userBook.book?.name || userBook.book?.title,
+    title: userBook.book?.title,
+    cover_url: userBook.book?.cover_url,
+    poster_url: userBook.book?.cover_url, // Fallback alias
+    release_date: userBook.book?.release_date,
+    // Keep book object for details modal
+    book: userBook.book
+  }));
+});
+
+// Methods
+const refreshLibrary = async () => {
+  loading.value = true;
+  errorMessage.value = null;
+
+  const result = await booksApi.getUserBooks();
+  if (result.success) {
+    userBooks.value = result.data;
+  } else {
+    errorMessage.value = result.error;
+  }
+  loading.value = false;
+};
+
+const handleSearch = async (query) => {
+  loading.value = true;
+  errorMessage.value = null;
+
+  const result = await booksApi.searchBooks(query);
+  if (result.success) {
+    searchResults.value = result.data;
+  } else {
+    errorMessage.value = result.error;
+    searchResults.value = [];
+  }
+  loading.value = false;
+};
+
+const addBookToLibrary = async (bookData) => {
+  loading.value = true;
+  errorMessage.value = null;
+
+  const result = await booksApi.addBook(bookData);
+  if (result.success) {
+    await refreshLibrary();
+    closeModal();
+  } else {
+    errorMessage.value = result.error;
+  }
+  loading.value = false;
+};
+
+const updateStatus = async (bookId, statusData) => {
+  loading.value = true;
+  errorMessage.value = null;
+
+  const result = await booksApi.updateBook(bookId, statusData);
+  if (result.success) {
+    await refreshLibrary();
+    closeModal();
+  } else {
+    errorMessage.value = result.error;
+  }
+  loading.value = false;
+};
+
+const removeBookFromLibrary = async (bookId) => {
+  if (
+    !window.confirm(
+      "Are you sure you want to remove this book from your library?"
+    )
+  ) {
+    return;
+  }
+
+  loading.value = true;
+  errorMessage.value = null;
+
+  const result = await booksApi.removeBook(bookId);
+  if (result.success) {
+    await refreshLibrary();
+    closeModal();
+  } else {
+    errorMessage.value = result.error;
+  }
+  loading.value = false;
+};
+
+const showBookDetails = async (book) => {
+  // If it's a library item, use the nested book data for details
+  // but attach the user book metadata for library operations
+  if (book.book) {
+    // Library item: merge book data with user book fields
+    selectedBook.value = {
+      ...book.book,
+      // Add user book fields for library operations
+      userBookId: book.id,
+      status: book.status,
+      quick_review: book.quickReview,
+      current_page: book.currentPage,
+      format: book.format,
+      notes: book.notes,
+      started_date: book.startedDate,
+      finished_date: book.finishedDate
+    };
+  } else {
+    // Search result: use directly
+    selectedBook.value = book;
+  }
+  
+  showModal.value = true;
+
+  // If it's a search result (has hardcover_id or hardcoverId), fetch details
+  const hardcoverId = book.hardcover_id || book.hardcoverId || book.book?.hardcoverId;
+  if (hardcoverId && !selectedBook.value.description && hardcoverId !== 'undefined' && hardcoverId !== null) {
+    // Ensure hardcoverId is a valid number
+    const validHardcoverId = parseInt(hardcoverId);
+    if (!isNaN(validHardcoverId) && validHardcoverId > 0) {
+      const result = await booksApi.getBookDetails(validHardcoverId);
+      if (result.success) {
+        selectedBook.value = { ...selectedBook.value, ...result.data };
+      }
+    }
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  selectedBook.value = null;
+};
+
+const isBookInLibrary = (bookIdentifier) => {
+  return userBooks.value.some((userBook) => {
+    const book = userBook.book;
+    return (
+      book.hardcoverId === bookIdentifier ||
+      book.hardcover_id === bookIdentifier ||
+      book.id === bookIdentifier
+    );
+  });
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  refreshLibrary();
+});
+</script>

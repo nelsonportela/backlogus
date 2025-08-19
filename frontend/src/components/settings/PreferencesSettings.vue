@@ -211,28 +211,16 @@ const originalData = ref({});
 watch(
   () => props.profile,
   (newProfile) => {
-    if (newProfile) {
-      // Load from localStorage if available
-      const stored = localStorage.getItem("media_tracker_preferences");
-      let menu_options = ["games", "movies", "tv", "books"];
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed.menu_options)) {
-            menu_options = parsed.menu_options;
-          }
-        } catch {
-          // Ignore JSON parse errors
-        }
-      }
+    if (newProfile && newProfile.preferences) {
+      // Load preferences from the profile (database)
       formData.value = {
-        default_view: "grid",
-        items_per_page: 20,
-        show_spoilers: false,
-        auto_update_status: true,
-        email_updates: false,
-        release_notifications: false,
-        menu_options,
+        default_view: newProfile.preferences.default_view || "grid",
+        items_per_page: newProfile.preferences.items_per_page || 20,
+        show_spoilers: newProfile.preferences.show_spoilers || false,
+        auto_update_status: newProfile.preferences.auto_update_status !== undefined ? newProfile.preferences.auto_update_status : true,
+        email_updates: newProfile.preferences.email_updates || false,
+        release_notifications: newProfile.preferences.release_notifications || false,
+        menu_options: newProfile.preferences.menu_options || ["games", "movies", "tv", "books"],
       };
       originalData.value = { ...formData.value };
     }
@@ -245,7 +233,9 @@ const hasChanges = computed(() => {
 });
 
 import { useMediaStore } from "@/stores/media.js";
+import { useUserStore } from "@/stores/user.js";
 const mediaStore = useMediaStore();
+const userStore = useUserStore();
 
 const submitForm = async () => {
   if (!hasChanges.value) return;
@@ -253,30 +243,30 @@ const submitForm = async () => {
   loading.value = true;
 
   try {
-    // For now, only save theme_preference to backend
-    // Other preferences can be stored in localStorage or added to backend later
-    emit("update-preferences", {
-      theme_preference: props.profile?.theme_preference,
-    });
+    // Save all preferences to database using user store
+    const preferencesToSave = {
+      default_view: formData.value.default_view,
+      items_per_page: formData.value.items_per_page,
+      show_spoilers: formData.value.show_spoilers,
+      auto_update_status: formData.value.auto_update_status,
+      email_updates: formData.value.email_updates,
+      release_notifications: formData.value.release_notifications,
+      menu_options: formData.value.menu_options,
+    };
 
-    // Store other preferences in localStorage for now
-    localStorage.setItem(
-      "media_tracker_preferences",
-      JSON.stringify({
-        default_view: formData.value.default_view,
-        items_per_page: formData.value.items_per_page,
-        show_spoilers: formData.value.show_spoilers,
-        auto_update_status: formData.value.auto_update_status,
-        email_updates: formData.value.email_updates,
-        release_notifications: formData.value.release_notifications,
-        menu_options: formData.value.menu_options,
-      })
-    );
+    const result = await userStore.updatePreferences(preferencesToSave);
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
 
-    // Immediately update sidebar menu options reactively
-    mediaStore.reloadEnabledMenuOptions();
+    // Emit event to parent to refresh profile data
+    emit("update-preferences", result.data);
 
     originalData.value = { ...formData.value };
+  } catch (error) {
+    console.error("Failed to save preferences:", error);
+    // You could add a toast notification here
   } finally {
     loading.value = false;
   }

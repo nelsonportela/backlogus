@@ -12,6 +12,20 @@ export const useUserStore = defineStore("user", () => {
     try {
       const response = await userApi.getProfile();
       profile.value = response.data;
+      
+      // Sync preferences to localStorage for immediate access
+      if (profile.value.preferences) {
+        localStorage.setItem(
+          "media_tracker_preferences",
+          JSON.stringify(profile.value.preferences)
+        );
+        
+        // Notify media store to reload menu options
+        const { useMediaStore } = await import("./media.js");
+        const mediaStore = useMediaStore();
+        mediaStore.reloadEnabledMenuOptions();
+      }
+      
       return { success: true, data: response.data };
     } catch (error) {
       return {
@@ -130,6 +144,35 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
+  const updatePreferences = async (preferences) => {
+    try {
+      const response = await userApi.updatePreferences(preferences);
+      
+      // Update local profile
+      if (profile.value) {
+        profile.value.preferences = response.data;
+      }
+      
+      // Sync to localStorage
+      localStorage.setItem(
+        "media_tracker_preferences",
+        JSON.stringify(response.data)
+      );
+      
+      // Notify media store to reload menu options
+      const { useMediaStore } = await import("./media.js");
+      const mediaStore = useMediaStore();
+      mediaStore.reloadEnabledMenuOptions();
+      
+      return { success: true, data: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Failed to update preferences",
+      };
+    }
+  };
+
   return {
     profile,
     apiCredentials,
@@ -142,5 +185,6 @@ export const useUserStore = defineStore("user", () => {
     deleteApiCredentials,
     createBackup,
     importBackup,
+    updatePreferences,
   };
 });

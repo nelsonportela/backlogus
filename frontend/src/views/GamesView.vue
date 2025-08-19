@@ -157,24 +157,11 @@ const closeModal = () => {
 };
 
 const addGameToLibrary = async (libraryData) => {
-  // Handle both old format (just game object) and new format (enhanced data from modal)
-  let gameData, status, quickReview, userPlatform, notes;
-
-  if (libraryData.item) {
-    // New format from AddToLibraryModal
-    gameData = libraryData.item;
-    status = libraryData.status;
-    quickReview = libraryData.quick_review;
-    userPlatform = libraryData.user_platform;
-    notes = libraryData.notes;
-  } else {
-    // Old format - direct game object
-    gameData = libraryData;
-    status = "BACKLOG"; // default status
-    quickReview = null;
-    userPlatform = null;
-    notes = null;
-  }
+  const gameData = libraryData.item;
+  const status = libraryData.status;
+  const quickReview = libraryData.quick_review;
+  const userPlatform = libraryData.user_platform;
+  const notes = libraryData.notes;
 
   const result = await gamesStore.addItem({
     igdb_id: gameData.id,

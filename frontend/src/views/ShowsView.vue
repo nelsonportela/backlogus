@@ -136,26 +136,12 @@ const closeModal = () => {
 
 // Library management methods
 const addShowToLibrary = async (libraryData) => {
-  // Handle both old format (just show object) and new format (enhanced data from modal)
-  let showData, status, quickReview, notes, currentSeason, currentEpisode;
-
-  if (libraryData.item) {
-    // New format from AddToLibraryModal
-    showData = libraryData.item;
-    status = libraryData.status;
-    quickReview = libraryData.quick_review;
-    notes = libraryData.notes;
-    currentSeason = libraryData.current_season;
-    currentEpisode = libraryData.current_episode;
-  } else {
-    // Old format - direct show object
-    showData = libraryData;
-    status = "BACKLOG"; // default status
-    quickReview = null;
-    notes = null;
-    currentSeason = null;
-    currentEpisode = null;
-  }
+  const showData = libraryData.item;
+  const status = libraryData.status;
+  const quickReview = libraryData.quick_review;
+  const notes = libraryData.notes;
+  const currentSeason = libraryData.current_season;
+  const currentEpisode = libraryData.current_episode;
 
   const result = await showsStore.addItem({
     tmdb_id: showData.tmdbId,

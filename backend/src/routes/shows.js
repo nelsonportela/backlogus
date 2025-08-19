@@ -59,22 +59,21 @@ async function showsRoutes(fastify, options) {
       const userShow = await showService.addShowToLibrary(request.user.userId, request.body)
       return reply.status(201).send(userShow)
     } catch (error) {
-      if (error.message.includes('tmdb_id is required')) {
-        return reply.status(400).send({ message: error.message })
-      }
-
       if (error.message.includes('credentials not found') || error.message.includes('credentials not configured')) {
         return reply.status(400).send({ 
           message: 'TMDB API credentials not configured. Please add your TMDB API key in Settings to add TV shows.' 
         })
       }
 
-      if (error.message.includes('Show is already in your library')) {
-        return reply.status(409).send({ message: error.message })
+      // Handle validation errors
+      if (error.message.includes('tmdb_id is required') ||
+          error.message.includes('Invalid status') ||
+          error.message.includes('Invalid quick_review')) {
+        return reply.status(400).send({ message: error.message })
       }
 
-      if (error.message.includes('Invalid')) {
-        return reply.status(400).send({ message: error.message })
+      if (error.message.includes('Show is already in your library')) {
+        return reply.status(409).send({ message: error.message })
       }
 
       fastify.log.error('Add show to library failed:', error)

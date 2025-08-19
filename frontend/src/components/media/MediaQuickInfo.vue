@@ -70,6 +70,35 @@
         </span>
       </div>
 
+      <!-- Book specific info -->
+      <div v-if="mediaType === 'book' && item.pages">
+        <span class="text-gray-600 dark:text-gray-400">Pages:</span>
+        <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
+          {{ item.pages.toLocaleString() }}
+        </span>
+      </div>
+
+      <div
+        v-if="mediaType === 'book' && item.authors && item.authors.length > 0">
+        <span class="text-gray-600 dark:text-gray-400">Author:</span>
+        <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
+          {{ item.authors[0].name
+          }}{{ item.authors.length > 1 ? " et al." : "" }}
+        </span>
+      </div>
+
+      <div
+        v-if="
+          mediaType === 'book' &&
+          item.series_names &&
+          item.series_names.length > 0
+        ">
+        <span class="text-gray-600 dark:text-gray-400">Series:</span>
+        <span class="font-medium ml-2 text-gray-900 dark:text-gray-100">
+          {{ item.series_names[0] }}
+        </span>
+      </div>
+
       <!-- Age Rating -->
       <div
         v-if="

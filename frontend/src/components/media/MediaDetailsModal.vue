@@ -462,27 +462,34 @@ const handleAddToLibrary = (libraryData) => {
 };
 
 const removeFromLibrary = () => {
-  emit("remove-from-library", props.item);
+  // For books, use userBookId; for other media, use id
+  const itemId = props.mediaType === 'book' ? props.item.userBookId : props.item.id;
+  emit("remove-from-library", itemId);
 };
 
 const updateItemStatus = (event) => {
-  emit("update-item", props.item.id, { status: event.target.value });
+  // For books, use userBookId; for other media, use id
+  const itemId = props.mediaType === 'book' ? props.item.userBookId : props.item.id;
+  emit("update-item", itemId, { status: event.target.value });
 };
 
 const updateUserPlatform = (event) => {
-  emit("update-item", props.item.id, { user_platform: event.target.value });
+  const itemId = props.mediaType === 'book' ? props.item.userBookId : props.item.id;
+  emit("update-item", itemId, { user_platform: event.target.value });
 };
 
 const updateCurrentSeason = (event) => {
   const value = event.target.value;
-  emit("update-item", props.item.id, {
+  const itemId = props.mediaType === 'book' ? props.item.userBookId : props.item.id;
+  emit("update-item", itemId, {
     current_season: value ? parseInt(value) : null,
   });
 };
 
 const updateCurrentEpisode = (event) => {
   const value = event.target.value;
-  emit("update-item", props.item.id, {
+  const itemId = props.mediaType === 'book' ? props.item.userBookId : props.item.id;
+  emit("update-item", itemId, {
     current_episode: value ? parseInt(value) : null,
   });
 };
@@ -491,6 +498,7 @@ const toggleQuickReview = (reviewValue) => {
   // Toggle functionality: if the same rating is clicked, set to null
   const newReview =
     props.item.quick_review === reviewValue ? null : reviewValue;
+
   emit("update-item", props.item.id, { quick_review: newReview });
 };
 

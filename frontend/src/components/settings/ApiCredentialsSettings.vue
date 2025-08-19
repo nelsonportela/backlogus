@@ -230,6 +230,114 @@
       </form>
     </div>
 
+    <!-- Hardcover Credentials -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <h3
+            class="text-md font-medium text-gray-900 dark:text-white flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM6 17V7h2v10H6zm4-5V9h2v3h-2zm4 0V9h2v3h-2z" />
+            </svg>
+            Hardcover.app
+          </h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Required for book search and metadata. Get your API key from
+            <a
+              href="https://hardcover.app/developers"
+              target="_blank"
+              class="text-primary-600 dark:text-primary-400 hover:underline">
+              Hardcover API
+            </a>
+          </p>
+        </div>
+        <div class="ml-4">
+          <span
+            :class="[
+              'px-2 py-1 text-xs font-medium rounded',
+              isProviderConfigured('hardcover')
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+            ]">
+            {{
+              isProviderConfigured("hardcover")
+                ? "Configured"
+                : "Not Configured"
+            }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button
+          v-if="!openForms.hardcover"
+          @click="toggleCredentialForm('hardcover')"
+          class="inline-flex items-center px-4 py-2 rounded-md shadow-sm text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          :aria-pressed="openForms.hardcover">
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 4v16m8-8H4" />
+          </svg>
+          {{ isProviderConfigured("hardcover") ? "Update" : "Configure" }}
+          Credentials
+        </button>
+      </div>
+
+      <!-- Hardcover Form -->
+      <form
+        v-if="openForms.hardcover"
+        @submit.prevent="saveCredentials('hardcover')"
+        class="mt-4 space-y-4">
+        <div>
+          <label
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            API Key *
+          </label>
+          <input
+            v-model="forms.hardcover.api_key"
+            type="password"
+            required
+            placeholder="Your Hardcover API Key"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400" />
+        </div>
+
+        <div
+          class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-0">
+          <button
+            v-if="isProviderConfigured('hardcover')"
+            type="button"
+            @click="deleteCredentials('hardcover')"
+            class="w-full sm:w-auto mb-2 sm:mb-0 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            Remove Credentials
+          </button>
+          <div
+            class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto ml-auto">
+            <button
+              type="button"
+              @click="toggleCredentialForm('hardcover')"
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="loading.hardcover"
+              class="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white font-medium rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              <span v-if="loading.hardcover">Saving...</span>
+              <span v-else>Save Credentials</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <!-- Information Panel -->
     <div
       class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -274,11 +382,13 @@ const emit = defineEmits(["save-credentials", "delete-credentials"]);
 const openForms = ref({
   igdb: false,
   tmdb: false,
+  hardcover: false,
 });
 
 const loading = ref({
   igdb: false,
   tmdb: false,
+  hardcover: false,
 });
 
 const forms = ref({
@@ -287,6 +397,9 @@ const forms = ref({
     access_token: "",
   },
   tmdb: {
+    api_key: "",
+  },
+  hardcover: {
     api_key: "",
   },
 });
@@ -303,6 +416,8 @@ const toggleCredentialForm = (provider) => {
       forms.value.igdb = { client_id: "", access_token: "" };
     } else if (provider === "tmdb") {
       forms.value.tmdb = { api_key: "" };
+    } else if (provider === "hardcover") {
+      forms.value.hardcover = { api_key: "" };
     }
   }
 };
@@ -319,6 +434,8 @@ const saveCredentials = async (provider) => {
       forms.value.igdb = { client_id: "", access_token: "" };
     } else if (provider === "tmdb") {
       forms.value.tmdb = { api_key: "" };
+    } else if (provider === "hardcover") {
+      forms.value.hardcover = { api_key: "" };
     }
   } finally {
     loading.value[provider] = false;
@@ -339,6 +456,8 @@ const deleteCredentials = async (provider) => {
       forms.value.igdb = { client_id: "", access_token: "" };
     } else if (provider === "tmdb") {
       forms.value.tmdb = { api_key: "" };
+    } else if (provider === "hardcover") {
+      forms.value.hardcover = { api_key: "" };
     }
   }
 };

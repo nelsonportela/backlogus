@@ -19,6 +19,7 @@
     </button>
 
     <!-- Cover Image Container -->
+    <!-- {{ item }} -->
     <div
       class="relative aspect-[2/3] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <!-- Always show a thumbnail/filler as the background -->

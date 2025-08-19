@@ -265,31 +265,67 @@
 
           <!-- Books Section -->
           <div v-if="enabledMenuOptions.includes('books')">
-            <router-link
-              :to="{ name: 'books' }"
-              class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            <div
+              @click="handleBooksMenuClick"
+              class="flex items-center justify-between px-4 py-2 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
               :class="{
                 'bg-primary-50 dark:bg-gray-700 text-primary-700 dark:text-gray-100':
-                  route.name === 'books',
+                  isBooksRoute,
               }">
+              <div class="flex items-center">
+              <svg 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke-width="1.5"
+              stroke="currentColor" 
+              class="w-5 h-5 mr-3">
+                <path 
+                stroke-width="2"
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+              </svg>
+                Books
+              </div>
               <svg
-                class="w-5 h-5 mr-3"
+                class="w-4 h-4 transition-transform duration-200"
+                :class="{ 'rotate-180': booksSubmenuOpen }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path
-                  d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
-                  stroke-width="2"
                   stroke-linecap="round"
-                  stroke-linejoin="round" />
-                <path
-                  d="M20 2H8a2 2 0 0 0-2 2v15"
+                  stroke-linejoin="round"
                   stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round" />
+                  d="M19 9l-7 7-7-7" />
               </svg>
-              Books
-            </router-link>
+            </div>
+
+            <!-- Books Submenu -->
+            <transition
+              enter-active-class="transition-all duration-300 ease-out"
+              enter-from-class="opacity-0 max-h-0 transform -translate-y-2"
+              enter-to-class="opacity-100 max-h-96 transform translate-y-0"
+              leave-active-class="transition-all duration-300 ease-in"
+              leave-from-class="opacity-100 max-h-96 transform translate-y-0"
+              leave-to-class="opacity-0 max-h-0 transform -translate-y-2">
+              <div
+                v-show="booksSubmenuOpen"
+                class="ml-6 mt-2 space-y-1 overflow-hidden max-h-64 overflow-y-auto">
+                <router-link
+                  v-for="status in bookStatuses"
+                  :key="status.value"
+                  :to="{ name: 'books', query: { status: status.value } }"
+                  class="flex items-center px-4 py-2 text-sm text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  :class="{
+                    'bg-primary-100 dark:bg-gray-600 text-primary-700 dark:text-gray-100 font-medium':
+                      $route.query.status === status.value ||
+                      (!$route.query.status && status.value === 'all'),
+                  }">
+                  {{ status.label }}
+                </router-link>
+              </div>
+            </transition>
           </div>
         </div>
       </nav>
@@ -487,6 +523,7 @@ const { isDark, toggleTheme } = useTheme();
 const gamesSubmenuOpen = ref(route.name === "games");
 const moviesSubmenuOpen = ref(route.name === "movies");
 const showsSubmenuOpen = ref(route.name === "tv");
+const booksSubmenuOpen = ref(route.name === "books");
 
 // Mobile menu state
 const mobileMenuOpen = ref(false);
@@ -508,6 +545,12 @@ const showStatuses = [
   ...getStatusOptions("show"),
 ];
 
+// Book statuses configuration
+const bookStatuses = [
+  { value: "all", label: "All Books" },
+  ...getStatusOptions("book"),
+];
+
 const isGamesRoute = computed(() => {
   return route.name === "games";
 });
@@ -518,6 +561,10 @@ const isMoviesRoute = computed(() => {
 
 const isShowsRoute = computed(() => {
   return route.name === "tv";
+});
+
+const isBooksRoute = computed(() => {
+  return route.name === "books";
 });
 
 const dynamicTitle = computed(() => {
@@ -538,6 +585,7 @@ const toggleGamesSubmenu = () => {
   gamesSubmenuOpen.value = false;
   moviesSubmenuOpen.value = false;
   showsSubmenuOpen.value = false;
+  booksSubmenuOpen.value = false;
   // Then open games submenu if it wasn't open before
   if (!wasOpen) {
     gamesSubmenuOpen.value = true;
@@ -550,6 +598,7 @@ const toggleMoviesSubmenu = () => {
   gamesSubmenuOpen.value = false;
   moviesSubmenuOpen.value = false;
   showsSubmenuOpen.value = false;
+  booksSubmenuOpen.value = false;
   // Then open movies submenu if it wasn't open before
   if (!wasOpen) {
     moviesSubmenuOpen.value = true;
@@ -562,9 +611,23 @@ const toggleShowsSubmenu = () => {
   gamesSubmenuOpen.value = false;
   moviesSubmenuOpen.value = false;
   showsSubmenuOpen.value = false;
+  booksSubmenuOpen.value = false;
   // Then open shows submenu if it wasn't open before
   if (!wasOpen) {
     showsSubmenuOpen.value = true;
+  }
+};
+
+const toggleBooksSubmenu = () => {
+  const wasOpen = booksSubmenuOpen.value;
+  // Close all submenus first
+  gamesSubmenuOpen.value = false;
+  moviesSubmenuOpen.value = false;
+  showsSubmenuOpen.value = false;
+  booksSubmenuOpen.value = false;
+  // Then open books submenu if it wasn't open before
+  if (!wasOpen) {
+    booksSubmenuOpen.value = true;
   }
 };
 
@@ -616,6 +679,22 @@ const handleShowsMenuClick = () => {
   }
 };
 
+const handleBooksMenuClick = () => {
+  // If submenu is already open and we're not on books route, navigate to books
+  if (booksSubmenuOpen.value && route.name !== "books") {
+    router.push({ name: "books", query: { status: "all" } });
+  }
+  // If we're already on books route, just toggle submenu
+  else if (route.name === "books") {
+    toggleBooksSubmenu();
+  }
+  // If submenu is closed, open it and navigate to books
+  else {
+    toggleBooksSubmenu();
+    router.push({ name: "books", query: { status: "all" } });
+  }
+};
+
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
 };
@@ -634,6 +713,8 @@ watch(
       moviesSubmenuOpen.value = true;
     } else if (newRouteName === "tv") {
       showsSubmenuOpen.value = true;
+    } else if (newRouteName === "books") {
+      booksSubmenuOpen.value = true;
     }
     // Close mobile menu on route change
     mobileMenuOpen.value = false;

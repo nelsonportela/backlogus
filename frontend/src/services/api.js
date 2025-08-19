@@ -69,6 +69,17 @@ export const showsApi = {
   getStats: () => api.get("/shows/stats"),
 };
 
+// Books API methods
+export const booksApi = {
+  search: (query) => api.get(`/books/search?q=${encodeURIComponent(query)}`),
+  getUserBooks: () => api.get("/books/user"),
+  addBook: (bookData) => api.post("/books", bookData),
+  updateBook: (bookId, updateData) => api.put(`/books/${bookId}`, updateData),
+  removeBook: (bookId) => api.delete(`/books/${bookId}`),
+  getBookDetails: (hardcoverId) => api.get(`/books/details/${hardcoverId}`),
+  getBookById: (bookId) => api.get(`/books/${bookId}`),
+};
+
 // Media API methods (unified across all media types)
 export const mediaApi = {
   getStats: (mediaType = null) => {
@@ -95,6 +106,9 @@ export const userApi = {
     api.put(`/user/api-credentials/${provider}`, credentials),
   deleteApiCredentials: (provider) =>
     api.delete(`/user/api-credentials/${provider}`),
+  getPreferences: () => api.get("/user/preferences"),
+  updatePreferences: (preferences) => api.patch("/user/preferences", preferences),
+  resetPreferences: () => api.post("/user/preferences/reset"),
   createBackup: () => api.get("/user/backup", { responseType: "blob" }),
   importBackup: (file, onUploadProgress = null) => {
     const formData = new FormData();

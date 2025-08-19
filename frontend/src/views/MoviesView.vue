@@ -136,22 +136,10 @@ const closeModal = () => {
 
 // Library management methods
 const addMovieToLibrary = async (libraryData) => {
-  // Handle both old format (just movie object) and new format (enhanced data from modal)
-  let movieData, status, quickReview, notes;
-
-  if (libraryData.item) {
-    // New format from AddToLibraryModal
-    movieData = libraryData.item;
-    status = libraryData.status;
-    quickReview = libraryData.quick_review;
-    notes = libraryData.notes;
-  } else {
-    // Old format - direct movie object
-    movieData = libraryData;
-    status = "BACKLOG"; // default status using universal MediaStatus
-    quickReview = null;
-    notes = null;
-  }
+  const movieData = libraryData.item;
+  const status = libraryData.status;
+  const quickReview = libraryData.quick_review;
+  const notes = libraryData.notes;
 
   const result = await moviesStore.addItem({
     tmdbId: movieData.tmdbId,

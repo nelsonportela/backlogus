@@ -83,3 +83,57 @@ export function useGamesApi() {
     getGameDetails,
   };
 }
+
+// Specific books API composable
+export function useBooksApi() {
+  const api = useApi();
+
+  const searchBooks = async (query, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.search(query), onSuccess);
+  };
+
+  const getUserBooks = async (onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.getUserBooks(), onSuccess);
+  };
+
+  const addBook = async (bookData, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.addBook(bookData), onSuccess);
+  };
+
+  const updateBook = async (bookId, updateData, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(
+      () => booksApi.updateBook(bookId, updateData),
+      onSuccess
+    );
+  };
+
+  const removeBook = async (bookId, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.removeBook(bookId), onSuccess);
+  };
+
+  const getBookDetails = async (hardcoverId, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.getBookDetails(hardcoverId), onSuccess);
+  };
+
+  const getBookById = async (bookId, onSuccess) => {
+    const { booksApi } = await import("../services/api.js");
+    return api.execute(() => booksApi.getBookById(bookId), onSuccess);
+  };
+
+  return {
+    ...api,
+    searchBooks,
+    getUserBooks,
+    addBook,
+    updateBook,
+    removeBook,
+    getBookDetails,
+    getBookById,
+  };
+}

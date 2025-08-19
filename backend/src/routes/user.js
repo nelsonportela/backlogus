@@ -138,6 +138,54 @@ async function userRoutes(fastify, options) {
       return reply.status(500).send({ message: 'Failed to delete API credentials' })
     }
   })
+
+  // Get user preferences
+  fastify.get('/preferences', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    const userService = new UserService(fastify.prisma, fastify.log)
+
+    try {
+      const preferences = await userService.preferencesService.getUserPreferences(request.user.userId)
+      return reply.send(preferences)
+    } catch (error) {
+      fastify.log.error(error)
+      return reply.status(500).send({ message: 'Failed to fetch user preferences' })
+    }
+  })
+
+  // Update user preferences
+  fastify.patch('/preferences', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    const userService = new UserService(fastify.prisma, fastify.log)
+
+    try {
+      const updatedPreferences = await userService.preferencesService.updateUserPreferences(
+        request.user.userId,
+        request.body
+      )
+      return reply.send(updatedPreferences)
+    } catch (error) {
+      fastify.log.error(error)
+      return reply.status(500).send({ message: 'Failed to update user preferences' })
+    }
+  })
+
+  // Reset user preferences to defaults
+  fastify.post('/preferences/reset', {
+    preHandler: [fastify.authenticate]
+  }, async (request, reply) => {
+    const userService = new UserService(fastify.prisma, fastify.log)
+
+    try {
+      const defaultPreferences = await userService.preferencesService.resetUserPreferences(request.user.userId)
+      return reply.send(defaultPreferences)
+    } catch (error) {
+      fastify.log.error(error)
+      return reply.status(500).send({ message: 'Failed to reset user preferences' })
+    }
+  })
 }
 
 export default userRoutes;

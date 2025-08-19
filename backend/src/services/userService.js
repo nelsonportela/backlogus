@@ -1,9 +1,11 @@
 import bcrypt from 'bcrypt'
+import UserPreferencesService from './userPreferencesService.js'
 
 class UserService {
   constructor(prisma, logger) {
     this.prisma = prisma
     this.logger = logger
+    this.preferencesService = new UserPreferencesService(prisma, logger)
   }
 
   /**
@@ -45,7 +47,13 @@ class UserService {
         throw new Error('User not found')
       }
 
-      return this.transformUserResponse(user)
+      // Get user preferences
+      const preferences = await this.preferencesService.getUserPreferences(userId)
+
+      return {
+        ...this.transformUserResponse(user),
+        preferences
+      }
     } catch (error) {
       this.logger.error('UserService.getUserProfile error:', error)
       throw error
@@ -215,7 +223,7 @@ class UserService {
    * Validates API credentials based on provider
    */
   validateApiCredentials(provider, credentialData) {
-    const supportedProviders = ['igdb', 'tmdb']
+    const supportedProviders = ['igdb', 'tmdb', 'hardcover']
     
     if (!supportedProviders.includes(provider)) {
       throw new Error(`Unsupported API provider. Supported: ${supportedProviders.join(', ')}`)
@@ -230,6 +238,10 @@ class UserService {
 
     if (provider === 'tmdb' && !api_key) {
       throw new Error('TMDB requires api_key')
+    }
+
+    if (provider === 'hardcover' && !api_key) {
+      throw new Error('Hardcover requires api_key')
     }
   }
 

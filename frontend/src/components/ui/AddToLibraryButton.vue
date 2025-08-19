@@ -346,7 +346,7 @@ const getSearchResultId = (item) => {
   if (props.mediaType === "game") return item.id;
   if (props.mediaType === "movie" || props.mediaType === "show")
     return item.tmdbId;
-  if (props.mediaType === "book") return item.googleBooksId;
+  if (props.mediaType === "book") return item.hardcoverId;
   return item.id;
 };
 
@@ -399,8 +399,9 @@ const isItemInLibrary = (itemId) => {
     // TMDB: search result id vs. library tmdb_id
     return props.libraryItems.some((item) => item.tmdbId === itemId);
   } else if (props.mediaType === "book") {
-    // Books: search result id vs. library google_books_id (if used)
-    return props.libraryItems.some((item) => item.google_books_id === itemId);
+    // Hardcover: search result hardcoverId vs. library hardcover_id
+    // Use string comparison to handle type mismatches
+    return props.libraryItems.some((item) => String(item.hardcover_id) === String(itemId));
   } else if (props.mediaType === "show") {
     // Shows: search result id vs. library tmdb_id (if using TMDB for shows)
     return props.libraryItems.some((item) => item.tmdbId === itemId);

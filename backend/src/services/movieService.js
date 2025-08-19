@@ -254,7 +254,7 @@ class MovieService {
   }
 
   /**
-   * Gets all movies in user's library with image URL transformation
+   * Gets all movies in user's library
    */
   async getUserLibrary(userId) {
     try {
@@ -266,11 +266,12 @@ class MovieService {
         orderBy: { updatedAt: 'desc' }
       })
 
-      const formattedMovies = await Promise.all(userMovies.map(async userMovie => {
+      // Transform for frontend with local image URLs where available
+      const transformedMovies = await Promise.all(userMovies.map(async userMovie => {
         return await this.transformUserMovieResponse(userMovie)
       }))
 
-      return formattedMovies
+      return transformedMovies
     } catch (error) {
       this.logger.error('MovieService.getUserLibrary error:', error)
       throw error

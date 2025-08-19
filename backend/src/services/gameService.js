@@ -211,7 +211,17 @@ class GameService {
   /**
    * Transforms a user game for API response
    */
-  transformUserGameResponse(userGame) {
+  async transformUserGameResponse(userGame) {
+    const game = userGame.game;
+    
+    // Convert image URLs to local URLs where cached
+    const [coverUrl, bannerUrl, artworks, screenshots] = await Promise.all([
+      imageCacheService.getLocalUrl(game.coverUrl),
+      imageCacheService.getLocalUrl(game.bannerUrl),
+      imageCacheService.getLocalUrls(game.artworks),
+      imageCacheService.getLocalUrls(game.screenshots)
+    ]);
+
     return {
       id: userGame.id,
       status: userGame.status,
@@ -219,25 +229,26 @@ class GameService {
       personal_rating: userGame.personalRating,
       user_platform: userGame.userPlatform,
       notes: userGame.notes,
-      // Game data
-      igdb_id: userGame.game.igdbId,
-      name: userGame.game.name,
-      cover_url: userGame.game.coverUrl,
-      banner_url: userGame.game.bannerUrl,
-      release_date: userGame.game.releaseDate?.toISOString() || null,
-      genres: userGame.game.genres,
-      summary: userGame.game.summary,
-      platforms: userGame.game.platforms,
-      developer: userGame.game.developer,
-      publisher: userGame.game.publisher,
-      game_engine: userGame.game.gameEngine,
-      esrb_rating: userGame.game.esrbRating,
-      website: userGame.game.website,
-      screenshots: userGame.game.screenshots,
-      franchise: userGame.game.franchise,
-      rating: userGame.game.rating,
-      total_rating: userGame.game.totalRating,
-      aggregated_rating: userGame.game.aggregatedRating
+      // Game data with local URLs
+      igdb_id: game.igdbId,
+      name: game.name,
+      cover_url: coverUrl,
+      banner_url: bannerUrl,
+      artworks: artworks,
+      release_date: game.releaseDate?.toISOString() || null,
+      genres: game.genres,
+      summary: game.summary,
+      platforms: game.platforms,
+      developer: game.developer,
+      publisher: game.publisher,
+      game_engine: game.gameEngine,
+      esrb_rating: game.esrbRating,
+      website: game.website,
+      screenshots: screenshots,
+      franchise: game.franchise,
+      rating: game.rating,
+      total_rating: game.totalRating,
+      aggregated_rating: game.aggregatedRating
     }
   }
 
@@ -268,7 +279,7 @@ class GameService {
       const userGame = await this.createUserGame(userId, game.id, gameData)
 
       // Transform for response
-      return this.transformUserGameResponse(userGame)
+      return await this.transformUserGameResponse(userGame)
     } catch (error) {
       this.logger.error('GameService.addGameToLibrary error:', error)
       throw error
@@ -354,7 +365,7 @@ class GameService {
       })
 
       // Transform for response
-      return this.transformUserGameResponse(updatedUserGame)
+      return await this.transformUserGameResponse(updatedUserGame)
     } catch (error) {
       this.logger.error('GameService.updateUserGame error:', error)
       throw error
@@ -362,7 +373,7 @@ class GameService {
   }
 
   /**
-   * Gets all games in user's library with image URL transformation
+   * Gets all games in user's library
    */
   async getUserLibrary(userId) {
     try {
@@ -374,46 +385,8 @@ class GameService {
 
       // Transform for frontend with local image URLs where available
       const transformedGames = await Promise.all(userGames.map(async (userGame) => {
-        const game = userGame.game;
-        
-        // Convert image URLs to local URLs where cached
-        const [coverUrl, bannerUrl, artworks, screenshots] = await Promise.all([
-          imageCacheService.getLocalUrl(game.coverUrl),
-          imageCacheService.getLocalUrl(game.bannerUrl),
-          imageCacheService.getLocalUrls(game.artworks),
-          imageCacheService.getLocalUrls(game.screenshots)
-        ]);
-
-        return {
-          // UserGame fields
-          id: userGame.id, // This is now the userGame ID for updates
-          status: userGame.status,  // Use raw enum value
-          quick_review: userGame.quickReview, // Use raw enum value
-          personal_rating: userGame.personalRating,
-          user_platform: userGame.userPlatform,
-          notes: userGame.notes,
-          // Game fields with local URLs
-          igdb_id: game.igdbId,
-          name: game.name,
-          cover_url: coverUrl,
-          banner_url: bannerUrl,
-          artworks: artworks,
-          release_date: game.releaseDate?.toISOString() || null,
-          genres: game.genres,
-          summary: game.summary,
-          platforms: game.platforms,
-          developer: game.developer,
-          publisher: game.publisher,
-          game_engine: game.gameEngine,
-          esrb_rating: game.esrbRating,
-          website: game.website,
-          screenshots: screenshots,
-          franchise: game.franchise,
-          rating: game.rating,
-          total_rating: game.totalRating,
-          aggregated_rating: game.aggregatedRating
-        };
-      }));
+        return await this.transformUserGameResponse(userGame)
+      }))
 
       return transformedGames
     } catch (error) {

@@ -6,7 +6,7 @@ import HomeView from "@/views/HomeView.vue";
 import GamesView from "@/views/GamesView.vue";
 import MoviesView from "@/views/MoviesView.vue";
 import ShowsView from "@/views/ShowsView.vue";
-import BooksView from "@/views/MoviesView.vue";
+import BooksView from "@/views/BooksView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 
 const router = createRouter({

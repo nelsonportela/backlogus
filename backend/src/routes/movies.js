@@ -92,8 +92,7 @@ async function moviesRoutes(fastify, options) {
         request.body
       )
 
-      const formattedUserMovie = await movieService.transformUserMovieResponse(userMovie)
-      return reply.status(201).send(formattedUserMovie)
+      return reply.status(201).send(userMovie)
     } catch (error) {
       if (error.message.includes('credentials not found') || error.message.includes('credentials not configured')) {
         return reply.status(400).send({ 

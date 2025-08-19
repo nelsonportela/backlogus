@@ -83,6 +83,8 @@ export const useMediaStore = defineStore("media", () => {
 
   function reloadEnabledMenuOptions() {
     if (typeof window === "undefined") return;
+    
+    // First try to get from localStorage (for immediate access)
     const stored = localStorage.getItem("media_tracker_preferences");
     if (stored) {
       try {
@@ -92,9 +94,11 @@ export const useMediaStore = defineStore("media", () => {
           return;
         }
       } catch {
-        // Ignore JSON parse errors
+        // Ignore JSON parse errors and continue to default
       }
     }
+    
+    // Default fallback
     enabledMenuOptions.value = ["games", "movies", "tv", "books"];
   }
 

@@ -18,11 +18,12 @@ model User {
   lastName        String?             @map("last_name") @db.VarChar(255)
   avatarUrl       String?             @map("avatar_url")
   timezone        String?             @default("UTC") @db.VarChar(50)
-  // themePreference removed
   apiCredentials  UserApiCredential[]
   userGames       UserGame[]
   userMovies      UserMovie[]
   userShows       UserShow[]
+  userBooks       UserBook[]
+  preferences     UserPreferences?
 
   @@map("users")
 }
@@ -122,6 +123,53 @@ model Show {
   @@map("shows")
 }
 
+model Book {
+  id                 Int        @id @default(autoincrement())
+  hardcoverId        Int        @unique @map("hardcover_id")
+  title              String
+  subtitle           String?
+  alternativeTitles  String[]   @default([]) @map("alternative_titles")
+  coverUrl           String?    @map("cover_url")
+  releaseDate        DateTime?  @map("release_date")
+  description        String?
+  pages              Int?
+  authors            Json?      // Array of author objects with name and role
+  series             String?    // Primary series name
+  seriesNames        String[]   @default([]) @map("series_names") // All series names
+  seriesPosition     Float?     @map("series_position")
+  genres             String[]   @default([])
+  tags               String[]   @default([])
+  moods              String[]   @default([])
+  averageRating      Float?     @map("average_rating")
+  hasAudiobook       Boolean?   @default(false) @map("has_audiobook")
+  hasEbook           Boolean?   @default(false) @map("has_ebook")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+  userBooks          UserBook[]
+
+  @@map("books")
+}
+
+model UserBook {
+  id              Int          @id @default(autoincrement())
+  status          MediaStatus  @default(BACKLOG)
+  quickReview     QuickReview? @map("quick_review")
+  currentPage     Int?         @map("current_page")
+  format          String?      // "Physical", "Digital", "Audio"
+  notes           String?
+  startedDate     DateTime?    @map("started_date")
+  finishedDate    DateTime?    @map("finished_date")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  userId          Int          @map("user_id")
+  bookId          Int          @map("book_id")
+  book            Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@map("user_books")
+}
+
 model UserShow {
   id             Int         @id @default(autoincrement())
   status         MediaStatus @default(BACKLOG)
@@ -204,4 +252,15 @@ enum QuickReview {
   POSITIVE
   NEUTRAL
   NEGATIVE
+}
+
+model UserPreferences {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique @map("user_id")
+  preferences Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
 }

@@ -87,20 +87,20 @@ async function gamesRoutes(fastify, options) {
     const gameService = new GameService(fastify.prisma, fastify.log)
 
     try {
-      const responseGame = await gameService.addGameToLibrary(request.user.userId, request.body)
-      return reply.status(201).send(responseGame)
+      const userGame = await gameService.addGameToLibrary(request.user.userId, request.body)
+      return reply.status(201).send(userGame)
     } catch (error) {
+      if (error.message.includes('credentials not found') || error.message.includes('credentials not configured')) {
+        return reply.status(400).send({ 
+          message: 'IGDB API credentials not configured. Please add your IGDB credentials in Settings.' 
+        })
+      }
+
       // Handle validation errors
       if (error.message === 'IGDB ID is required' ||
           error.message === 'Invalid status value' ||
           error.message === 'Invalid quick_review value') {
         return reply.status(400).send({ message: error.message })
-      }
-
-      if (error.message.includes('credentials not found') || error.message.includes('credentials not configured')) {
-        return reply.status(400).send({ 
-          message: 'IGDB API credentials not configured. Please add your IGDB credentials in Settings.' 
-        })
       }
 
       if (error.message === 'Game already in your library') {
